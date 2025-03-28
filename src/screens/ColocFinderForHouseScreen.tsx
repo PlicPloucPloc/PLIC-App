@@ -1,0 +1,54 @@
+import React from 'react';
+import { Button, StyleSheet, Text, View } from 'react-native';
+import { ColocFinderStackScreenProps } from '../navigation/Types';
+
+export default function ColocFinderForHouseScreen({
+  navigation,
+  route,
+}: ColocFinderStackScreenProps<'ColocFinderForHouse'>) {
+  return (
+    <View style={styles.container}>
+      <Text style={styles.title}>Find coloc for house: {route.params.houseId}</Text>
+      <Button
+        title="user 1"
+        onPress={() =>
+          navigation.navigate('SharedStack', {
+            screen: 'OtherProfil',
+            params: { userId: 1 },
+          })
+        }
+      />
+      <Button
+        title="user 2"
+        onPress={() =>
+          navigation.navigate('SharedStack', {
+            screen: 'OtherProfil',
+            params: { userId: 2 },
+          })
+        }
+      />
+      <Button
+        title="user 3"
+        onPress={() =>
+          navigation.navigate('SharedStack', {
+            screen: 'OtherProfil',
+            params: { userId: 3 },
+          })
+        }
+      />
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#fff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
+});
