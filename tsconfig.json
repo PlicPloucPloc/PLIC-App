@@ -3,6 +3,7 @@
   "compilerOptions": {
     "strict": true,
     "noEmitOnError": true,
-    "allowImportingTsExtensions": true
+    "allowImportingTsExtensions": true,
+    "baseUrl": "./"
   }
 }
