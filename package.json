@@ -1,0 +1,37 @@
+{
+  "name": "swappart",
+  "version": "1.0.0",
+  "main": "index.ts",
+  "scripts": {
+    "lint": "eslint . --ext .ts,.tsx,.js,.jsx --max-warnings=0",
+    "lint:fix": "eslint . --ext .ts,.tsx,.js,.jsx --fix",
+    "typecheck": "tsc --noEmit",
+    "start": "npm run typecheck && npm run lint && expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@react-navigation/bottom-tabs": "^7.2.1",
+    "@react-navigation/native": "^7.0.15",
+    "@react-navigation/stack": "^7.1.2",
+    "@reduxjs/toolkit": "^2.6.1",
+    "expo": "52.0.41",
+    "expo-status-bar": "~2.0.1",
+    "react": "18.3.1",
+    "react-native": "0.76.7",
+    "react-redux": "^9.2.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.2",
+    "@react-native/eslint-config": "^0.78.1",
+    "@types/react": "~18.3.12",
+    "eslint": "^8.57.1",
+    "eslint-config-expo": "~8.0.1",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-plugin-prettier": "^5.2.5",
+    "prettier": "^3.5.3",
+    "typescript": ">=4.7.4 <5.6.0"
+  },
+  "private": true
+}
