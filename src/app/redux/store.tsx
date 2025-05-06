@@ -1,9 +1,11 @@
 import { configureStore } from '@reduxjs/toolkit';
-import { appStateSlice } from '../slices';
+
+import { appStateSlice, authStateSlice } from './slices';
 
 const store = configureStore({
   reducer: {
     appState: appStateSlice.reducer,
+    authState: authStateSlice.reducer,
   },
 });
 

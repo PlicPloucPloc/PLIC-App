@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
-import { SharedStackScreenProps } from '../navigation/Types';
+
+import { SharedStackScreenProps } from '@navigation/Types';
 
 export default function HouseDetailsScreen({
   navigation,

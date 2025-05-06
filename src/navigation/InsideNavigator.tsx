@@ -1,4 +1,4 @@
-import BottomTabStack from '../stacks/BottomTabStack';
+import BottomTabStack from '@stacks/BottomTabStack';
 
 export default function InsideNavigator() {
   return <BottomTabStack />;

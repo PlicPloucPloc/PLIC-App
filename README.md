@@ -7,10 +7,9 @@ It has been developped and tested with android devices. IOS devices should be su
 ## Installation
 
 > Requirements:
+>
 > - npm
 
-
-
-
 ## Usage
+
 To start the expo server run `npm run start`

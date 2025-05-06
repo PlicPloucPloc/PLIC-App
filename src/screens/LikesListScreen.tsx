@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
-import { LikesStackScreenProps } from '../navigation/Types';
+
+import { LikesStackScreenProps } from '@navigation/Types';
 
 export default function LikesListScreen({ navigation }: LikesStackScreenProps<'LikesList'>) {
   return (

@@ -1,9 +1,10 @@
 import React from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
-import { ProfilStackScreenProps } from '../navigation/Types';
-import store from '../app/store';
-import { changeRoot } from '../app/slices';
-import { RootEnum } from '../app/definitions';
+
+import { RootEnum } from '@app/definitions';
+import { setRoot } from '@app/redux/slices';
+import store from '@app/redux/store';
+import { ProfilStackScreenProps } from '@navigation/Types';
 
 export default function SettingsScreen({ navigation }: ProfilStackScreenProps<'Settings'>) {
   return (
@@ -11,10 +12,7 @@ export default function SettingsScreen({ navigation }: ProfilStackScreenProps<'S
       <Text style={styles.title}>Settings</Text>
       <Button title="Edit Filters" onPress={() => navigation.navigate('Filters')} />
       <Button title="View history" onPress={() => navigation.navigate('History')} />
-      <Button
-        title="Logout"
-        onPress={() => store.dispatch(changeRoot({ root: RootEnum.ROOT_AUTH }))}
-      />
+      <Button title="Logout" onPress={() => store.dispatch(setRoot(RootEnum.ROOT_AUTH))} />
     </View>
   );
 }

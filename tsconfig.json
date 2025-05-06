@@ -4,6 +4,14 @@
     "strict": true,
     "noEmitOnError": true,
     "allowImportingTsExtensions": true,
-    "baseUrl": "./"
+    "baseUrl": "./src",
+    "paths": {
+      "@assets/*": ["../assets/*"],
+      "@app/*": ["app/*"],
+      "@navigation/*": ["navigation/*"],
+      "@screens/*": ["screens/*"],
+      "@stacks/*": ["stacks/*"],
+      "@components/*": ["components/*"]
+    }
   }
 }

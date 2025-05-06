@@ -1,9 +1,8 @@
+import { SharedStackParamList } from '@navigation/Types';
 import { createStackNavigator } from '@react-navigation/stack';
-import { SharedStackParamList } from '../navigation/Types';
-import HouseDetailsScreen from '../screens/HouseDetailsScreen';
-
-import OtherProfilScreen from '../screens/OtherProfilScreen';
-import DirectMessageScreen from '../screens/DirectMessage';
+import DirectMessageScreen from '@screens/DirectMessage';
+import HouseDetailsScreen from '@screens/HouseDetailsScreen';
+import OtherProfilScreen from '@screens/OtherProfilScreen';
 
 const Stack = createStackNavigator<SharedStackParamList>();
 

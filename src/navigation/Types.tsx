@@ -1,12 +1,12 @@
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
-import type { StackScreenProps } from '@react-navigation/stack';
+import { StackScreenProps } from '@react-navigation/stack';
 
 // ...ParamList is the list of all the screens in the navigator
 // and the types of the props used by the screen
 // EX: const Navigator = createStackNavigator<AuthNavigatorParamList>();
 //
-// ...ScreenProps is a shortant to annotate quickly the props when declaring a screen
+// ...ScreenProps is a short-hand to annotate quickly the props when declaring a screen
 // EX: export default function WelcomeScreen({ route, navigation }: AuthNavigatorScreenProps<'Welcome'>)
 
 // =================== Auth navigator ===================
@@ -14,12 +14,24 @@ import type { StackScreenProps } from '@react-navigation/stack';
 export type AuthStackParamList = {
   Welcome: undefined;
   Login: undefined;
-  Signup: undefined;
+  RegisterStack: NavigatorScreenParams<RegisterStackParamList>;
 };
 
 export type AuthStackScreenProps<T extends keyof AuthStackParamList> = StackScreenProps<
   AuthStackParamList,
   T
+>;
+
+// ------- Auth stack -------
+export type RegisterStackParamList = {
+  Email: undefined;
+  UserInfo: undefined;
+  Password: undefined;
+};
+
+export type RegisterStackScreenProps<T extends keyof RegisterStackParamList> = CompositeScreenProps<
+  StackScreenProps<RegisterStackParamList, T>,
+  AuthStackScreenProps<keyof AuthStackParamList>
 >;
 
 // =================== Inside navigator ===================

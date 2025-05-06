@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { ProfilStackScreenProps } from '../navigation/Types';
+
+import { ProfilStackScreenProps } from '@navigation/Types';
 
 export default function FiltersScreen(_: ProfilStackScreenProps<'Filters'>) {
   return (
