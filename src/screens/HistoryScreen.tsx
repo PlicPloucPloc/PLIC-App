@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
-import { ProfilStackScreenProps } from '../navigation/Types';
+
+import { ProfilStackScreenProps } from '@navigation/Types';
 
 export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'History'>) {
   return (

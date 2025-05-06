@@ -1,9 +1,10 @@
+import { BottomTabStackScreenProps, MessageStackParamList } from '@navigation/Types';
 import { createStackNavigator } from '@react-navigation/stack';
-import MessageListScreen from '../screens/MessageListScreen';
-import { BottomTabStackScreenProps, MessageStackParamList } from '../navigation/Types';
+import GroupInfoScreen from '@screens/GroupInfoScreen';
+import GroupMessageScreen from '@screens/GroupMessageScreen';
+import MessageListScreen from '@screens/MessageListScreen';
+
 import SharedStack from './SharedStack';
-import GroupMessageScreen from '../screens/GroupMessageScreen';
-import GroupInfoScreen from '../screens/GroupInfoScreen';
 
 const Stack = createStackNavigator<MessageStackParamList>();
 

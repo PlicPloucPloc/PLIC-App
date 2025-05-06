@@ -1,6 +1,7 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { SharedStackScreenProps } from '../navigation/Types';
+
+import { SharedStackScreenProps } from '@navigation/Types';
 
 export default function DirectMessageScreen({ route }: SharedStackScreenProps<'DirectMessage'>) {
   return (

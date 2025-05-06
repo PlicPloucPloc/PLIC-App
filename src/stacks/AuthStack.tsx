@@ -1,17 +1,38 @@
-import { createStackNavigator } from '@react-navigation/stack';
-import WelcomeScreen from '../screens/WelcomeScreen';
-import LoginScreen from '../screens/LoginScreen';
-import SignupScreen from '../screens/SignupScreen';
-import { AuthStackParamList } from '../navigation/Types';
+import React from 'react';
 
-const Navigator = createStackNavigator<AuthStackParamList>();
+import { AuthStackParamList } from '@navigation/Types';
+import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
+import LoginScreen from '@screens/authStack/LoginScreen';
+import WelcomeScreen from '@screens/authStack/WelcomeScreen';
+import HeaderBackButton from 'components/HeaderBackButton';
+import HeaderLogo from 'components/HeaderLogo';
+
+import RegisterStack from './RegisterStack';
+
+function authStackHeaderOptions(navigation: StackNavigationProp<AuthStackParamList>) {
+  return {
+    headerShown: true,
+    headerTitle: '',
+    headerShadowVisible: false,
+    headerLeft: () => <HeaderBackButton navigation={navigation} />,
+    headerRight: () => <HeaderLogo />,
+  };
+}
+
+const Stack = createStackNavigator<AuthStackParamList>();
 
 export default function AuthStack() {
   return (
-    <Navigator.Navigator initialRouteName="Welcome" screenOptions={{ headerShown: false }}>
-      <Navigator.Screen name="Welcome" component={WelcomeScreen} />
-      <Navigator.Screen name="Login" component={LoginScreen} />
-      <Navigator.Screen name="Signup" component={SignupScreen} />
-    </Navigator.Navigator>
+    <Stack.Navigator
+      initialRouteName="Welcome"
+      screenOptions={{ headerShown: false, animation: 'slide_from_right' }}>
+      <Stack.Screen name="Welcome" component={WelcomeScreen} />
+      <Stack.Screen
+        name="Login"
+        component={LoginScreen}
+        options={({ navigation }) => authStackHeaderOptions(navigation)}
+      />
+      <Stack.Screen name="RegisterStack" component={RegisterStack} />
+    </Stack.Navigator>
   );
 }

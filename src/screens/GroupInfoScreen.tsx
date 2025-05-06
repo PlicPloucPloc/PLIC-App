@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
-import { MessageStackScreenProps } from '../navigation/Types';
+
+import { MessageStackScreenProps } from '@navigation/Types';
 
 export default function GroupInfoScreen({
   navigation,

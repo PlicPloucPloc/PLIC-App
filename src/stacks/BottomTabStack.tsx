@@ -1,9 +1,10 @@
+import { BottomTabStackParamList } from '@navigation/Types';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import HomeStack from '../stacks/HomeStack';
-import MessageStack from '../stacks/MessageStack';
-import { BottomTabStackParamList } from '../navigation/Types';
-import LikesStack from './LikesStack';
+import HomeStack from '@stacks/HomeStack';
+import MessageStack from '@stacks/MessageStack';
+
 import ColocFinderStack from './ColocFinderStack';
+import LikesStack from './LikesStack';
 import ProfilStack from './ProfilStack';
 
 const Stack = createBottomTabNavigator<BottomTabStackParamList>();

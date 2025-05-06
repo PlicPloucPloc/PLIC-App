@@ -1,13 +1,14 @@
 import React from 'react';
+
+import store from '@app/redux/store';
+import AppContainer from '@navigation/AppContainer';
 import { StatusBar } from 'expo-status-bar';
 import { Provider } from 'react-redux';
-import store from './src/app/store';
-import AppContainer from './src/navigation/AppContainer';
 
 export default function App() {
   return (
     <Provider store={store}>
-      <StatusBar style="auto" />
+      <StatusBar style="dark" />
       <AppContainer />
     </Provider>
   );

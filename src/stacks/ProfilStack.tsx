@@ -1,10 +1,11 @@
+import { BottomTabStackScreenProps, ProfilStackParamList } from '@navigation/Types';
 import { createStackNavigator } from '@react-navigation/stack';
-import { BottomTabStackScreenProps, ProfilStackParamList } from '../navigation/Types';
-import ProfilScreen from '../screens/ProfilScreen';
+import FiltersScreen from '@screens/FiltersScreen';
+import HistoryScreen from '@screens/HistoryScreen';
+import ProfilScreen from '@screens/ProfilScreen';
+import SettingsScreen from '@screens/SettingsScreen';
+
 import SharedStack from './SharedStack';
-import SettingsScreen from '../screens/SettingsScreen';
-import FiltersScreen from '../screens/FiltersScreen';
-import HistoryScreen from '../screens/HistoryScreen';
 
 const Stack = createStackNavigator<ProfilStackParamList>();
 

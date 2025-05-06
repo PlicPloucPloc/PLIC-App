@@ -1,9 +1,9 @@
-import 'ts-node/register'; // Add this to import TypeScript files
-import { ExpoConfig } from 'expo/config';
+// Add this to import TypeScript files
+import { ConfigContext, ExpoConfig } from 'expo/config';
+import 'ts-node/register';
 
-const config: ExpoConfig = {
+export default ({ config }: ConfigContext): ExpoConfig => ({
+  ...config,
   name: 'SwAppart',
   slug: 'SwAppart',
-};
-
-export default config;
+});

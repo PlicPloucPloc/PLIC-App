@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button, StyleSheet, Text, View } from 'react-native';
-import { ColocFinderStackScreenProps } from '../navigation/Types';
+
+import { ColocFinderStackScreenProps } from '@navigation/Types';
 
 export default function ColocFinderForHouseScreen({
   navigation,
