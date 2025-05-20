@@ -5,7 +5,7 @@ export interface IAuthState {
   email?: string;
   firstName?: string;
   lastName?: string;
-  birth?: string;
+  birth?: string; //ISOString : (YYYY-MM-DDTHH:mm:ss.sssZ)
 }
 
 const initialState: IAuthState = {};
