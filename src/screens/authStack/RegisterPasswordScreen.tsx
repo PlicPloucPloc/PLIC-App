@@ -14,10 +14,14 @@ import {
 import { Images } from '@assets/index';
 import PasswordInput from '@components/PasswordInput';
 import { RegisterStackScreenProps } from '@navigation/Types';
+import { useSelector } from 'react-redux';
+import { RootState } from '@app/redux/store';
 
 export default function RegisterPasswordScreen(_: RegisterStackScreenProps<'Password'>) {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  const authState = useSelector((state: RootState) => state.authState);
 
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
@@ -34,7 +38,7 @@ export default function RegisterPasswordScreen(_: RegisterStackScreenProps<'Pass
 
     Alert.alert(
       'Success',
-      // `Account created for ${firstName} ${lastName}, ${age} years old.\nEmail: ${email}`,
+      `Account created for ${authState.firstName} ${authState.lastName}\nBirth: ${authState.birth}\nEmail: ${authState.email}`,
     );
   };
 

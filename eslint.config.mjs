@@ -1,3 +1,6 @@
+// Config used by the IDE
+// Disable some warnings and errors
+
 import { defineConfig } from 'eslint-define-config';
 import pluginImport from 'eslint-plugin-import';
 import pluginPrettier from 'eslint-plugin-prettier';

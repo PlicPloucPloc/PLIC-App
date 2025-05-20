@@ -39,7 +39,7 @@ export default function RegisterEmailScreen({ navigation }: RegisterStackScreenP
       } else {
         navigation.navigate('UserInfo');
       }
-    }, 100);
+    }, 1000);
   };
 
   return (
