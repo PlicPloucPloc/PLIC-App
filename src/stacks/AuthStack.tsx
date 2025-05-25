@@ -1,7 +1,11 @@
 import React from 'react';
 
 import { AuthStackParamList } from '@navigation/Types';
-import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
+import {
+  createStackNavigator,
+  StackNavigationOptions,
+  StackNavigationProp,
+} from '@react-navigation/stack';
 import LoginScreen from '@screens/authStack/LoginScreen';
 import WelcomeScreen from '@screens/authStack/WelcomeScreen';
 import HeaderBackButton from 'components/HeaderBackButton';
@@ -9,7 +13,9 @@ import HeaderLogo from 'components/HeaderLogo';
 
 import RegisterStack from './RegisterStack';
 
-function authStackHeaderOptions(navigation: StackNavigationProp<AuthStackParamList>) {
+function authStackHeaderOptions(
+  navigation: StackNavigationProp<AuthStackParamList>,
+): StackNavigationOptions {
   return {
     headerShown: true,
     headerTitle: '',

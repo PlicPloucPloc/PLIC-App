@@ -9,7 +9,7 @@ export default function HeaderLogo() {
       style={{
         width: 35,
         height: 35,
-        marginRight: 15,
+        marginHorizontal: 15,
       }}
       resizeMode="contain"
     />

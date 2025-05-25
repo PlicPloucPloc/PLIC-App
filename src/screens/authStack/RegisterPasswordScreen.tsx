@@ -11,11 +11,11 @@ import {
   View,
 } from 'react-native';
 
+import { RootState } from '@app/redux/store';
 import { Images } from '@assets/index';
 import PasswordInput from '@components/PasswordInput';
 import { RegisterStackScreenProps } from '@navigation/Types';
 import { useSelector } from 'react-redux';
-import { RootState } from '@app/redux/store';
 
 export default function RegisterPasswordScreen(_: RegisterStackScreenProps<'Password'>) {
   const [password, setPassword] = useState('');

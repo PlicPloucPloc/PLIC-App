@@ -2,7 +2,11 @@ import React from 'react';
 import { View } from 'react-native';
 
 import { RegisterStackParamList } from '@navigation/Types';
-import { createStackNavigator, StackNavigationProp } from '@react-navigation/stack';
+import {
+  createStackNavigator,
+  StackNavigationOptions,
+  StackNavigationProp,
+} from '@react-navigation/stack';
 import RegisterEmailScreen from '@screens/authStack/RegisterEmailScreen';
 import RegisterPasswordScreen from '@screens/authStack/RegisterPasswordScreen';
 import RegisterUserInfoScreen from '@screens/authStack/RegisterUserInfoScreen';
@@ -13,12 +17,12 @@ import { Bar } from 'react-native-progress';
 function registerStackHeaderOptions(
   navigation: StackNavigationProp<RegisterStackParamList>,
   progress: number,
-) {
+): StackNavigationOptions {
   return {
-    animation: 'slide_from_right' as const,
+    animation: 'slide_from_right',
     headerShown: true,
     headerShadowVisible: false,
-    headerTitleAlign: 'center' as const,
+    headerTitleAlign: 'center',
     headerLeft: () => <HeaderBackButton navigation={navigation} />,
     headerRight: () => <HeaderLogo />,
     headerTitle: () => (
