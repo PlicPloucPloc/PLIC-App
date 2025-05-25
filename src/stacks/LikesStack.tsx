@@ -8,7 +8,7 @@ const Stack = createStackNavigator<LikesStackParamList>();
 
 export default function LikesStack(_: BottomTabStackScreenProps<'LikesStack'>) {
   return (
-    <Stack.Navigator initialRouteName="LikesList">
+    <Stack.Navigator initialRouteName="LikesList" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="LikesList" component={LikesListScreen} />
       <Stack.Screen name="SharedStack" component={SharedStack} />
     </Stack.Navigator>

@@ -9,9 +9,9 @@ import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import tsParser from '@typescript-eslint/parser';
 
-export default defineConfig([
+export const baseConfig = defineConfig([
   {
-    ignores: ['node_modules/**', 'expo/**', 'metro.config.js'],
+    ignores: ['node_modules/**', 'expo/**', 'metro.config.js', '.expo/**'],
   },
   {
     files: ['**/*.{js,ts,jsx,tsx}'],
@@ -46,3 +46,5 @@ export default defineConfig([
     },
   },
 ]);
+
+export default baseConfig;

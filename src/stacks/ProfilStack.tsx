@@ -11,7 +11,7 @@ const Stack = createStackNavigator<ProfilStackParamList>();
 
 export default function ProfilStack(_: BottomTabStackScreenProps<'ProfilStack'>) {
   return (
-    <Stack.Navigator initialRouteName="Profil">
+    <Stack.Navigator initialRouteName="Profil" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Profil" component={ProfilScreen} />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Filters" component={FiltersScreen} />
