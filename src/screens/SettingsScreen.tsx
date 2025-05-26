@@ -3,7 +3,7 @@ import { Button, StyleSheet, Text, View } from 'react-native';
 
 import { RootEnum } from '@app/definitions';
 import { setRoot } from '@app/redux/slices';
-import store from '@app/redux/store';
+import store from '@app/redux/Store';
 import { ProfilStackScreenProps } from '@navigation/Types';
 
 export default function SettingsScreen({ navigation }: ProfilStackScreenProps<'Settings'>) {

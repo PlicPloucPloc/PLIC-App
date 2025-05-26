@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 
 import { RootEnum } from '@app/definitions';
-import { RootState } from '@app/redux/store';
+import { RootState } from '@app/redux/Store';
 import { Images } from '@assets/index';
 import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';

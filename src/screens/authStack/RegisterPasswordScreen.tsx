@@ -11,7 +11,7 @@ import {
   View,
 } from 'react-native';
 
-import { RootState } from '@app/redux/store';
+import { RootState } from '@app/redux/Store';
 import { Images } from '@assets/index';
 import PasswordInput from '@components/PasswordInput';
 import { RegisterStackScreenProps } from '@navigation/Types';

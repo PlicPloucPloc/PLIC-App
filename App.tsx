@@ -1,6 +1,6 @@
 import React from 'react';
 
-import store from '@app/redux/store';
+import store from '@app/redux/Store';
 import AppContainer from '@navigation/AppContainer';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';

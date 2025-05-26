@@ -13,7 +13,7 @@ import {
 
 import { RootEnum } from '@app/definitions';
 import { setRoot } from '@app/redux/slices';
-import store from '@app/redux/store';
+import store from '@app/redux/Store';
 import { Images } from '@assets/index';
 import PasswordInput from '@components/PasswordInput';
 import { AuthStackScreenProps } from '@navigation/Types';

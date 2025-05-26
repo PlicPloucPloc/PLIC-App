@@ -13,7 +13,7 @@ import {
 } from 'react-native';
 
 import * as AuthActions from '@app/redux/slices/AuthStateSlice';
-import store, { RootState } from '@app/redux/store';
+import store, { RootState } from '@app/redux/Store';
 import { Images } from '@assets/index';
 import { RegisterStackScreenProps } from '@navigation/Types';
 import { useSelector } from 'react-redux';
