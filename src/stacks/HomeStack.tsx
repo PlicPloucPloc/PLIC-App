@@ -29,7 +29,7 @@ function headerOptions(
 
 export default function HomeStack(_: BottomTabStackScreenProps<'HomeStack'>) {
   return (
-    <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: true }}>
+    <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
       <Stack.Screen
         name="Home"
         component={HomeScreen}

@@ -1,7 +1,7 @@
 import { Apartment } from '@app/definitions';
 import {
-  createApi,
   BaseQueryFn,
+  createApi,
   FetchArgs,
   fetchBaseQuery,
   FetchBaseQueryError,
@@ -14,7 +14,7 @@ const customBaseQuery: BaseQueryFn<
 > = async (args, api, extraOptions) => {
   console.log('Making request with args:', args);
 
-  const rawBaseQuery = fetchBaseQuery({ baseUrl: 'http://10.68.250.135:3000' });
+  const rawBaseQuery = fetchBaseQuery({ baseUrl: 'http://10.41.177.155:3000' });
   const result = await rawBaseQuery(args, api, extraOptions);
 
   if (result.error) {

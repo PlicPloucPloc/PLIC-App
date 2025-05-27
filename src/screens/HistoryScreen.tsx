@@ -11,8 +11,8 @@ export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'Hi
         title="See details of liked house 42"
         onPress={() =>
           navigation.navigate('SharedStack', {
-            screen: 'HouseDetails',
-            params: { houseId: 42 },
+            screen: 'ApartmentDetails',
+            params: { apartmentId: 42 },
           })
         }
       />
@@ -20,8 +20,8 @@ export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'Hi
         title="See details of liked house 69"
         onPress={() =>
           navigation.navigate('SharedStack', {
-            screen: 'HouseDetails',
-            params: { houseId: 69 },
+            screen: 'ApartmentDetails',
+            params: { apartmentId: 69 },
           })
         }
       />
@@ -29,8 +29,8 @@ export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'Hi
         title="See details of diliked house 1234"
         onPress={() =>
           navigation.navigate('SharedStack', {
-            screen: 'HouseDetails',
-            params: { houseId: 1234 },
+            screen: 'ApartmentDetails',
+            params: { apartmentId: 1234 },
           })
         }
       />
@@ -38,8 +38,8 @@ export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'Hi
         title="See details of liked house 90"
         onPress={() =>
           navigation.navigate('SharedStack', {
-            screen: 'HouseDetails',
-            params: { houseId: 90 },
+            screen: 'ApartmentDetails',
+            params: { apartmentId: 90 },
           })
         }
       />
