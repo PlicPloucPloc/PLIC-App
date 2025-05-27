@@ -1,120 +1,147 @@
-import React, { useCallback, useRef, useState } from 'react';
-import {
-  Image,
-  type ImageSourcePropType,
-  Modal,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { Apartment } from '@app/definitions';
+import { useGetApartmentsQuery } from '@app/redux/slices';
 import ActionButton from '@components/ActionButton';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { Swiper, type SwiperCardRefType } from 'rn-swiper-list';
-import { useGetApartmentsQuery } from '@app/redux/slices';
-
-const IMAGES: ImageSourcePropType[] = [
-  require('../../assets/tmp/1.png'),
-  require('../../assets/tmp/2.png'),
-  require('../../assets/tmp/3.png'),
-  require('../../assets/tmp/4.png'),
-  require('../../assets/tmp/5.png'),
-  require('../../assets/tmp/6.png'),
-  require('../../assets/tmp/7.png'),
-];
 
 const ICON_SIZE = 38;
+const SWIPE_DELAY = 300;
 
 export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>) {
-  const { data: apartments, error, isLoading } = useGetApartmentsQuery();
-
   const ref = useRef<SwiperCardRefType>();
 
-  const [modalVisible, setModalVisible] = useState(false);
+  // ============= Hooks ============= //
+  const { data: apartmentsTmp, error, isLoading } = useGetApartmentsQuery();
 
-  const renderCard = useCallback((image: ImageSourcePropType) => {
-    return <Image source={image} style={styles.renderCardImage} resizeMode="cover" />;
-  }, []);
+  const [swiperIndex, setSwiperIndex] = useState(0);
 
-  const OverlayLabelRight = useCallback(() => {
-    return <View style={[styles.overlayLabelContainer, { backgroundColor: '#4BA3C3' }]} />;
-  }, []);
+  const apartmentsRef = useRef<Apartment[]>([]); // used to render the appart info
+  const [apartments, setApartments] = useState<Apartment[]>([]); // used to update the swiper
+  const [allSwiped, setAllSwiped] = useState(false);
+  const [apartmentInfo, setApartmentInfo] = useState<{
+    title?: string;
+    surface?: number;
+    location?: string;
+  }>({});
 
-  const OverlayLabelLeft = useCallback(() => {
-    return <View style={[styles.overlayLabelContainer, { backgroundColor: 'red' }]} />;
+  useEffect(() => {
+    if (!apartmentsTmp) return;
+
+    for (let i = 0; i < apartmentsTmp.length; i++) {
+      apartmentsTmp[i].additional_info.images.thumb_url = 'https://picsum.photos/800/1000';
+    }
+
+    setApartments(apartmentsTmp);
+    apartmentsRef.current = apartmentsTmp;
+  }, [apartmentsTmp]);
+
+  const onIndexChange = useCallback((index: number) => {
+    // console.log('onIndexChange called with index:', index);
+    const currentApartments = apartmentsRef.current;
+    if (!currentApartments || index >= currentApartments.length) return;
+
+    setSwiperIndex(index);
+
+    const apartment = currentApartments[index];
+    setApartmentInfo({
+      title: apartment.additional_info.title,
+      surface: apartment.additional_info.criteria.surface,
+      location: apartment.location,
+    });
   }, []);
 
   if (isLoading) return <Text>Loading...</Text>;
   if (error) return <Text>Error fetching apartments</Text>;
 
-  var updatedApartments = [];
-  if (apartments && IMAGES) {
-    const minLength = Math.min(apartments.length, IMAGES.length);
-
-    const trimmedApartments = apartments.slice(0, minLength);
-    const trimmedImages = IMAGES.slice(0, minLength);
-
-    updatedApartments = trimmedApartments.map((apartment, index) => ({
-      ...apartment,
-      additional_info: {
-        ...apartment.additional_info,
-        images: {
-          ...apartment.additional_info.images,
-          thumb_url: trimmedImages[index],
-        },
-      },
-    }));
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.swiperContainer}>
+        {allSwiped && (
+          <View style={styles.endScreenContainer}>
+            <Text style={styles.modalText}>It looks like you swiped everything!</Text>
+
+            <TouchableOpacity
+              style={styles.modalButton}
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate('ProfilStack', { screen: 'History' })}>
+              <Text style={styles.modalButtonText}>View history</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: '#7EC0FD', marginTop: 10 }]}
+              activeOpacity={0.7}
+              onPress={() => navigation.navigate('ProfilStack', { screen: 'Filters' })}>
+              <Text style={styles.modalButtonText}>Expand filters</Text>
+            </TouchableOpacity>
+          </View>
+        )}
         <TouchableWithoutFeedback
-          style={styles.touchableContainer}
-          onPress={() => {
+          style={[styles.touchableContainer, allSwiped ? { width: '0%', height: '0%' } : {}]}
+          onPress={() =>
             navigation.navigate('SharedStack', {
-              screen: 'HouseDetails',
-              params: { houseId: 69 },
-            });
-          }}>
+              screen: 'ApartmentDetails',
+              params: { apartment: apartmentsRef.current[swiperIndex] },
+            })
+          }>
           <Swiper
             ref={ref}
             cardStyle={styles.cardStyle}
-            data={IMAGES}
-            renderCard={renderCard}
+            data={apartments}
             disableBottomSwipe={true}
             disableTopSwipe={true}
-            onIndexChange={(index) => {
-              // console.log('Current Active index', index);
-            }}
-            onSwipeRight={(cardIndex) => {
-              // console.log('cardIndex', cardIndex);
-            }}
-            onSwipeLeft={(cardIndex) => {
-              // console.log('onSwipeLeft', cardIndex);
-            }}
+            onIndexChange={onIndexChange}
             onSwipedAll={() => {
-              setModalVisible(true);
-              // console.log('onSwipedAll');
+              setTimeout(() => {
+                setApartmentInfo({});
+                setAllSwiped(true);
+              }, SWIPE_DELAY);
+              console.log('All cards swiped');
             }}
-            OverlayLabelRight={OverlayLabelRight}
-            OverlayLabelLeft={OverlayLabelLeft}
+            renderCard={(apartment: Apartment) => (
+              <Image
+                source={{ uri: apartment.additional_info.images.thumb_url }}
+                style={styles.renderCardImage}
+                resizeMode="cover"
+              />
+            )}
+            OverlayLabelRight={() => (
+              <View style={[styles.overlayLabelContainer, { backgroundColor: '#4BA3C3' }]} />
+            )}
+            OverlayLabelLeft={() => (
+              <View style={[styles.overlayLabelContainer, { backgroundColor: 'red' }]} />
+            )}
           />
         </TouchableWithoutFeedback>
       </View>
 
       <View style={styles.textContainer}>
-        <Text style={styles.textTitle}>T2 proche de Bastille</Text>
-        <Text style={styles.textSubtitle}>720€ (830€ - 900€) </Text>
+        {Object.keys(apartmentInfo).length !== 0 && (
+          <>
+            <Text numberOfLines={1} ellipsizeMode="tail" style={styles.textTitle}>
+              {apartmentInfo.title}
+            </Text>
+            <Text numberOfLines={1} ellipsizeMode="tail" style={styles.textSubtitle}>
+              {apartmentInfo.location}
+            </Text>
+            <Text numberOfLines={1} ellipsizeMode="tail" style={styles.textSubtitle}>
+              {apartmentInfo.surface} m²
+            </Text>
+          </>
+        )}
       </View>
 
       <View style={styles.buttonsContainer}>
         <ActionButton
           style={styles.button}
           onTap={() => {
+            if (allSwiped) {
+              setAllSwiped(false);
+            }
             ref.current?.swipeBack();
           }}>
           <Ionicons name="arrow-undo" size={ICON_SIZE - 10} color="black" />
@@ -133,47 +160,10 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
           }}>
           <Ionicons name="heart" size={ICON_SIZE} color="#7EC0FD" />
         </ActionButton>
-        <ActionButton
-          style={styles.button}
-          onTap={() => {
-            ref.current?.swipeTop();
-          }}>
+        <ActionButton style={styles.button} onTap={() => setAllSwiped(!allSwiped)}>
           <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color="black" />
         </ActionButton>
       </View>
-
-      {/* Modal Section */}
-      <Modal
-        transparent={true}
-        visible={modalVisible}
-        animationType="fade"
-        onRequestClose={() => setModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <Text style={styles.modalText}>It looks like you swiped everything!</Text>
-
-            <TouchableOpacity
-              style={styles.modalButton}
-              activeOpacity={0.7}
-              onPress={() => {
-                setModalVisible(false);
-                navigation.navigate('ProfilStack', { screen: 'History' });
-              }}>
-              <Text style={styles.modalButtonText}>View history</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: '#7EC0FD', marginTop: 10 }]}
-              activeOpacity={0.7}
-              onPress={() => {
-                setModalVisible(false);
-                navigation.navigate('ProfilStack', { screen: 'Filters' });
-              }}>
-              <Text style={styles.modalButtonText}>Expand filters</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }
@@ -181,12 +171,12 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
     backgroundColor: 'white',
   },
 
   swiperContainer: {
-    flex: 7,
+    // backgroundColor: 'red',
+    flex: 6,
     justifyContent: 'center',
     alignItems: 'center',
     zIndex: 1,
@@ -217,21 +207,23 @@ const styles = StyleSheet.create({
   },
 
   textContainer: {
+    // backgroundColor: 'green',
     flex: 1,
     paddingLeft: 20,
+    justifyContent: 'center',
   },
   textTitle: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 10,
   },
   textSubtitle: {
-    fontSize: 22,
+    fontSize: 18,
   },
 
   buttonsContainer: {
+    // backgroundColor: 'blue',
     flex: 1,
-    paddingVertical: 20,
+    paddingBottom: 5,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-evenly',
@@ -246,23 +238,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     shadowColor: 'black',
   },
-  buttonText: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
 
-  modalOverlay: {
+  // Reuse modal styles for the final screen
+  endScreenContainer: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  modalContainer: {
-    backgroundColor: 'white',
     padding: 30,
-    borderRadius: 20,
-    alignItems: 'center',
-    elevation: 10,
   },
   modalText: {
     fontSize: 18,

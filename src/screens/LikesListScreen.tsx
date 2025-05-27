@@ -11,8 +11,8 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
         title="Go to details of house 1"
         onPress={() =>
           navigation.navigate('SharedStack', {
-            screen: 'HouseDetails',
-            params: { houseId: 1 },
+            screen: 'ApartmentDetails',
+            params: { apartmentId: 1 },
           })
         }
       />
@@ -20,8 +20,8 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
         title="Go to details of house 2"
         onPress={() =>
           navigation.navigate('SharedStack', {
-            screen: 'HouseDetails',
-            params: { houseId: 2 },
+            screen: 'ApartmentDetails',
+            params: { apartmentId: 2 },
           })
         }
       />
