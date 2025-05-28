@@ -17,4 +17,3 @@ export const apartmentApi = createApi({
 });
 
 export const { useGetApartmentsQuery, useGetApartmentByIdQuery } = apartmentApi;
-

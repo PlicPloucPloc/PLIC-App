@@ -9,7 +9,19 @@ interface LoginRequest {
 
 interface LoginResponse {
   token: string;
-  user: { id: number; email: string; name: string };
+  user: { id: number; email: string; fisrtname: string };
+}
+
+interface RegisterRequest {
+  email: string;
+  firstName: string;
+  lastName: string;
+  birth: string; // (YYYY-MM-DD)
+  password: string;
+}
+
+interface RegisterResponse {
+  token: string;
 }
 
 export const userApi = createApi({
@@ -23,7 +35,7 @@ export const userApi = createApi({
         body: credentials,
       }),
     }),
-    register: builder.mutation<any, Record<string, any>>({
+    register: builder.mutation<RegisterResponse, RegisterRequest>({
       query: (userInfo) => ({
         url: Endpoints.USER.REGISTER,
         method: 'POST',
