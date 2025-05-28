@@ -1,4 +1,5 @@
-export * from './AppStateSlice';
-export * from './AuthStateSlice';
+export * from './app/AppStateSlice';
+export * from './app/AuthStateSlice';
 
-export * from './ApartmentSlice';
+export * from './api/ApartmentSlice';
+export * from './api/UserSlice';

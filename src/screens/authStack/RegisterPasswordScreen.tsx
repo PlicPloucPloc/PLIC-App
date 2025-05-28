@@ -26,6 +26,8 @@ export default function RegisterPasswordScreen(_: RegisterStackScreenProps<'Pass
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
   const handleRegister = () => {
+    // password must be at least 8 characaters long, one number, one special character
+
     if (!password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in both password fields.');
       return;
