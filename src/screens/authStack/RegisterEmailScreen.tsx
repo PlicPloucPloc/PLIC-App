@@ -34,12 +34,13 @@ export default function RegisterEmailScreen({ navigation }: RegisterStackScreenP
     setTimeout(() => {
       setLoading(false);
 
-      if (email === 'rdoulaud@gmail.com') {
+      if (email === 'romain.doulaud@epita.fr') {
         Alert.alert('Email Exists', 'This email is already in use.');
       } else {
+        store.dispatch(AuthActions.setEmail(email));
         navigation.navigate('UserInfo');
       }
-    }, 1000);
+    }, 0);
   };
 
   return (

@@ -1,0 +1,1 @@
+yarn run eslint . --config eslint.full.config.mjs --max-warnings=0

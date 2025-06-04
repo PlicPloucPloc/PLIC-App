@@ -11,13 +11,17 @@ import {
   View,
 } from 'react-native';
 
-import { RootState } from '@app/redux/Store';
+import store, { RootState } from '@app/redux/Store';
 import { Images } from '@assets/index';
 import PasswordInput from '@components/PasswordInput';
 import { RegisterStackScreenProps } from '@navigation/Types';
 import { useSelector } from 'react-redux';
+import { setRoot, useRegisterMutation } from '@app/redux/slices';
+import { RootEnum } from '@app/definitions';
 
 export default function RegisterPasswordScreen(_: RegisterStackScreenProps<'Password'>) {
+  const [register, { data, isLoading, isError, error }] = useRegisterMutation();
+
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
@@ -25,23 +29,45 @@ export default function RegisterPasswordScreen(_: RegisterStackScreenProps<'Pass
 
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
-  const handleRegister = () => {
-    // password must be at least 8 characaters long, one number, one special character
-
+  const handleRegister = async () => {
     if (!password || !confirmPassword) {
       Alert.alert('Error', 'Please fill in both password fields.');
       return;
+    }
+
+    if (password.length < 8) {
+      return Alert.alert('Error', 'Password must be at least 8 characters long.');
+    }
+    var regex = /^(.*[0-9].*)$/;
+    if (!regex.test(password)) {
+      return Alert.alert('Error', 'Password must contain at least one number.');
+    }
+    var regex = /^(.*[-!@#$%_^&*].*)$/;
+    if (!regex.test(password)) {
+      return Alert.alert('Error', 'Password must contain at least one special character.');
     }
 
     if (password !== confirmPassword) {
       Alert.alert('Error', 'Passwords do not match.');
       return;
     }
+    try {
+      console.log('Registering user with data');
 
-    Alert.alert(
-      'Success',
-      `Account created for ${authState.firstName} ${authState.lastName}\nBirth: ${authState.birth}\nEmail: ${authState.email}`,
-    );
+      const userInfo = {
+        ...authState,
+        password,
+      };
+
+      console.log('User Info:', userInfo);
+
+      const result = await register(userInfo).unwrap();
+      console.log('Register successful:', result);
+      alert('Registration Successful');
+      // store.dispatch(setRoot(RootEnum.ROOT_INSIDE));
+    } catch (err) {
+      console.error('Register failed:', err);
+    }
   };
 
   return (

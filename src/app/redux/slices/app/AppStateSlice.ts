@@ -7,7 +7,7 @@ export interface IAppState {
 }
 
 const initialState: IAppState = {
-  root: RootEnum.ROOT_INSIDE,
+  root: RootEnum.ROOT_AUTH,
 };
 
 export const appStateSlice = createSlice({
