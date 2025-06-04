@@ -25,7 +25,7 @@ export default function RegisterUserInfoScreen({
 
   const [firstName, setFirstName] = useState(authState.firstName ?? '');
   const [lastName, setLastName] = useState(authState.lastName ?? '');
-  const [birth, setBirth] = useState(authState.birth ? new Date(authState.birth) : null);
+  const [birth, setBirth] = useState(authState.birthdate ? new Date(authState.birthdate) : null);
 
   const firstNameInputRef = useRef<TextInput>(null);
   const lastNameInputRef = useRef<TextInput>(null);
@@ -40,7 +40,7 @@ export default function RegisterUserInfoScreen({
         if (!selectedDate) return;
 
         setBirth(selectedDate);
-        store.dispatch(AuthActions.setBirth(selectedDate.toISOString()));
+        store.dispatch(AuthActions.setBirthdate(selectedDate.toISOString().split('T')[0]));
       },
       mode: 'date',
       maximumDate: maxDate,
@@ -54,6 +54,8 @@ export default function RegisterUserInfoScreen({
       return;
     }
 
+    store.dispatch(AuthActions.setFirstName(firstName));
+    store.dispatch(AuthActions.setLastName(lastName));
     navigation.navigate('Password');
   };
 

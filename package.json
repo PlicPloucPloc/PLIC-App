@@ -10,8 +10,7 @@
     "start:quick": "expo start",
     "start:no-cache": "npm run typecheck && npm run lint && expo start --clear",
     "android": "expo start --android",
-    "ios": "expo start --ios",
-    "web": "expo start --web"
+    "prepare": "husky"
   },
   "dependencies": {
     "@expo/metro-config": "~0.17.1",
@@ -20,6 +19,7 @@
     "@react-navigation/native": "^7.0.15",
     "@react-navigation/stack": "^7.1.2",
     "@reduxjs/toolkit": "^2.6.1",
+    "axios": "^1.9.0",
     "expo": "50.0.21",
     "expo-status-bar": "~1.11.1",
     "react": "18.2.0",
@@ -47,6 +47,7 @@
     "eslint-plugin-prettier": "^5.4.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "husky": "^9.1.7",
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "ts-node": "^10.9.2",

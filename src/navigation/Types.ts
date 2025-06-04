@@ -1,5 +1,5 @@
-import { Apartment } from '@app/definitions';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
+import { Apartment } from '@app/definitions';
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
 

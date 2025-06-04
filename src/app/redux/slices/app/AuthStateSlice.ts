@@ -2,13 +2,18 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
 export interface IAuthState {
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  birth?: string; // (YYYY-MM-DD)
+  email: string;
+  firstName: string;
+  lastName: string;
+  birthdate: string; // (YYYY-MM-DD)
 }
 
-const initialState: IAuthState = {};
+const initialState: IAuthState = {
+  email: '',
+  firstName: '',
+  lastName: '',
+  birthdate: '',
+};
 
 export const authStateSlice = createSlice({
   name: 'auth',
@@ -23,12 +28,12 @@ export const authStateSlice = createSlice({
     setLastName: (state, action: PayloadAction<string>) => {
       state.lastName = action.payload;
     },
-    setBirth: (state, action: PayloadAction<string>) => {
-      state.birth = action.payload;
+    setBirthdate: (state, action: PayloadAction<string>) => {
+      state.birthdate = action.payload;
     },
   },
 });
 
-export const { setEmail, setFirstName, setLastName, setBirth } = authStateSlice.actions;
+export const { setEmail, setFirstName, setLastName, setBirthdate } = authStateSlice.actions;
 
 export default authStateSlice.reducer;

@@ -5,12 +5,11 @@ import {
   FetchBaseQueryError,
 } from '@reduxjs/toolkit/query/react';
 
-// User API_URL
-// const API_URL = 'http://localhost:3001';
-
-// Apartment API URL
-const HOST = '10.68.251.33';
+// 3001 = User API
+// 3002 = Apartment API
 const PORT = 3002;
+
+const HOST = '10.68.251.33';
 const API_URL = `http://${HOST}:${PORT}`;
 
 const customBaseQuery: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError> = async (
