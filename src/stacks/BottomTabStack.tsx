@@ -9,7 +9,6 @@ import {
 import HomeStack from '@stacks/HomeStack';
 import LikesStack from '@stacks/LikesStack';
 import MessageStack from '@stacks/MessageStack';
-import Colors from 'Colors';
 
 import ColocFinderStack from './ColocFinderStack';
 import ProfilStack from './ProfilStack';

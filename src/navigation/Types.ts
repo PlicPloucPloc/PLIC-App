@@ -1,5 +1,5 @@
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { Apartment } from '@app/definitions';
+import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
 
@@ -14,7 +14,9 @@ import { StackScreenProps } from '@react-navigation/stack';
 // ------- Auth stack -------
 export type AuthStackParamList = {
   Welcome: undefined;
-  Login: undefined;
+  Login: {
+    navigateFromRegister?: boolean;
+  };
   RegisterStack: NavigatorScreenParams<RegisterStackParamList>;
 };
 
@@ -28,6 +30,7 @@ export type RegisterStackParamList = {
   Email: undefined;
   UserInfo: undefined;
   Password: undefined;
+  Successful: undefined;
 };
 
 export type RegisterStackScreenProps<T extends keyof RegisterStackParamList> = CompositeScreenProps<

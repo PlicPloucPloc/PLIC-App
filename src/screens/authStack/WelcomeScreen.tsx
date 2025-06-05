@@ -1,83 +1,71 @@
 import React from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
+import { ColorTheme } from '@app/Colors';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { Images } from '@assets/index';
+import AuthStackButton from '@components/AuthStackButton';
+import BackgroundBuildings from '@components/BackgroundBuildings';
 import { AuthStackScreenProps } from '@navigation/Types';
 
 export default function WelcomeScreen({ navigation }: AuthStackScreenProps<'Welcome'>) {
+  const colors = useThemeColors();
+  const styles = createStyles(colors);
+
   return (
     <View style={styles.container}>
       <View style={styles.logoContainer}>
-        <Image source={Images.logo} style={[styles.logo, { justifyContent: 'space-evenly' }]} />
+        <Image source={Images.logo} style={styles.logo} />
         <Text style={styles.title}>SwAppart</Text>
       </View>
 
       <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.button}>
-          <Text style={styles.buttonText}>Log In</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
+        <AuthStackButton
+          title="Log In"
+          onPress={() => navigation.navigate('Login', {})}
+          containerStyle={{ backgroundColor: colors.background }}
+        />
+        <AuthStackButton
+          title="Register"
           onPress={() => navigation.navigate('RegisterStack', { screen: 'Email' })}
-          style={[styles.button, { backgroundColor: '#EE5622' }]}>
-          <Text style={[styles.buttonText, { color: 'white' }]}>Register</Text>
-        </TouchableOpacity>
+        />
       </View>
 
-      <View style={styles.buildingsContainer}>
-        <Image source={Images.backgroundBuildings} style={{ width: '100%' }} />
-      </View>
+      <BackgroundBuildings />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: 'white',
-  },
+const createStyles = (colors: ColorTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+    },
 
-  logoContainer: {
-    flex: 2,
-    width: '100%',
-    justifyContent: 'flex-end',
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
-  logo: {
-    width: '50%',
-  },
-  title: {
-    fontSize: 34,
-    fontWeight: 'bold',
-  },
+    logoContainer: {
+      flex: 2,
+      width: '100%',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+      paddingBottom: 20,
+    },
+    logo: {
+      width: '50%',
+      justifyContent: 'space-evenly',
+    },
+    title: {
+      fontSize: 34,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+    },
 
-  buttonContainer: {
-    flex: 1,
-    width: '100%',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-  },
-  button: {
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '65%',
-    padding: 3,
-    borderRadius: 100,
-    borderWidth: 2,
-    elevation: 3,
-  },
-  buttonText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-
-  buildingsContainer: {
-    flex: 2,
-    width: '100%',
-    alignItems: 'center',
-    paddingTop: 20,
-  },
-});
+    buttonContainer: {
+      flex: 1,
+      width: '100%',
+      justifyContent: 'space-evenly',
+      alignItems: 'center',
+    },
+  });

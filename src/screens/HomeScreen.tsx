@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Apartment } from '@app/definitions';
-import { useGetApartmentsQuery } from '@app/redux/slices';
 import ActionButton from '@components/ActionButton';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
@@ -16,7 +15,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   const ref = useRef<SwiperCardRefType>();
 
   // ============= Hooks ============= //
-  const { data: apartmentsTmp, error, isLoading } = useGetApartmentsQuery();
+  // const { data: apartmentsTmp, error, isLoading } = useGetApartmentsQuery();
 
   const [swiperIndex, setSwiperIndex] = useState(0);
 
@@ -30,6 +29,8 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   }>({});
 
   useEffect(() => {
+    const apartmentsTmp: Apartment[] = [];
+
     if (!apartmentsTmp) return;
 
     for (let i = 0; i < apartmentsTmp.length; i++) {
@@ -38,7 +39,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
     setApartments(apartmentsTmp);
     apartmentsRef.current = apartmentsTmp;
-  }, [apartmentsTmp]);
+  }, []);
 
   const onIndexChange = useCallback((index: number) => {
     // console.log('onIndexChange called with index:', index);
@@ -55,8 +56,8 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     });
   }, []);
 
-  if (isLoading) return <Text>Loading...</Text>;
-  if (error) return <Text>Error fetching apartments</Text>;
+  // if (isLoading) return <Text>Loading...</Text>;
+  // if (error) return <Text>Error fetching apartments</Text>;
 
   return (
     <View style={styles.container}>

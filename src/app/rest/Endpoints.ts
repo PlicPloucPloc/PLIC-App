@@ -6,7 +6,7 @@ const Endpoints = {
   USER: {
     LOGIN: '/user/login',
     REGISTER: '/user/register',
-  }
+  },
 };
 
 export default Endpoints;

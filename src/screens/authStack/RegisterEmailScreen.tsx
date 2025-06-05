@@ -1,55 +1,78 @@
 import React, { useState } from 'react';
 import {
-  ActivityIndicator,
   Alert,
-  Image,
   Keyboard,
   StyleSheet,
   Text,
   TextInput,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from 'react-native';
 
+import { ColorTheme } from '@app/Colors';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
 import * as AuthActions from '@app/redux/slices/app/AuthStateSlice';
 import store, { RootState } from '@app/redux/Store';
-import { Images } from '@assets/index';
+import { checkEmailExists } from '@app/rest/UserApi';
+import { checkEmail } from '@app/utils/Auth';
+import AuthStackButton from '@components/AuthStackButton';
+import BackgroundBuildings from '@components/BackgroundBuildings';
+import Loader from '@components/Loader';
 import { RegisterStackScreenProps } from '@navigation/Types';
 import { useSelector } from 'react-redux';
 
 export default function RegisterEmailScreen({ navigation }: RegisterStackScreenProps<'Email'>) {
+  const colors = useThemeColors();
+  const styles = createStyles(colors);
+
   const authState = useSelector((state: RootState) => state.authState);
 
   const [email, setEmail] = useState(authState.email ?? '');
   const [loading, setLoading] = useState(false);
 
-  const handleNext = () => {
-    if (!email) {
-      Alert.alert('Error', 'Please enter your email.');
+  async function handleNext() {
+    const emailValidation = checkEmail(email);
+    if (emailValidation) {
+      Alert.alert('Error', emailValidation);
       return;
     }
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    const response = await checkEmailExists(email);
+    setLoading(false);
 
-      if (email === 'romain.doulaud@epita.fr') {
-        Alert.alert('Email Exists', 'This email is already in use.');
-      } else {
-        store.dispatch(AuthActions.setEmail(email));
-        navigation.navigate('UserInfo');
-      }
-    }, 0);
-  };
+    if (!response.ok) {
+      const errorData = await response.json();
+      Alert.alert(
+        'Register Error',
+        errorData.message || 'An error occurred during email checking.',
+      );
+      return;
+    }
+
+    const data = await response.json();
+    if (data.emailTaken) {
+      Alert.alert(
+        'Register Error',
+        'This email is already registered. Please use a different email.',
+      );
+      return;
+    }
+
+    store.dispatch(AuthActions.setEmail(email));
+    navigation.navigate('UserInfo');
+  }
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={styles.container}>
       <View style={styles.container}>
+        <Loader loading={loading} />
+
         <View style={styles.buttonContainer}>
           <Text style={styles.title}>Register - Email</Text>
           <TextInput
             placeholder="Email"
+            placeholderTextColor={colors.textSecondary}
             value={email}
             onChangeText={setEmail}
             style={styles.input}
@@ -61,71 +84,45 @@ export default function RegisterEmailScreen({ navigation }: RegisterStackScreenP
             onSubmitEditing={handleNext}
             onBlur={() => store.dispatch(AuthActions.setEmail(email))}
           />
-          {loading ? (
-            <ActivityIndicator size="large" />
-          ) : (
-            <TouchableOpacity onPress={handleNext} style={styles.button}>
-              <Text style={styles.buttonText}>Next</Text>
-            </TouchableOpacity>
-          )}
+
+          <AuthStackButton title="Next" onPress={handleNext} disabled={loading} />
         </View>
 
-        <View style={styles.buildingsContainer}>
-          <Image source={Images.backgroundBuildings} style={{ width: '100%' }} />
-        </View>
+        <BackgroundBuildings />
       </View>
     </TouchableWithoutFeedback>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
+const createStyles = (colors: ColorTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+    },
+    title: {
+      fontSize: 28,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+    },
 
-  buttonContainer: {
-    flex: 3,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 20,
-    paddingHorizontal: 20,
-  },
-  input: {
-    width: '100%',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    fontSize: 16,
-  },
-  button: {
-    backgroundColor: '#EE5622',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '65%',
-    padding: 3,
-    borderRadius: 100,
-    borderWidth: 2,
-    elevation: 3,
-  },
-  buttonText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: 'white',
-  },
-
-  buildingsContainer: {
-    flex: 2,
-    width: '100%',
-    alignItems: 'center',
-    paddingTop: 20,
-  },
-});
+    buttonContainer: {
+      flex: 3,
+      width: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 20,
+      paddingHorizontal: 20,
+    },
+    input: {
+      width: '100%',
+      padding: 12,
+      borderWidth: 1,
+      borderColor: colors.contrast,
+      borderRadius: 10,
+      fontSize: 16,
+      color: colors.textPrimary,
+    },
+  });

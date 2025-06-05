@@ -1,7 +1,6 @@
 import React, { useRef, useState } from 'react';
 import {
   Alert,
-  Image,
   Keyboard,
   StyleSheet,
   Text,
@@ -11,39 +10,55 @@ import {
   View,
 } from 'react-native';
 
+import { ColorTheme } from '@app/Colors';
 import { RootEnum } from '@app/definitions';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setRoot } from '@app/redux/slices';
 import store from '@app/redux/Store';
-import { Images } from '@assets/index';
+import { loginUser } from '@app/rest/UserApi';
+import { checkEmail, checkPassword } from '@app/utils/Auth';
+import AuthStackButton from '@components/AuthStackButton';
+import BackgroundBuildings from '@components/BackgroundBuildings';
 import PasswordInput from '@components/PasswordInput';
 import { AuthStackScreenProps } from '@navigation/Types';
 import Loader from 'components/Loader';
 
 export default function LoginScreen(_: AuthStackScreenProps<'Login'>) {
+  const colors = useThemeColors();
+  const styles = createStyles(colors);
+
   const passwordInputRef = useRef<TextInput>(null);
   const [loading, setLoading] = useState(false);
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  const handleLogin = () => {
-    if (!email || !password) {
-      Alert.alert('Error', 'Please enter both email and password.');
+  async function handleLogin() {
+    var emailValidation = checkEmail(email);
+    if (emailValidation) {
+      Alert.alert('Error', emailValidation);
+      return;
+    }
+
+    var passwordValidation = checkPassword(password);
+    if (passwordValidation) {
+      Alert.alert('Error', passwordValidation);
       return;
     }
 
     setLoading(true);
+    const response = await loginUser({ email, password });
+    setLoading(false);
 
-    setTimeout(() => {
-      setLoading(false);
+    if (!response.ok) {
+      const errorData = await response.json();
+      Alert.alert('Login Error', errorData.message || 'An error occurred during login.');
+      return;
+    }
 
-      if (email === 'rdoulaud@gmail.com' && password === 'test') {
-        store.dispatch(setRoot(RootEnum.ROOT_INSIDE));
-      } else {
-        Alert.alert('Invalid Credentials', 'The email or password you entered is incorrect.');
-      }
-    }, 1500);
-  };
+    store.dispatch(setRoot(RootEnum.ROOT_INSIDE));
+    // TODO: store token or session shit
+  }
 
   const handleForgotPassword = () => {
     Alert.alert('Forgot Password', 'Password recovery is not implemented yet.');
@@ -82,72 +97,48 @@ export default function LoginScreen(_: AuthStackScreenProps<'Login'>) {
             <Text style={styles.forgotText}>Forgot your password?</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
-            onPress={handleLogin}
-            style={[styles.button, loading && { opacity: 0.6 }]}>
-            <Text style={styles.buttonText}>Log In</Text>
-          </TouchableOpacity>
+          <AuthStackButton title="Log In" onPress={handleLogin} disabled={loading} />
         </View>
 
-        <View style={styles.buildingsContainer}>
-          <Image source={Images.backgroundBuildings} style={{ width: '100%' }} />
-        </View>
+        <BackgroundBuildings />
       </View>
     </TouchableWithoutFeedback>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-  },
-  title: {
-    fontSize: 34,
-    fontWeight: 'bold',
-  },
-  buttonContainer: {
-    flex: 3,
-    width: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 20,
-    paddingHorizontal: 20,
-  },
-  input: {
-    width: '100%',
-    padding: 12,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    fontSize: 16,
-  },
-  forgotText: {
-    color: '#007BFF',
-    fontSize: 14,
-    marginTop: -10,
-    marginBottom: 10,
-  },
-  button: {
-    backgroundColor: 'white',
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '65%',
-    padding: 3,
-    borderRadius: 100,
-    borderWidth: 2,
-    elevation: 3,
-  },
-  buttonText: {
-    fontSize: 22,
-    fontWeight: 'bold',
-  },
-  buildingsContainer: {
-    flex: 2,
-    width: '100%',
-    alignItems: 'center',
-    paddingTop: 20,
-  },
-});
+const createStyles = (colors: ColorTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: colors.background,
+    },
+    title: {
+      fontSize: 34,
+      fontWeight: 'bold',
+      color: colors.textPrimary,
+    },
+
+    buttonContainer: {
+      flex: 3,
+      width: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      gap: 20,
+      paddingHorizontal: 20,
+    },
+    input: {
+      width: '100%',
+      padding: 12,
+      borderWidth: 1,
+      borderColor: '#ccc',
+      borderRadius: 10,
+      fontSize: 16,
+    },
+    forgotText: {
+      color: '#007BFF',
+      fontSize: 14,
+      marginBottom: 10,
+    },
+  });
