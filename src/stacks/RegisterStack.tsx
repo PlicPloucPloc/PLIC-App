@@ -9,6 +9,7 @@ import {
 } from '@react-navigation/stack';
 import RegisterEmailScreen from '@screens/authStack/RegisterEmailScreen';
 import RegisterPasswordScreen from '@screens/authStack/RegisterPasswordScreen';
+import RegisterSuccessfulScreen from '@screens/authStack/RegisterSuccessful';
 import RegisterUserInfoScreen from '@screens/authStack/RegisterUserInfoScreen';
 import HeaderBackButton from 'components/HeaderBackButton';
 import HeaderLogo from 'components/HeaderLogo';
@@ -58,6 +59,11 @@ export default function RegisterStack() {
         name="Password"
         component={RegisterPasswordScreen}
         options={({ navigation }) => registerStackHeaderOptions(navigation, 1)}
+      />
+      <Stack.Screen
+        name="Successful"
+        component={RegisterSuccessfulScreen}
+        options={{ headerShown: false, animation: 'slide_from_right' }}
       />
     </Stack.Navigator>
   );

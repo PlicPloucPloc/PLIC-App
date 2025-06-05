@@ -36,7 +36,10 @@ export default function AuthStack() {
       <Stack.Screen
         name="Login"
         component={LoginScreen}
-        options={({ navigation }) => authStackHeaderOptions(navigation)}
+        options={({ navigation, route }) => ({
+          ...authStackHeaderOptions(navigation),
+          animation: route.params?.navigateFromRegister ? 'fade' : 'slide_from_right',
+        })}
       />
       <Stack.Screen name="RegisterStack" component={RegisterStack} />
     </Stack.Navigator>
