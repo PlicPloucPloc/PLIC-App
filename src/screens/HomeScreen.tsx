@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Apartment } from '@app/definitions';
+import { getUserId } from '@app/rest/UserApi';
 import ActionButton from '@components/ActionButton';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
@@ -27,6 +28,14 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     surface?: number;
     location?: string;
   }>({});
+
+  useEffect(() => {
+    (async () => {
+      const response = await getUserId();
+      const data = await response.json();
+      console.log('User ID:', data);
+    })();
+  }, []);
 
   useEffect(() => {
     const apartmentsTmp: Apartment[] = [];
@@ -101,7 +110,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
                 setApartmentInfo({});
                 setAllSwiped(true);
               }, SWIPE_DELAY);
-              console.log('All cards swiped');
+              // console.log('All cards swiped');
             }}
             renderCard={(apartment: Apartment) => (
               <Image

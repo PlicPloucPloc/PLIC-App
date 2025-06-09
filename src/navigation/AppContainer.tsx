@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
 
 import { RootEnum } from '@app/definitions';
-import { RootState } from '@app/redux/Store';
+import { setRoot } from '@app/redux/slices';
+import store, { RootState } from '@app/redux/Store';
+import { getToken } from '@app/rest/Client';
 import { Images } from '@assets/index';
 import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
@@ -18,22 +20,25 @@ export default function AppContainer() {
 
   const [isLoading, setIsLoading] = useState(true);
 
-  async function loadAssetsAsync() {
-    const imageAssetsPromises = Object.values(Images).map((image) =>
-      Asset.fromModule(image).downloadAsync(),
-    );
+  async function loadResources() {
+    const loadAssetsAsync = async () => {
+      const imageAssetsPromises = Object.values(Images).map((image) =>
+        Asset.fromModule(image).downloadAsync(),
+      );
 
-    return Promise.all(imageAssetsPromises);
-  }
+      return Promise.all(imageAssetsPromises);
+    };
 
-  async function loadFontsAsync() {
-    return Font.loadAsync(Ionicons.font);
+    await Promise.all([loadAssetsAsync(), Font.loadAsync(Ionicons.font)]);
   }
 
   useEffect(() => {
     (async () => {
       try {
-        await Promise.all([loadAssetsAsync(), loadFontsAsync()]);
+        await loadResources();
+
+        const token = await getToken();
+        store.dispatch(setRoot(token ? RootEnum.ROOT_INSIDE : RootEnum.ROOT_AUTH));
       } catch (e) {
         console.warn(e);
       } finally {
