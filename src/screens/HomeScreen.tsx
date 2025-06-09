@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Apartment } from '@app/definitions';
-import { getUserId } from '@app/rest/UserApi';
 import ActionButton from '@components/ActionButton';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
@@ -16,8 +15,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   const ref = useRef<SwiperCardRefType>();
 
   // ============= Hooks ============= //
-  // const { data: apartmentsTmp, error, isLoading } = useGetApartmentsQuery();
-
   const [swiperIndex, setSwiperIndex] = useState(0);
 
   const apartmentsRef = useRef<Apartment[]>([]); // used to render the appart info

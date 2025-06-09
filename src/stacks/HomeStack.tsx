@@ -1,19 +1,13 @@
 import HeaderLogo from '@components/HeaderLogo';
 import { BottomTabStackScreenProps, HomeStackParamList } from '@navigation/Types';
-import {
-  createStackNavigator,
-  StackNavigationOptions,
-  StackNavigationProp,
-} from '@react-navigation/stack';
+import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import HomeScreen from '@screens/HomeScreen';
 
 import SharedStack from './SharedStack';
 
 const Stack = createStackNavigator<HomeStackParamList>();
 
-function headerOptions(
-  navigation: StackNavigationProp<HomeStackParamList>,
-): StackNavigationOptions {
+function headerOptions(): StackNavigationOptions {
   return {
     headerShown: true,
     headerShadowVisible: false,
@@ -30,11 +24,7 @@ function headerOptions(
 export default function HomeStack(_: BottomTabStackScreenProps<'HomeStack'>) {
   return (
     <Stack.Navigator initialRouteName="Home" screenOptions={{ headerShown: false }}>
-      <Stack.Screen
-        name="Home"
-        component={HomeScreen}
-        options={({ navigation }) => headerOptions(navigation)}
-      />
+      <Stack.Screen name="Home" component={HomeScreen} options={() => headerOptions()} />
       <Stack.Screen name="SharedStack" component={SharedStack} />
     </Stack.Navigator>
   );
