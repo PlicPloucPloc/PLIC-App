@@ -30,14 +30,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   }>({});
 
   useEffect(() => {
-    (async () => {
-      const response = await getUserId();
-      const data = await response.json();
-      console.log('User ID:', data);
-    })();
-  }, []);
-
-  useEffect(() => {
     const apartmentsTmp: Apartment[] = [];
 
     if (!apartmentsTmp) return;
