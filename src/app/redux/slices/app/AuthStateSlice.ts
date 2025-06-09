@@ -2,6 +2,7 @@ import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
 export interface IAuthState {
+  userId: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -9,6 +10,7 @@ export interface IAuthState {
 }
 
 const initialState: IAuthState = {
+  userId: '',
   email: '',
   firstName: '',
   lastName: '',
@@ -19,6 +21,9 @@ export const authStateSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
+    setUserId: (state, action: PayloadAction<string>) => {
+      state.userId = action.payload;
+    },
     setEmail: (state, action: PayloadAction<string>) => {
       state.email = action.payload;
     },
@@ -34,6 +39,7 @@ export const authStateSlice = createSlice({
   },
 });
 
-export const { setEmail, setFirstName, setLastName, setBirthdate } = authStateSlice.actions;
+export const { setEmail, setFirstName, setLastName, setBirthdate, setUserId } =
+  authStateSlice.actions;
 
 export default authStateSlice.reducer;
