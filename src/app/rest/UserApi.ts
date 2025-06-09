@@ -1,17 +1,6 @@
+import { LoginRequest, RegisterRequest } from '@app/definitions/rest/UserApi';
+
 import { apiFetch } from './Client';
-
-interface LoginRequest {
-  email: string;
-  password: string;
-}
-
-interface RegisterRequest {
-  email: string;
-  firstName: string;
-  lastName: string;
-  birthdate: string;
-  password: string;
-}
 
 export async function loginUser(credentials: LoginRequest): Promise<Response> {
   return apiFetch(
@@ -47,3 +36,13 @@ export async function checkEmailExists(email: string): Promise<Response> {
 
 // TODO: Resend email
 // TODO: Forgot password
+
+export async function getUserId(): Promise<Response> {
+  return apiFetch(
+    `/user/id`,
+    {
+      method: 'GET',
+    },
+    true,
+  );
+}

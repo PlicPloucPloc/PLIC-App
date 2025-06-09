@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { RootEnum } from '@app/definitions';
+import { LoginResponse, RootEnum } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { setRoot } from '@app/redux/slices';
+import { setRoot, setUserId } from '@app/redux/slices';
 import store from '@app/redux/Store';
 import { loginUser } from '@app/rest/UserApi';
 import { checkEmail, checkPassword } from '@app/utils/Auth';
@@ -22,6 +22,7 @@ import BackgroundBuildings from '@components/BackgroundBuildings';
 import PasswordInput from '@components/PasswordInput';
 import { AuthStackScreenProps } from '@navigation/Types';
 import Loader from 'components/Loader';
+import * as SecureStore from 'expo-secure-store';
 
 export default function LoginScreen(_: AuthStackScreenProps<'Login'>) {
   const colors = useThemeColors();
@@ -56,8 +57,12 @@ export default function LoginScreen(_: AuthStackScreenProps<'Login'>) {
       return;
     }
 
+    const userData: LoginResponse = await response.json();
+    SecureStore.setItemAsync('token', userData.session.access_token);
+    SecureStore.setItemAsync('refresh_token', userData.session.refresh_token);
+
+    store.dispatch(setUserId(userData.session.user.id));
     store.dispatch(setRoot(RootEnum.ROOT_INSIDE));
-    // TODO: store token or session shit
   }
 
   const handleForgotPassword = () => {
