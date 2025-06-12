@@ -6,12 +6,12 @@ import { useThemeColors } from '@app/hooks/UseThemeColor';
 
 type LikeItemProps = {
   title: string;
-  price: string;
+  surface: number;
   description: string;
   imageUrl: string;
 };
 
-export default function LikeItem({ title, price, description, imageUrl }: LikeItemProps) {
+export default function LikeItem({ title, surface, description, imageUrl }: LikeItemProps) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -19,9 +19,15 @@ export default function LikeItem({ title, price, description, imageUrl }: LikeIt
     <View style={styles.likesContainer}>
       <Image source={{ uri: imageUrl }} style={styles.image} />
       <View style={styles.likesContent}>
-        <Text style={styles.title}>{title}</Text>
-        <Text>{price}</Text>
-        <Text>{description}</Text>
+        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>
+          {title}
+        </Text>
+        <Text numberOfLines={1} ellipsizeMode="tail">
+          {surface} m²
+        </Text>
+        <Text numberOfLines={1} ellipsizeMode="tail">
+          {description}
+        </Text>
       </View>
     </View>
   );
@@ -32,21 +38,19 @@ const createStyles = (colors: ColorTheme) =>
     likesContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 20,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.contrast,
+      padding: 10,
     },
     image: {
-      width: 80,
-      height: 80,
-      borderRadius: 10,
-      marginRight: 20,
+      width: 70,
+      height: 70,
+      borderRadius: 5,
+      marginRight: 10,
     },
     likesContent: {
       flex: 1,
     },
     title: {
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: 'bold',
     },
   });

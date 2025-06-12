@@ -1,4 +1,4 @@
-export interface Apartment {
+export interface ApartmentResponse {
   adLink: string;
   location: string;
   additional_info: AdditionalInfo;

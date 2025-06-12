@@ -1,7 +1,9 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  Alert,
   FlatList,
   Keyboard,
+  Pressable,
   RefreshControl,
   StyleSheet,
   TextInput,
@@ -10,41 +12,37 @@ import {
 } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
+import { ApartmentResponse } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { getApartments } from '@app/rest/ApartmentService';
 import LikeItem from '@components/LikeItem';
 import { LikesStackScreenProps } from '@navigation/Types';
-
-type Apartment = {
-  id: string;
-  title: string;
-  price: string;
-  description: string;
-  imageUrl: string;
-};
 
 export default function LikesListScreen({ navigation }: LikesStackScreenProps<'LikesList'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const [data, setData] = useState<Apartment[]>([]);
+  const [data, setData] = useState<ApartmentResponse[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-
-    // Simulate API call
-    await new Promise((res) => setTimeout(res, 1000));
-    const mockData: Apartment[] = Array.from({ length: 10 }).map((_, i) => ({
-      id: `${i}`,
-      title: `Apartment ${i + 1}`,
-      price: `$${1000 + i * 100}/month`,
-      description: `Spacious and modern apartment ${i + 1}`,
-      imageUrl: 'https://picsum.photos/800/1000',
-    }));
-
-    setData(mockData);
+    const response = await getApartments();
     setLoading(false);
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      Alert.alert(
+        'Apartment Error',
+        errorData.message || 'An error occurred while fetching the apartments.',
+      );
+      return;
+    }
+
+    const apartmentsResponse: ApartmentResponse[] = await response.json();
+
+    setData(apartmentsResponse);
   }, []);
 
   useEffect(() => {
@@ -52,7 +50,7 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
   }, [fetchData]);
 
   const filteredData = data.filter((item) =>
-    item.title.toLowerCase().includes(search.toLowerCase()),
+    item.additional_info.title.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -69,17 +67,33 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
       </TouchableWithoutFeedback>
       <FlatList
         data={filteredData}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.adLink}
         renderItem={({ item }) => (
-          <LikeItem
-            title={item.title}
-            price={item.price}
-            description={item.description}
-            imageUrl={item.imageUrl}
-          />
+          <Pressable
+            onPress={() =>
+              navigation.navigate('SharedStack', {
+                screen: 'ApartmentDetails',
+                params: { apartment: item },
+              })
+            }
+            // android_ripple={{ color: colors.primary + '33' }}
+            // style={({ pressed }) => [
+            //   {
+            //     opacity: pressed ? 0.6 : 1,
+            //   },
+            // ]}
+          >
+            <LikeItem
+              title={item.additional_info.title}
+              surface={item.additional_info.criteria.surface}
+              description={item.additional_info.description}
+              imageUrl={item.additional_info.images.thumb_url}
+            />
+          </Pressable>
         )}
         refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchData} />}
         contentContainerStyle={{ paddingBottom: 20 }}
+        keyboardShouldPersistTaps="handled"
       />
     </View>
   );

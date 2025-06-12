@@ -15,7 +15,7 @@ import { LoginResponse, RootEnum } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setRoot, setUserId } from '@app/redux/slices';
 import store from '@app/redux/Store';
-import { loginUser } from '@app/rest/UserApi';
+import { loginUser } from '@app/rest/UserService';
 import { checkEmail, checkPassword } from '@app/utils/Auth';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
