@@ -1,10 +1,11 @@
-import { LoginRequest, RegisterRequest } from '@app/definitions/rest/UserApi';
+import { LoginRequest, RegisterRequest } from '@app/definitions/rest/UserService';
 
 import { apiFetch } from './Client';
+import Endpoints from './Endpoints';
 
 export async function loginUser(credentials: LoginRequest): Promise<Response> {
   return apiFetch(
-    '/user/login',
+    Endpoints.USER.LOGIN,
     {
       method: 'POST',
       body: JSON.stringify(credentials),
@@ -15,7 +16,7 @@ export async function loginUser(credentials: LoginRequest): Promise<Response> {
 
 export async function registerUser(userInfo: RegisterRequest): Promise<Response> {
   return apiFetch(
-    '/user/register',
+    Endpoints.USER.REGISTER,
     {
       method: 'POST',
       body: JSON.stringify(userInfo),
@@ -26,7 +27,7 @@ export async function registerUser(userInfo: RegisterRequest): Promise<Response>
 
 export async function checkEmailExists(email: string): Promise<Response> {
   return apiFetch(
-    `/user/checkEmail/${email.toLowerCase()}`,
+    Endpoints.USER.CHECK_EMAIL(email),
     {
       method: 'GET',
     },
@@ -39,7 +40,7 @@ export async function checkEmailExists(email: string): Promise<Response> {
 
 export async function getUserId(): Promise<Response> {
   return apiFetch(
-    `/user/id`,
+    Endpoints.USER.GET_ID,
     {
       method: 'GET',
     },
