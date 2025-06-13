@@ -4,10 +4,7 @@ import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react
 import { ApartmentResponse } from '@app/definitions';
 import { SharedStackScreenProps } from '@navigation/Types';
 import { Image } from 'expo-image';
-import { StatusBar } from 'expo-status-bar';
-import { TouchableOpacity } from 'react-native-gesture-handler';
 import PagerView from 'react-native-pager-view';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ApartmentDetailsScreen({
   navigation,
@@ -25,9 +22,7 @@ export default function ApartmentDetailsScreen({
           <Pressable
             key={index}
             style={styles.imageContainer}
-            onPress={() =>
-              navigation.navigate('ImageGallery', { images: images.urls, index: index })
-            }>
+            onPress={() => navigation.navigate('ImageList', { images: images.urls })}>
             <Image key={index} contentFit="cover" source={uri} style={styles.image} />
           </Pressable>
         ))}

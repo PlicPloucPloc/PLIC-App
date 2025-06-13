@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import * as React from 'react';
 import { StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { SharedStackScreenProps } from '@navigation/Types';
+import { InsideStackScreenProps } from '@navigation/Types';
 import { useIsFocused } from '@react-navigation/native';
 import { Image } from 'expo-image';
 import AwesomeGallery, { GalleryRef, RenderItemInfo } from 'react-native-awesome-gallery';
@@ -26,7 +26,7 @@ const renderItem = ({ item, setImageDimensions }: RenderItemInfo<{ uri: string }
 export default function ImageGalleryScreen({
   navigation,
   route,
-}: SharedStackScreenProps<'ImageGallery'>) {
+}: InsideStackScreenProps<'ImageGallery'>) {
   const { top, bottom } = useSafeAreaInsets();
 
   const params = route.params;

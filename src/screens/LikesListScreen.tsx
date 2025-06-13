@@ -29,7 +29,6 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
   const fetchData = useCallback(async () => {
     setLoading(true);
     const response = await getApartments();
-    setLoading(false);
 
     if (!response.ok) {
       const errorData = await response.json();
@@ -43,6 +42,8 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
     const apartmentsResponse: ApartmentResponse[] = await response.json();
 
     setData(apartmentsResponse);
+
+    setLoading(false);
   }, []);
 
   useEffect(() => {
