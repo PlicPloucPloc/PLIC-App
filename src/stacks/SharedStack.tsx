@@ -8,7 +8,6 @@ import {
 } from '@react-navigation/stack';
 import ApartmentDetailsScreen from '@screens/ApartmentDetailsScreen';
 import DirectMessageScreen from '@screens/DirectMessage';
-import ImageGalleryScreen from '@screens/ImageGalleryScreen';
 import OtherProfilScreen from '@screens/OtherProfilScreen';
 
 const Stack = createStackNavigator<SharedStackParamList>();
@@ -38,7 +37,6 @@ export default function SharedStack() {
         component={ApartmentDetailsScreen}
         options={({ navigation }) => headerOptions(navigation)}
       />
-      <Stack.Screen name="ImageGallery" component={ImageGalleryScreen} />
       <Stack.Screen name="OtherProfil" component={OtherProfilScreen} />
       <Stack.Screen name="DirectMessage" component={DirectMessageScreen} />
     </Stack.Navigator>

@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ApartmentResponse } from '@app/definitions';
+import { getApartments } from '@app/rest/ApartmentService';
 import ActionButton from '@components/ActionButton';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
@@ -15,8 +16,9 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   const ref = useRef<SwiperCardRefType>();
 
   // ============= Hooks ============= //
-  const [swiperIndex, setSwiperIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
+  const [swiperIndex, setSwiperIndex] = useState(0);
   const apartmentsRef = useRef<ApartmentResponse[]>([]); // used to render the appart info
   const [apartments, setApartments] = useState<ApartmentResponse[]>([]); // used to update the swiper
   const [allSwiped, setAllSwiped] = useState(false);
@@ -26,17 +28,33 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     location?: string;
   }>({});
 
-  useEffect(() => {
-    const apartmentsTmp: ApartmentResponse[] = [];
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const response = await getApartments();
 
-    if (!apartmentsTmp) return;
+    if (!response.ok) {
+      const errorData = await response.json();
+      Alert.alert(
+        'Apartment Error',
+        errorData.message || 'An error occurred while fetching the apartments.',
+      );
+      return;
+    }
 
-    setApartments(apartmentsTmp);
-    apartmentsRef.current = apartmentsTmp;
+    const apartmentsResponse: ApartmentResponse[] = await response.json();
+
+    setApartments(apartmentsResponse);
+    apartmentsRef.current = apartmentsResponse;
+
+    setLoading(false);
   }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const onIndexChange = useCallback((index: number) => {
-    // console.log('onIndexChange called with index:', index);
+    console.log('onIndexChange called with index:', index);
     const currentApartments = apartmentsRef.current;
     if (!currentApartments || index >= currentApartments.length) return;
 
@@ -50,8 +68,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     });
   }, []);
 
-  // if (isLoading) return <Text>Loading...</Text>;
-  // if (error) return <Text>Error fetching apartments</Text>;
+  if (loading) return <Text>Loading...</Text>;
 
   return (
     <View style={styles.container}>
@@ -95,11 +112,11 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
                 setApartmentInfo({});
                 setAllSwiped(true);
               }, SWIPE_DELAY);
-              // console.log('All cards swiped');
+              console.log('All cards swiped');
             }}
             renderCard={(apartment: ApartmentResponse) => (
               <Image
-                source={{ uri: apartment.additional_info.images.thumb_url }}
+                source={{ uri: apartment.additional_info.images.urls[0] }}
                 style={styles.renderCardImage}
                 resizeMode="cover"
               />
@@ -155,7 +172,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
           }}>
           <Ionicons name="heart" size={ICON_SIZE} color="#7EC0FD" />
         </ActionButton>
-        <ActionButton style={styles.button} onTap={() => setAllSwiped(!allSwiped)}>
+        <ActionButton style={styles.button} onTap={() => Alert.alert('Chat not implemented yet')}>
           <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color="black" />
         </ActionButton>
       </View>
