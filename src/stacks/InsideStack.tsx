@@ -11,8 +11,12 @@ export default function InsideStack() {
   return (
     <Stack.Navigator initialRouteName="BottomTabStack" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="BottomTabStack" component={BottomTabStack} />
-      <Stack.Screen name="ImageList" component={ImageListScreen} />
-      <Stack.Screen name="ImageGallery" component={ImageGalleryScreen} />
+      <Stack.Screen name="ImageList" component={ImageListScreen} options={{ animation: 'fade' }} />
+      <Stack.Screen
+        name="ImageGallery"
+        component={ImageGalleryScreen}
+        options={{ animation: 'fade' }}
+      />
     </Stack.Navigator>
   );
 }

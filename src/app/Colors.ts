@@ -3,6 +3,7 @@ export type ColorTheme = {
   secondary: string;
   textPrimary: string;
   textSecondary: string;
+  textContrast: string;
   background: string;
   backgroundSecondary: string;
   contrast: string;
@@ -13,7 +14,8 @@ const Colors = {
     primary: '#68CADE',
     secondary: '#175676',
     textPrimary: '#000000',
-    textSecondary: '#67686E',
+    textSecondary: '#888',
+    textContrast: '#eeffff',
     background: '#FFFFFF',
     backgroundSecondary: '#F5F5F5',
     contrast: '#000000',
@@ -23,6 +25,7 @@ const Colors = {
     secondary: '#175676',
     textPrimary: '#FFFFFF',
     textSecondary: '#B0B0B0',
+    textContrast: '#000000',
     background: '#121212',
     backgroundSecondary: '#1E1E1E',
     contrast: '#FFFFFF',

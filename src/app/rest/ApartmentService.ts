@@ -7,7 +7,7 @@ export async function getApartments(): Promise<Response> {
     {
       method: 'GET',
     },
-    false,
+    true,
   );
 }
 
@@ -17,6 +17,6 @@ export async function getApartmentById(id: number): Promise<Response> {
     {
       method: 'GET',
     },
-    false,
+    true,
   );
 }
