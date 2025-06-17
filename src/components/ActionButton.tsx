@@ -5,7 +5,7 @@ type ActionButtonProps = TouchableOpacity['props'] & {
   onTap?: () => void;
 };
 
-const ActionButton = React.memo(({ onTap, style, children, ...rest }: ActionButtonProps) => {
+const SwipeButton = React.memo(({ onTap, style, children, ...rest }: ActionButtonProps) => {
   return (
     <TouchableOpacity onPress={onTap} {...rest} style={style}>
       {children}
@@ -13,4 +13,4 @@ const ActionButton = React.memo(({ onTap, style, children, ...rest }: ActionButt
   );
 });
 
-export default ActionButton;
+export default SwipeButton;

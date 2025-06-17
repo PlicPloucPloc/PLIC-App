@@ -1,9 +1,11 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { Apartment } from '@app/definitions';
-import { getUserId } from '@app/rest/UserApi';
-import ActionButton from '@components/ActionButton';
+import { ColorTheme } from '@app/Colors';
+import { ApartmentResponse } from '@app/definitions';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { getApartments } from '@app/rest/ApartmentService';
+import SwipeButton from '@components/ActionButton';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
@@ -13,15 +15,17 @@ const ICON_SIZE = 38;
 const SWIPE_DELAY = 300;
 
 export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>) {
+  const colors = useThemeColors();
+  const styles = createStyles(colors);
+
   const ref = useRef<SwiperCardRefType>();
 
   // ============= Hooks ============= //
-  // const { data: apartmentsTmp, error, isLoading } = useGetApartmentsQuery();
+  const [loading, setLoading] = useState(true);
 
   const [swiperIndex, setSwiperIndex] = useState(0);
-
-  const apartmentsRef = useRef<Apartment[]>([]); // used to render the appart info
-  const [apartments, setApartments] = useState<Apartment[]>([]); // used to update the swiper
+  const apartmentsRef = useRef<ApartmentResponse[]>([]); // used to render the appart info
+  const [apartments, setApartments] = useState<ApartmentResponse[]>([]); // used to update the swiper
   const [allSwiped, setAllSwiped] = useState(false);
   const [apartmentInfo, setApartmentInfo] = useState<{
     title?: string;
@@ -29,21 +33,33 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     location?: string;
   }>({});
 
-  useEffect(() => {
-    const apartmentsTmp: Apartment[] = [];
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    const response = await getApartments();
 
-    if (!apartmentsTmp) return;
-
-    for (let i = 0; i < apartmentsTmp.length; i++) {
-      apartmentsTmp[i].additional_info.images.thumb_url = 'https://picsum.photos/800/1000';
+    if (!response.ok) {
+      const errorData = await response.json();
+      Alert.alert(
+        'Apartment Error',
+        errorData.message || 'An error occurred while fetching the apartments.',
+      );
+      return;
     }
 
-    setApartments(apartmentsTmp);
-    apartmentsRef.current = apartmentsTmp;
+    const apartmentsResponse: ApartmentResponse[] = await response.json();
+
+    setApartments(apartmentsResponse);
+    apartmentsRef.current = apartmentsResponse;
+
+    setLoading(false);
   }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
   const onIndexChange = useCallback((index: number) => {
-    // console.log('onIndexChange called with index:', index);
+    console.log('onIndexChange called with index:', index);
     const currentApartments = apartmentsRef.current;
     if (!currentApartments || index >= currentApartments.length) return;
 
@@ -57,12 +73,12 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     });
   }, []);
 
-  // if (isLoading) return <Text>Loading...</Text>;
-  // if (error) return <Text>Error fetching apartments</Text>;
+  if (loading) return <Text>Loading...</Text>;
 
   return (
     <View style={styles.container}>
       <View style={styles.swiperContainer}>
+        {/* End screen */}
         {allSwiped && (
           <View style={styles.endScreenContainer}>
             <Text style={styles.modalText}>It looks like you swiped everything!</Text>
@@ -82,6 +98,8 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             </TouchableOpacity>
           </View>
         )}
+
+        {/* Swiper */}
         <TouchableWithoutFeedback
           style={[styles.touchableContainer, allSwiped ? { width: '0%', height: '0%' } : {}]}
           onPress={() =>
@@ -102,11 +120,11 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
                 setApartmentInfo({});
                 setAllSwiped(true);
               }, SWIPE_DELAY);
-              // console.log('All cards swiped');
+              console.log('All cards swiped');
             }}
-            renderCard={(apartment: Apartment) => (
+            renderCard={(apartment: ApartmentResponse) => (
               <Image
-                source={{ uri: apartment.additional_info.images.thumb_url }}
+                source={{ uri: apartment.additional_info.images.urls[0] }}
                 style={styles.renderCardImage}
                 resizeMode="cover"
               />
@@ -121,6 +139,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
         </TouchableWithoutFeedback>
       </View>
 
+      {/* Apartment Info */}
       <View style={styles.textContainer}>
         {Object.keys(apartmentInfo).length !== 0 && (
           <>
@@ -137,8 +156,9 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
         )}
       </View>
 
+      {/* Buttons */}
       <View style={styles.buttonsContainer}>
-        <ActionButton
+        <SwipeButton
           style={styles.button}
           onTap={() => {
             if (allSwiped) {
@@ -146,125 +166,122 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             }
             ref.current?.swipeBack();
           }}>
-          <Ionicons name="arrow-undo" size={ICON_SIZE - 10} color="black" />
-        </ActionButton>
-        <ActionButton
+          <Ionicons name="arrow-undo" size={ICON_SIZE - 10} color={colors.contrast} />
+        </SwipeButton>
+        <SwipeButton
           style={styles.button}
           onTap={() => {
             ref.current?.swipeLeft();
           }}>
           <Ionicons name="close" size={ICON_SIZE} color="red" />
-        </ActionButton>
-        <ActionButton
+        </SwipeButton>
+        <SwipeButton
           style={styles.button}
           onTap={() => {
             ref.current?.swipeRight();
           }}>
-          <Ionicons name="heart" size={ICON_SIZE} color="#7EC0FD" />
-        </ActionButton>
-        <ActionButton style={styles.button} onTap={() => setAllSwiped(!allSwiped)}>
-          <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color="black" />
-        </ActionButton>
+          <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
+        </SwipeButton>
+        <SwipeButton style={styles.button} onTap={() => Alert.alert('Chat not implemented yet')}>
+          <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />
+        </SwipeButton>
       </View>
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'white',
-  },
+const createStyles = (colors: ColorTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
 
-  swiperContainer: {
-    // backgroundColor: 'red',
-    flex: 6,
-    justifyContent: 'center',
-    alignItems: 'center',
-    zIndex: 1,
-  },
-  touchableContainer: {
-    width: '100%',
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cardStyle: {
-    width: '95%',
-    height: '95%',
-    borderRadius: 15,
-    marginVertical: 20,
-  },
-  renderCardImage: {
-    height: '100%',
-    width: '100%',
-    borderRadius: 15,
-  },
-  overlayLabelContainer: {
-    flex: 1,
-    width: '100%',
-    height: '100%',
-    borderRadius: 15,
-    opacity: 0.5,
-  },
+    swiperContainer: {
+      flex: 6,
+      justifyContent: 'center',
+      alignItems: 'center',
+      zIndex: 1,
+    },
+    touchableContainer: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    cardStyle: {
+      width: '95%',
+      height: '95%',
+      borderRadius: 15,
+      marginVertical: 20,
+    },
+    renderCardImage: {
+      height: '100%',
+      width: '100%',
+      borderRadius: 15,
+    },
+    overlayLabelContainer: {
+      flex: 1,
+      width: '100%',
+      height: '100%',
+      borderRadius: 15,
+      opacity: 0.5,
+    },
 
-  textContainer: {
-    // backgroundColor: 'green',
-    flex: 1,
-    paddingLeft: 20,
-    justifyContent: 'center',
-  },
-  textTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-  },
-  textSubtitle: {
-    fontSize: 18,
-  },
+    textContainer: {
+      flex: 1,
+      paddingLeft: 20,
+      justifyContent: 'center',
+    },
+    textTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+    },
+    textSubtitle: {
+      fontSize: 18,
+    },
 
-  buttonsContainer: {
-    // backgroundColor: 'blue',
-    flex: 1,
-    paddingBottom: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-evenly',
-  },
-  button: {
-    padding: 10,
-    borderRadius: 40,
-    aspectRatio: 1,
-    backgroundColor: 'white',
-    elevation: 4,
-    justifyContent: 'center',
-    alignItems: 'center',
-    shadowColor: 'black',
-  },
+    buttonsContainer: {
+      flex: 1,
+      paddingBottom: 5,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-evenly',
+    },
+    button: {
+      padding: 10,
+      borderRadius: 40,
+      aspectRatio: 1,
+      backgroundColor: colors.background,
+      elevation: 4,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: 'black',
+    },
 
-  // Reuse modal styles for the final screen
-  endScreenContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 30,
-  },
-  modalText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
-  },
-  modalButton: {
-    backgroundColor: '#4BA3C3',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 10,
-    minWidth: 180,
-    alignItems: 'center',
-  },
-  modalButtonText: {
-    color: 'white',
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});
+    endScreenContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      padding: 30,
+    },
+    modalText: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 20,
+      textAlign: 'center',
+    },
+    modalButton: {
+      backgroundColor: colors.primary,
+      paddingHorizontal: 20,
+      paddingVertical: 10,
+      borderRadius: 10,
+      minWidth: 180,
+      alignItems: 'center',
+    },
+    modalButtonText: {
+      color: colors.contrast,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+  });

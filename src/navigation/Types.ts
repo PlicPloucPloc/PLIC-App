@@ -1,4 +1,4 @@
-import { Apartment } from '@app/definitions';
+import { ApartmentResponse } from '@app/definitions';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -39,6 +39,18 @@ export type RegisterStackScreenProps<T extends keyof RegisterStackParamList> = C
 >;
 
 // =================== Inside navigator ===================
+// ------- Inside stack -------
+export type InsideStackParamList = {
+  BottomTabStack: NavigatorScreenParams<BottomTabStackParamList>;
+  ImageList: { images: string[] };
+  ImageGallery: { images: string[]; index: number };
+};
+
+export type InsideStackScreenProps<T extends keyof InsideStackParamList> = StackScreenProps<
+  InsideStackParamList,
+  T
+>;
+
 // ------- Bottom Tab stack -------
 export type BottomTabStackParamList = {
   HomeStack: NavigatorScreenParams<HomeStackParamList>;
@@ -49,7 +61,10 @@ export type BottomTabStackParamList = {
 };
 
 export type BottomTabStackScreenProps<T extends keyof BottomTabStackParamList> =
-  BottomTabScreenProps<BottomTabStackParamList, T>;
+  CompositeScreenProps<
+    BottomTabScreenProps<BottomTabStackParamList, T>,
+    InsideStackScreenProps<keyof InsideStackParamList>
+  >;
 
 // ------- Home stack -------
 export type HomeStackParamList = {
@@ -115,7 +130,7 @@ export type ProfilStackScreenProps<T extends keyof ProfilStackParamList> = Compo
 
 // ------- Shared stack -------
 export type SharedStackParamList = {
-  ApartmentDetails: { apartment?: Apartment; apartmentId?: number };
+  ApartmentDetails: { apartment?: ApartmentResponse; apartmentId?: number };
   OtherProfil: { userId: number };
   DirectMessage: { userId: number };
 };
