@@ -11,8 +11,7 @@ import { RegisterStackScreenProps } from '@navigation/Types';
 export default function RegisterSuccessfulScreen({
   navigation,
 }: RegisterStackScreenProps<'Successful'>) {
-  const colors = useThemeColors();
-  const styles = createStyles(colors);
+  const styles = createStyles(useThemeColors());
 
   return (
     <View style={styles.container}>

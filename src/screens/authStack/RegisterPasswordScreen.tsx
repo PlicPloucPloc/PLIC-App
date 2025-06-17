@@ -12,7 +12,7 @@ import {
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
-import { registerUser } from '@app/rest/UserApi';
+import { registerUser } from '@app/rest/UserService';
 import { checkPassword } from '@app/utils/Auth';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';

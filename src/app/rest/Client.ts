@@ -8,12 +8,11 @@ import store from '@app/redux/Store';
 import * as SecureStore from 'expo-secure-store';
 import { v4 as uuidv4 } from 'uuid';
 
-// 3001 = User API
-// 3002 = Apartment API
-const PORT = 3001;
-// const HOST = '10.68.251.33;
-// const HOST = '192.168.1.57';
-const HOST = '10.0.0.2';
+import Endpoints from './Endpoints';
+
+const PORT = 4242; // gateway
+// const HOST = '10.68.250.163';
+const HOST = '192.168.1.57';
 const API_URL = `http://${HOST}:${PORT}`;
 const TIMEOUT = 5000;
 
@@ -145,7 +144,7 @@ export async function getToken(): Promise<string | null> {
 
 async function rotateTokens(refreshToken: string): Promise<string | null> {
   const response = await apiFetch(
-    '/user/refresh',
+    Endpoints.USER.REFRESH,
     {
       method: 'GET',
       headers: {

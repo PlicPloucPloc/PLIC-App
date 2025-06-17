@@ -13,7 +13,7 @@ import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import * as AuthActions from '@app/redux/slices/app/AuthStateSlice';
 import store, { RootState } from '@app/redux/Store';
-import { checkEmailExists } from '@app/rest/UserApi';
+import { checkEmailExists } from '@app/rest/UserService';
 import { checkEmail } from '@app/utils/Auth';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
