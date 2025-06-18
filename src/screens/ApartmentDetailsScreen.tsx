@@ -50,18 +50,31 @@ export default function ApartmentDetailsScreen({
   const [showFullDescription, setShowFullDescription] = useState(false);
   const MAX_LINES = 4;
 
+  const [currentPage, setCurrentPage] = useState(0);
+
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
-      <PagerView style={styles.pagerView} initialPage={0}>
-        {images.urls.map((uri, index) => (
-          <Pressable
-            key={index}
-            style={styles.imageContainer}
-            onPress={() => navigation.navigate('ImageList', { images: images.urls })}>
-            <Image key={index} contentFit="cover" source={uri} style={styles.image} />
-          </Pressable>
-        ))}
-      </PagerView>
+      <View style={styles.pagerWrapper}>
+        <PagerView
+          style={styles.pagerView}
+          initialPage={0}
+          onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}>
+          {images.urls.map((uri, index) => (
+            <Pressable
+              key={index}
+              style={styles.imageContainer}
+              onPress={() => navigation.navigate('ImageList', { images: images.urls })}>
+              <Image contentFit="cover" source={uri} style={styles.image} />
+            </Pressable>
+          ))}
+        </PagerView>
+
+        <View style={styles.imageCounter}>
+          <Text style={styles.imageCounterText}>
+            {currentPage + 1} / {images.urls.length}
+          </Text>
+        </View>
+      </View>
 
       <View style={styles.infoContainer}>
         <Text style={styles.title}>{title}</Text>
@@ -148,6 +161,30 @@ const createStyles = (colors: ColorTheme) =>
       width: width - 10,
       height: '100%',
       borderRadius: 12,
+    },
+
+    pagerWrapper: {
+      position: 'relative',
+      height: 250,
+      width: '100%',
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
+
+    imageCounter: {
+      position: 'absolute',
+      bottom: 10,
+      right: 14,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      borderRadius: 12,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      zIndex: 10,
+    },
+    imageCounterText: {
+      color: '#fff',
+      fontSize: 12,
+      fontWeight: '600',
     },
 
     infoContainer: {
