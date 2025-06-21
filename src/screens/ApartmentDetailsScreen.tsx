@@ -147,6 +147,13 @@ const createStyles = (colors: ColorTheme) =>
       paddingBottom: 24,
     },
 
+    pagerWrapper: {
+      position: 'relative',
+      height: 250,
+      width: '100%',
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
     pagerView: {
       height: 250,
       width: '100%',
@@ -163,14 +170,6 @@ const createStyles = (colors: ColorTheme) =>
       borderRadius: 12,
     },
 
-    pagerWrapper: {
-      position: 'relative',
-      height: 250,
-      width: '100%',
-      borderRadius: 12,
-      overflow: 'hidden',
-    },
-
     imageCounter: {
       position: 'absolute',
       bottom: 10,
@@ -182,7 +181,7 @@ const createStyles = (colors: ColorTheme) =>
       zIndex: 10,
     },
     imageCounterText: {
-      color: '#fff',
+      color: colors.textContrast,
       fontSize: 12,
       fontWeight: '600',
     },
@@ -206,11 +205,6 @@ const createStyles = (colors: ColorTheme) =>
       fontSize: 14,
     },
 
-    criteriaContainer: {
-      padding: 12,
-      borderRadius: 8,
-      marginTop: 8,
-    },
     criteriaContainerGrid: {
       flexDirection: 'row',
       justifyContent: 'space-between',
