@@ -50,9 +50,7 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
     fetchData();
   }, [fetchData]);
 
-  const filteredData = data.filter((apt) =>
-    apt.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filteredData = data.filter((apt) => apt.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <View style={styles.container}>
