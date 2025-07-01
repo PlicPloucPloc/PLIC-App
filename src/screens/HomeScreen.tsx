@@ -47,6 +47,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     }
 
     const apartmentsResponse: ApartmentResponse[] = await response.json();
+    console.log('Fetched apartments:', apartmentsResponse);
 
     setApartments(apartmentsResponse);
     apartmentsRef.current = apartmentsResponse;
@@ -67,8 +68,8 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
     const apartment = currentApartments[index];
     setApartmentInfo({
-      title: apartment.additional_info.title,
-      surface: apartment.additional_info.criteria.surface,
+      title: apartment.name,
+      surface: apartment.surface,
       location: apartment.location,
     });
   }, []);
@@ -124,7 +125,8 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             }}
             renderCard={(apartment: ApartmentResponse) => (
               <Image
-                source={{ uri: apartment.additional_info.images.urls[0] }}
+                // source={{ uri: apartment.additional_info.images.urls[0] }}
+                source={{ uri: `https://picsum.photos/id/${apartment.apartment_id}/800/600`}}
                 style={styles.renderCardImage}
                 resizeMode="cover"
               />

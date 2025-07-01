@@ -43,14 +43,22 @@ export default function ApartmentDetailsScreen({
   const styles = createStyles(colors);
 
   const apartment = route.params.apartment ?? ({} as ApartmentResponse);
-  const { title, description, images, criteria } = apartment.additional_info;
-  const baseRent = 720;
-  const fullRent = baseRent + criteria.monthlyCharges;
+  const fullRent = apartment.rent + 0; // TODO: add estimated charges here
 
   const [showFullDescription, setShowFullDescription] = useState(false);
   const MAX_LINES = 4;
 
   const [currentPage, setCurrentPage] = useState(0);
+
+  const images = {
+    urls: [
+      'https://picsum.photos/id/1011/800/600',
+      'https://picsum.photos/id/1025/800/600',
+      'https://picsum.photos/id/1043/800/600',
+      'https://picsum.photos/id/1062/800/600',
+      'https://picsum.photos/id/1084/800/600',
+    ],
+  };
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
@@ -77,10 +85,10 @@ export default function ApartmentDetailsScreen({
       </View>
 
       <View style={styles.infoContainer}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.title}>{apartment.name}</Text>
 
         <Text style={styles.priceText}>
-          {baseRent} € <Text style={styles.lightText}>no charges</Text>
+          {apartment.rent} € <Text style={styles.lightText}>no charges</Text>
         </Text>
         <Text style={styles.priceText}>
           {fullRent} € <Text style={styles.lightText}>with charges</Text>
@@ -88,24 +96,23 @@ export default function ApartmentDetailsScreen({
 
         <View style={styles.criteriaContainerGrid}>
           <View style={styles.criteriaColumn}>
-            <InfoItem icon="resize" label="Surface" value={`${criteria.surface} m²`} />
-            <InfoItem icon="apps" label="Rooms" value={criteria.numberOfRooms} />
-            <InfoItem icon="bed-outline" label="Bedrooms" value={criteria.numberOfBedRoom} />
+            <InfoItem icon="resize" label="Surface" value={`${apartment.surface} m²`} />
+            <InfoItem icon="apps" label="Rooms" value={apartment.number_of_rooms} />
+            <InfoItem icon="bed-outline" label="Bedrooms" value={apartment.number_of_bed_rooms} />
             <InfoItem
               icon="cube-outline"
               label="Furnished"
-              value={criteria.isFurnished ? 'Yes' : 'No'}
+              value={apartment.is_furnished ? 'Yes' : 'No'}
             />
           </View>
           <View style={styles.criteriaColumn}>
-            <InfoItem icon="flame-outline" label="Heating" value={criteria.heating_type} />
-            <InfoItem icon="layers-outline" label="Floor" value={criteria.floor} />
+            <InfoItem icon="layers-outline" label="Floor" value={apartment.floor} />
             <InfoItem
               icon="swap-vertical-outline"
               label="Elevator"
-              value={criteria.elevator ? 'Yes' : 'No'}
+              value={apartment.elevator ? 'Yes' : 'No'}
             />
-            <InfoItem icon="calendar-outline" label="Available" value={criteria.availableFrom} />
+            <InfoItem icon="calendar-outline" label="Available" value={apartment.available_from} />
           </View>
         </View>
 
@@ -116,9 +123,9 @@ export default function ApartmentDetailsScreen({
           style={styles.description}
           numberOfLines={showFullDescription ? undefined : MAX_LINES}
           ellipsizeMode="tail">
-          {description}
+          {apartment.description}
         </Text>
-        {description.length > 100 && (
+        {apartment.description.length > 100 && (
           <Pressable onPress={() => setShowFullDescription(!showFullDescription)}>
             <Text style={{ color: '#007bff', marginTop: 4 }}>
               {showFullDescription ? 'Read less' : 'Read more'}
