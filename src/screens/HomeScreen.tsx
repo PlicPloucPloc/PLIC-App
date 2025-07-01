@@ -126,7 +126,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             renderCard={(apartment: ApartmentResponse) => (
               <Image
                 // source={{ uri: apartment.additional_info.images.urls[0] }}
-                source={{ uri: `https://picsum.photos/id/${apartment.apartment_id}/800/600`}}
+                source={{ uri: `https://picsum.photos/id/${apartment.apartment_id}/800/600` }}
                 style={styles.renderCardImage}
                 resizeMode="cover"
               />
