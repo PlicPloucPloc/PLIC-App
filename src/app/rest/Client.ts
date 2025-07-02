@@ -10,11 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import Endpoints from './Endpoints';
 
-const PORT = 4242; // gateway
-// const HOST = '10.68.250.54';
-const HOST = '192.168.1.58';
-const API_URL = `http://${HOST}:${PORT}`;
-const TIMEOUT = 5000;
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const TIMEOUT = parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '5000');
 
 /**
  * Fetches data from the API with optional authentication.

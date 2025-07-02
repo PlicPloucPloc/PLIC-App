@@ -1,6 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
-  Alert,
   FlatList,
   Keyboard,
   Pressable,
@@ -12,9 +11,9 @@ import {
 } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { ApartmentResponse } from '@app/definitions';
+import { ApartmentInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { getApartments } from '@app/rest/ApartmentService';
+import { getApartmentsInfoPaginated } from '@app/rest/ApartmentService';
 import LikeItem from '@components/LikeItem';
 import { LikesStackScreenProps } from '@navigation/Types';
 
@@ -22,24 +21,14 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const [data, setData] = useState<ApartmentResponse[]>([]);
+  const [data, setData] = useState<ApartmentInfo[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const response = await getApartments();
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      Alert.alert(
-        'Apartment Error',
-        errorData.message || 'An error occurred while fetching the apartments.',
-      );
-      return;
-    }
-
-    const apartmentsResponse: ApartmentResponse[] = await response.json();
+    const apartmentsResponse = await getApartmentsInfoPaginated(10);
+    if (!apartmentsResponse) return;
 
     setData(apartmentsResponse);
 
@@ -86,7 +75,7 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
               title={apt.name}
               surface={apt.surface}
               description={apt.description}
-              imageUrl={`https://picsum.photos/id/${apt.apartment_id}/800/600`}
+              imageUrl={apt.image_thumbnail}
             />
           </Pressable>
         )}
