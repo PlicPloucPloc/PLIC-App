@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { ApartmentResponse } from '@app/definitions';
+import { ApartmentInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { getApartments } from '@app/rest/ApartmentService';
+import { getApartmentsInfoPaginated } from '@app/rest/ApartmentService';
 import SwipeButton from '@components/ActionButton';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
@@ -24,8 +24,8 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   const [loading, setLoading] = useState(true);
 
   const [swiperIndex, setSwiperIndex] = useState(0);
-  const apartmentsRef = useRef<ApartmentResponse[]>([]); // used to render the appart info
-  const [apartments, setApartments] = useState<ApartmentResponse[]>([]); // used to update the swiper
+  const apartmentsRef = useRef<ApartmentInfo[]>([]); // used to render the appart info
+  const [apartments, setApartments] = useState<ApartmentInfo[]>([]); // used to update the swiper
   const [allSwiped, setAllSwiped] = useState(false);
   const [apartmentInfo, setApartmentInfo] = useState<{
     title?: string;
@@ -35,19 +35,8 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const response = await getApartments();
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      Alert.alert(
-        'Apartment Error',
-        errorData.message || 'An error occurred while fetching the apartments.',
-      );
-      return;
-    }
-
-    const apartmentsResponse: ApartmentResponse[] = await response.json();
-    console.log('Fetched apartments:', apartmentsResponse);
+    const apartmentsResponse = await getApartmentsInfoPaginated(0);
+    if (!apartmentsResponse) return;
 
     setApartments(apartmentsResponse);
     apartmentsRef.current = apartmentsResponse;
@@ -123,10 +112,9 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
               }, SWIPE_DELAY);
               console.log('All cards swiped');
             }}
-            renderCard={(apartment: ApartmentResponse) => (
+            renderCard={(apartment: ApartmentInfo) => (
               <Image
-                // source={{ uri: apartment.additional_info.images.urls[0] }}
-                source={{ uri: `https://picsum.photos/id/${apartment.apartment_id}/800/600` }}
+                source={{ uri: apartment.image_thumbnail }}
                 style={styles.renderCardImage}
                 resizeMode="cover"
               />

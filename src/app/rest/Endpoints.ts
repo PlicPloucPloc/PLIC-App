@@ -1,7 +1,7 @@
 const Endpoints = {
   APARTMENT: {
-    GET_ALL: '/apt',
-    GET_BY_ID: (id: number) => `/apartment/${id}`,
+    GET_INFO_PAGINATED: (offset: number) => `/apt?offset=${offset}`,
+    GET_INFO_BY_ID: (id: number) => `/apartment/${id}`,
   },
   USER: {
     LOGIN: '/user/login',

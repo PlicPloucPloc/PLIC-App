@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { ApartmentResponse } from '@app/definitions';
+import { ApartmentInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { getApartmentImages, getApartmentInfoById } from '@app/rest/ApartmentService';
 import { Images } from '@assets/index';
 import { Ionicons } from '@expo/vector-icons';
 import { SharedStackScreenProps } from '@navigation/Types';
@@ -42,24 +43,38 @@ export default function ApartmentDetailsScreen({
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const apartment = route.params.apartment ?? ({} as ApartmentResponse);
-  const fullRent = apartment.rent + 0; // TODO: add estimated charges here
-
+  const [loading, setLoading] = useState(true);
+  const [apartment, setApartment] = useState<ApartmentInfo>();
   const [showFullDescription, setShowFullDescription] = useState(false);
   const MAX_LINES = 4;
 
   const [currentPage, setCurrentPage] = useState(0);
 
-  const images = {
-    urls: [
-      'https://picsum.photos/id/1011/800/600',
-      'https://picsum.photos/id/1025/800/600',
-      'https://picsum.photos/id/1043/800/600',
-      'https://picsum.photos/id/1062/800/600',
-      'https://picsum.photos/id/1084/800/600',
-    ],
-  };
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
 
+      let apartmentTmp: ApartmentInfo;
+      if (route.params?.apartment) {
+        apartmentTmp = { ...route.params.apartment };
+      } else if (route.params?.apartmentId) {
+        const apartmentResponse = await getApartmentInfoById(route.params.apartmentId);
+        if (!apartmentResponse) return;
+
+        apartmentTmp = apartmentResponse;
+      } else {
+        return;
+      }
+
+      apartmentTmp.images = await getApartmentImages(apartmentTmp);
+      setApartment(apartmentTmp);
+      setLoading(false);
+    })();
+  }, [route.params]);
+
+  if (loading || !apartment) {
+    return <Text>Loading...</Text>;
+  }
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
       <View style={styles.pagerWrapper}>
@@ -67,11 +82,11 @@ export default function ApartmentDetailsScreen({
           style={styles.pagerView}
           initialPage={0}
           onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}>
-          {images.urls.map((uri, index) => (
+          {apartment.images.map((uri, index) => (
             <Pressable
               key={index}
               style={styles.imageContainer}
-              onPress={() => navigation.navigate('ImageList', { images: images.urls })}>
+              onPress={() => navigation.navigate('ImageList', { images: apartment.images })}>
               <Image contentFit="cover" source={uri} style={styles.image} />
             </Pressable>
           ))}
@@ -79,7 +94,7 @@ export default function ApartmentDetailsScreen({
 
         <View style={styles.imageCounter}>
           <Text style={styles.imageCounterText}>
-            {currentPage + 1} / {images.urls.length}
+            {currentPage + 1} / {apartment.images.length}
           </Text>
         </View>
       </View>
@@ -91,7 +106,8 @@ export default function ApartmentDetailsScreen({
           {apartment.rent} € <Text style={styles.lightText}>no charges</Text>
         </Text>
         <Text style={styles.priceText}>
-          {fullRent} € <Text style={styles.lightText}>with charges</Text>
+          {apartment.rent + 0} € <Text style={styles.lightText}>with charges</Text>{' '}
+          {/* TODO: change charges */}
         </Text>
 
         <View style={styles.criteriaContainerGrid}>

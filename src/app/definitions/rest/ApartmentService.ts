@@ -1,4 +1,4 @@
-export interface ApartmentResponse {
+export interface ApartmentInfo {
   apartment_id: number;
   name: string;
   location: string;
@@ -15,4 +15,8 @@ export interface ApartmentResponse {
   floor: number;
   elevator: boolean;
   parking_spaces: number;
+
+  // Additional fields
+  image_thumbnail: string;
+  images: string[];
 }
