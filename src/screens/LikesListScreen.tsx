@@ -14,6 +14,7 @@ import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { getApartmentsInfoPaginated } from '@app/rest/ApartmentService';
+import { getLikedApartmentsPaginated } from '@app/rest/RelationService';
 import LikeItem from '@components/LikeItem';
 import { LikesStackScreenProps } from '@navigation/Types';
 
@@ -25,9 +26,9 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
 
-  const fetchData = useCallback(async () => {
+  const fetchInitialData = useCallback(async () => {
     setLoading(true);
-    const apartmentsResponse = await getApartmentsInfoPaginated(10);
+    const apartmentsResponse = await getLikedApartmentsPaginated(true, 0);
     if (!apartmentsResponse) return;
 
     setData(apartmentsResponse);
@@ -35,9 +36,18 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
     setLoading(false);
   }, []);
 
+  const fetchMoreData = useCallback(async () => {
+    if (loading) return;
+
+    const apartmentsResponse = await getLikedApartmentsPaginated(true, data.length);
+    if (!apartmentsResponse) return;
+
+    setData((prevData) => [...prevData, ...apartmentsResponse]);
+  }, [data.length, loading]);
+
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
+    fetchInitialData();
+  }, [fetchInitialData]);
 
   const filteredData = data.filter((apt) => apt.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -79,7 +89,9 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
             />
           </Pressable>
         )}
-        refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchData} />}
+        refreshControl={<RefreshControl refreshing={loading} onRefresh={fetchInitialData} />}
+        onEndReached={fetchMoreData}
+        onEndReachedThreshold={0.75}
         contentContainerStyle={{ paddingBottom: 20 }}
         keyboardShouldPersistTaps="handled"
       />

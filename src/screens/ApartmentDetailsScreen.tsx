@@ -4,7 +4,8 @@ import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { getApartmentImages, getApartmentInfoById } from '@app/rest/ApartmentService';
+import { getApartmentInfoById } from '@app/rest/ApartmentService';
+import { getApartmentImages } from '@app/rest/S3Service.ts';
 import { Images } from '@assets/index';
 import { Ionicons } from '@expo/vector-icons';
 import { SharedStackScreenProps } from '@navigation/Types';
@@ -63,6 +64,7 @@ export default function ApartmentDetailsScreen({
 
         apartmentTmp = apartmentResponse;
       } else {
+        console.warn('No apartment data provided in route params');
         return;
       }
 

@@ -3,8 +3,10 @@ import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-na
 
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo } from '@app/definitions';
+import { RELATION_TYPE } from '@app/definitions/rest/RelationService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { getApartmentsInfoPaginated } from '@app/rest/ApartmentService';
+import { postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
@@ -49,7 +51,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   }, [fetchData]);
 
   const onIndexChange = useCallback((index: number) => {
-    console.log('onIndexChange called with index:', index);
+    // console.log('onIndexChange called with index:', index);
     const currentApartments = apartmentsRef.current;
     if (!currentApartments || index >= currentApartments.length) return;
 
@@ -62,6 +64,10 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
       location: apartment.location,
     });
   }, []);
+
+  async function handlePostRelation(apartmentId: number, type: RELATION_TYPE) {
+    await postRelation(apartmentId, type);
+  }
 
   if (loading) return <Text>Loading...</Text>;
 
@@ -110,7 +116,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
                 setApartmentInfo({});
                 setAllSwiped(true);
               }, SWIPE_DELAY);
-              console.log('All cards swiped');
+              // console.log('All cards swiped');
             }}
             renderCard={(apartment: ApartmentInfo) => (
               <Image
@@ -162,6 +168,10 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
           style={styles.button}
           onTap={() => {
             ref.current?.swipeLeft();
+            handlePostRelation(
+              apartmentsRef.current[swiperIndex].apartment_id,
+              RELATION_TYPE.DISLIKE,
+            );
           }}>
           <Ionicons name="close" size={ICON_SIZE} color="red" />
         </SwipeButton>
@@ -169,6 +179,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
           style={styles.button}
           onTap={() => {
             ref.current?.swipeRight();
+            handlePostRelation(apartmentsRef.current[swiperIndex].apartment_id, RELATION_TYPE.LIKE);
           }}>
           <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
         </SwipeButton>
