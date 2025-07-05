@@ -72,15 +72,9 @@ export async function postRelation(apartmentId: number, type: RELATION_TYPE) {
     true,
   );
 
-  console.log(`Posting relation for apartment ID ${apartmentId} with type ${type}`);
-
   if (!response.ok) {
-    console.log(
-      `Failed to post relation for apartment ID ${apartmentId}. Response status: ${response.status}`,
-    );
 
     const errorData = await response.json();
-    console.log(errorData.message);
 
     if (errorData.message == 'Relation already exists') {
       console.warn(
@@ -101,7 +95,7 @@ export async function updateRelation(apartmentId: number, type: RELATION_TYPE) {
     Endpoints.RELATIONS.UPDATE_RELATION,
     {
       method: 'PUT',
-      body: JSON.stringify({ apartment_id: apartmentId, type }),
+      body: JSON.stringify({ aptId: apartmentId, isLike: type === RELATION_TYPE.LIKE }),
     },
     true,
   );

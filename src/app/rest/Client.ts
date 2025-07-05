@@ -97,7 +97,9 @@ async function handleErrorResponse(
   withAuth: boolean,
   requestId: string,
 ): Promise<Response> {
-  const data = await response.text();
+  const clone = response.clone();
+
+  const data = await clone.text();
 
   if (data.includes('token is expired')) {
     console.log('--- Token expired, begin rotation ---');
@@ -110,15 +112,15 @@ async function handleErrorResponse(
     return await apiFetch(endpoint, options, withAuth);
   }
 
-  if (response.status === 403 || response.status === 401) {
+  if (clone.status === 403 || clone.status === 401) {
     return userNeedsLogin(requestId);
   }
 
   console.error(
-    `Request ID: ${requestId} | Failed with status: ${response.status}, error: ${data}`,
+    `Request ID: ${requestId} | Failed with status: ${clone.status}, error: ${data}`,
   );
 
-  return response.clone();
+  return response;
 }
 
 /**
