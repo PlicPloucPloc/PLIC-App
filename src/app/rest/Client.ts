@@ -11,8 +11,8 @@ import { v4 as uuidv4 } from 'uuid';
 import Endpoints from './Endpoints';
 
 const PORT = 4242; // gateway
-// const HOST = '10.68.250.163';
-const HOST = '192.168.1.57';
+// const HOST = '10.68.250.54';
+const HOST = '192.168.1.58';
 const API_URL = `http://${HOST}:${PORT}`;
 const TIMEOUT = 5000;
 

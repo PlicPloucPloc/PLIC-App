@@ -50,9 +50,7 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
     fetchData();
   }, [fetchData]);
 
-  const filteredData = data.filter((item) =>
-    item.additional_info.title.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filteredData = data.filter((apt) => apt.name.toLowerCase().includes(search.toLowerCase()));
 
   return (
     <View style={styles.container}>
@@ -68,13 +66,13 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
       </TouchableWithoutFeedback>
       <FlatList
         data={filteredData}
-        keyExtractor={(item) => item.adLink}
-        renderItem={({ item }) => (
+        keyExtractor={(apt) => apt.name}
+        renderItem={({ item: apt }) => (
           <Pressable
             onPress={() =>
               navigation.navigate('SharedStack', {
                 screen: 'ApartmentDetails',
-                params: { apartment: item },
+                params: { apartment: apt },
               })
             }
             // android_ripple={{ color: colors.primary + '33' }}
@@ -85,10 +83,10 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
             // ]}
           >
             <LikeItem
-              title={item.additional_info.title}
-              surface={item.additional_info.criteria.surface}
-              description={item.additional_info.description}
-              imageUrl={item.additional_info.images.thumb_url}
+              title={apt.name}
+              surface={apt.surface}
+              description={apt.description}
+              imageUrl={`https://picsum.photos/id/${apt.apartment_id}/800/600`}
             />
           </Pressable>
         )}

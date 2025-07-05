@@ -43,31 +43,52 @@ export default function ApartmentDetailsScreen({
   const styles = createStyles(colors);
 
   const apartment = route.params.apartment ?? ({} as ApartmentResponse);
-  const { title, description, images, criteria } = apartment.additional_info;
-  const baseRent = 720;
-  const fullRent = baseRent + criteria.monthlyCharges;
+  const fullRent = apartment.rent + 0; // TODO: add estimated charges here
 
   const [showFullDescription, setShowFullDescription] = useState(false);
   const MAX_LINES = 4;
 
+  const [currentPage, setCurrentPage] = useState(0);
+
+  const images = {
+    urls: [
+      'https://picsum.photos/id/1011/800/600',
+      'https://picsum.photos/id/1025/800/600',
+      'https://picsum.photos/id/1043/800/600',
+      'https://picsum.photos/id/1062/800/600',
+      'https://picsum.photos/id/1084/800/600',
+    ],
+  };
+
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
-      <PagerView style={styles.pagerView} initialPage={0}>
-        {images.urls.map((uri, index) => (
-          <Pressable
-            key={index}
-            style={styles.imageContainer}
-            onPress={() => navigation.navigate('ImageList', { images: images.urls })}>
-            <Image key={index} contentFit="cover" source={uri} style={styles.image} />
-          </Pressable>
-        ))}
-      </PagerView>
+      <View style={styles.pagerWrapper}>
+        <PagerView
+          style={styles.pagerView}
+          initialPage={0}
+          onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}>
+          {images.urls.map((uri, index) => (
+            <Pressable
+              key={index}
+              style={styles.imageContainer}
+              onPress={() => navigation.navigate('ImageList', { images: images.urls })}>
+              <Image contentFit="cover" source={uri} style={styles.image} />
+            </Pressable>
+          ))}
+        </PagerView>
+
+        <View style={styles.imageCounter}>
+          <Text style={styles.imageCounterText}>
+            {currentPage + 1} / {images.urls.length}
+          </Text>
+        </View>
+      </View>
 
       <View style={styles.infoContainer}>
-        <Text style={styles.title}>{title}</Text>
+        <Text style={styles.title}>{apartment.name}</Text>
 
         <Text style={styles.priceText}>
-          {baseRent} € <Text style={styles.lightText}>no charges</Text>
+          {apartment.rent} € <Text style={styles.lightText}>no charges</Text>
         </Text>
         <Text style={styles.priceText}>
           {fullRent} € <Text style={styles.lightText}>with charges</Text>
@@ -75,24 +96,23 @@ export default function ApartmentDetailsScreen({
 
         <View style={styles.criteriaContainerGrid}>
           <View style={styles.criteriaColumn}>
-            <InfoItem icon="resize" label="Surface" value={`${criteria.surface} m²`} />
-            <InfoItem icon="apps" label="Rooms" value={criteria.numberOfRooms} />
-            <InfoItem icon="bed-outline" label="Bedrooms" value={criteria.numberOfBedRoom} />
+            <InfoItem icon="resize" label="Surface" value={`${apartment.surface} m²`} />
+            <InfoItem icon="apps" label="Rooms" value={apartment.number_of_rooms} />
+            <InfoItem icon="bed-outline" label="Bedrooms" value={apartment.number_of_bed_rooms} />
             <InfoItem
               icon="cube-outline"
               label="Furnished"
-              value={criteria.isFurnished ? 'Yes' : 'No'}
+              value={apartment.is_furnished ? 'Yes' : 'No'}
             />
           </View>
           <View style={styles.criteriaColumn}>
-            <InfoItem icon="flame-outline" label="Heating" value={criteria.heating_type} />
-            <InfoItem icon="layers-outline" label="Floor" value={criteria.floor} />
+            <InfoItem icon="layers-outline" label="Floor" value={apartment.floor} />
             <InfoItem
               icon="swap-vertical-outline"
               label="Elevator"
-              value={criteria.elevator ? 'Yes' : 'No'}
+              value={apartment.elevator ? 'Yes' : 'No'}
             />
-            <InfoItem icon="calendar-outline" label="Available" value={criteria.availableFrom} />
+            <InfoItem icon="calendar-outline" label="Available" value={apartment.available_from} />
           </View>
         </View>
 
@@ -103,9 +123,9 @@ export default function ApartmentDetailsScreen({
           style={styles.description}
           numberOfLines={showFullDescription ? undefined : MAX_LINES}
           ellipsizeMode="tail">
-          {description}
+          {apartment.description}
         </Text>
-        {description.length > 100 && (
+        {apartment.description.length > 100 && (
           <Pressable onPress={() => setShowFullDescription(!showFullDescription)}>
             <Text style={{ color: '#007bff', marginTop: 4 }}>
               {showFullDescription ? 'Read less' : 'Read more'}
@@ -134,6 +154,13 @@ const createStyles = (colors: ColorTheme) =>
       paddingBottom: 24,
     },
 
+    pagerWrapper: {
+      position: 'relative',
+      height: 250,
+      width: '100%',
+      borderRadius: 12,
+      overflow: 'hidden',
+    },
     pagerView: {
       height: 250,
       width: '100%',
@@ -148,6 +175,22 @@ const createStyles = (colors: ColorTheme) =>
       width: width - 10,
       height: '100%',
       borderRadius: 12,
+    },
+
+    imageCounter: {
+      position: 'absolute',
+      bottom: 10,
+      right: 14,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      borderRadius: 12,
+      paddingHorizontal: 8,
+      paddingVertical: 2,
+      zIndex: 10,
+    },
+    imageCounterText: {
+      color: colors.textContrast,
+      fontSize: 12,
+      fontWeight: '600',
     },
 
     infoContainer: {
@@ -169,11 +212,6 @@ const createStyles = (colors: ColorTheme) =>
       fontSize: 14,
     },
 
-    criteriaContainer: {
-      padding: 12,
-      borderRadius: 8,
-      marginTop: 8,
-    },
     criteriaContainerGrid: {
       flexDirection: 'row',
       justifyContent: 'space-between',
