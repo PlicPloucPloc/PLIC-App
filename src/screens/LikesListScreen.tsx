@@ -13,7 +13,6 @@ import {
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { getApartmentsInfoPaginated } from '@app/rest/ApartmentService';
 import { getLikedApartmentsPaginated } from '@app/rest/RelationService';
 import LikeItem from '@components/LikeItem';
 import { LikesStackScreenProps } from '@navigation/Types';
@@ -48,6 +47,13 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
   useEffect(() => {
     fetchInitialData();
   }, [fetchInitialData]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      fetchInitialData();
+    });
+    return unsubscribe;
+  }, [fetchInitialData, navigation]);
 
   const filteredData = data.filter((apt) => apt.name.toLowerCase().includes(search.toLowerCase()));
 
