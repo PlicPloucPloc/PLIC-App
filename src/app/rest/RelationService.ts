@@ -73,7 +73,6 @@ export async function postRelation(apartmentId: number, type: RELATION_TYPE) {
   );
 
   if (!response.ok) {
-
     const errorData = await response.json();
 
     if (errorData.message == 'Relation already exists') {

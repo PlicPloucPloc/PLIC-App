@@ -116,9 +116,7 @@ async function handleErrorResponse(
     return userNeedsLogin(requestId);
   }
 
-  console.error(
-    `Request ID: ${requestId} | Failed with status: ${clone.status}, error: ${data}`,
-  );
+  console.error(`Request ID: ${requestId} | Failed with status: ${clone.status}, error: ${data}`);
 
   return response;
 }
