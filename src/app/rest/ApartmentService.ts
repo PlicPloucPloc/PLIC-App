@@ -1,11 +1,8 @@
-import { Alert } from 'react-native';
-
 import { ApartmentInfo } from '@app/definitions';
 
-import { apiFetch } from './Client';
+import { alertOnError, apiFetch } from './Client';
 import Endpoints from './Endpoints';
-
-const S3_URL = process.env.EXPO_PUBLIC_S3_URL;
+import { getApartmentImages, getApartmentThumbnail } from './S3Service.ts';
 
 export async function getApartmentsInfoPaginated(offset: number) {
   const response = await apiFetch(
@@ -16,19 +13,12 @@ export async function getApartmentsInfoPaginated(offset: number) {
     true,
   );
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    Alert.alert(
-      'Apartment Error',
-      errorData.message || 'An error occurred while fetching the apartments.',
-    );
-    return undefined;
-  }
+  if (await alertOnError(response, 'Apartment', 'fetching the apartments')) return;
 
   const apartments: ApartmentInfo[] = await response.json();
 
   for (const apt of apartments) {
-    apt.image_thumbnail = `${S3_URL}/apartment-pictures/${apt.apartment_id}/0.jpg`;
+    apt.image_thumbnail = await getApartmentThumbnail(apt);
   }
 
   return apartments;
@@ -43,39 +33,13 @@ export async function getApartmentInfoById(id: number) {
     true,
   );
 
-  if (!response.ok) {
-    const errorData = await response.json();
-    Alert.alert(
-      'Apartment Error',
-      errorData.message || 'An error occurred while fetching an apartment.',
-    );
-    return undefined;
-  }
+  if (await alertOnError(response, 'Apartment', 'fetching an apartment')) return;
 
   const apartment: ApartmentInfo = await response.json();
 
-  apartment.image_thumbnail = `${S3_URL}/apartment-pictures/${apartment.apartment_id}/0.jpg`;
+  apartment.image_thumbnail = (await getApartmentThumbnail(apartment)) ?? '';
+
   await getApartmentImages(apartment);
 
   return apartment;
-}
-
-export async function getApartmentImages(apt: ApartmentInfo) {
-  const images_url = [apt.image_thumbnail];
-
-  let index = 1;
-  while (true) {
-    const imageUrl = `${S3_URL}/apartment-pictures/${apt.apartment_id}/${index}.jpg`;
-    try {
-      const response = await fetch(imageUrl);
-      if (!response.ok) break; // No more images available
-      images_url.push(imageUrl);
-      index++;
-    } catch (error) {
-      break; // Error fetching image, stop the loop
-    }
-  }
-
-  console.log('Fetched images:', images_url);
-  return images_url;
 }

@@ -48,7 +48,6 @@ export default function RegisterPasswordScreen({
     }
 
     const userInfo = { ...authState, password };
-    console.log('User Info:', userInfo);
 
     setLoading(true);
     const response = await registerUser(userInfo);

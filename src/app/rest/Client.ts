@@ -34,7 +34,7 @@ export async function apiFetch(
 
   let response: Response;
   try {
-    response = await fetchWithTimeout(`${API_URL}${endpoint}`, { ...options, headers }, TIMEOUT);
+    response = await fetchWithTimeout(`${API_URL}${endpoint}`, { ...options, headers });
   } catch (error: any) {
     if (error.name === 'AbortError') {
       console.error(`Request ID: ${requestId} | Request timed out after ${TIMEOUT}ms`);
@@ -77,13 +77,9 @@ async function prepareHeaders(
   return headers;
 }
 
-async function fetchWithTimeout(
-  url: string,
-  options: RequestInit,
-  timeout: number,
-): Promise<Response> {
+export async function fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
+  const id = setTimeout(() => controller.abort(), TIMEOUT);
   try {
     return await fetch(url, {
       ...options,
@@ -112,6 +108,10 @@ async function handleErrorResponse(
     console.log('--- End rotation ---');
 
     return await apiFetch(endpoint, options, withAuth);
+  }
+
+  if (response.status === 403 || response.status === 401) {
+    return userNeedsLogin(requestId);
   }
 
   console.error(
@@ -177,4 +177,15 @@ function userNeedsLogin(requestId: string): Response {
     status: 401,
     statusText: 'Unauthorized',
   });
+}
+
+export async function alertOnError(response: Response, service: string, message: string) {
+  const hasError = !response.ok;
+
+  if (hasError) {
+    const errorData = await response.json();
+    Alert.alert(`${service} Error`, errorData.message || `An error occurred while ${message}.`);
+  }
+
+  return hasError;
 }

@@ -1,4 +1,4 @@
-export interface ApartmentInfo {
+export type ApartmentInfo = {
   apartment_id: number;
   name: string;
   location: string;
@@ -19,4 +19,4 @@ export interface ApartmentInfo {
   // Additional fields
   image_thumbnail: string;
   images: string[];
-}
+};
