@@ -39,6 +39,7 @@ export default function BottomTabStack() {
         headerShown: false,
         tabBarActiveTintColor: '#4BA3C3',
         tabBarInactiveTintColor: 'black',
+        animation: 'shift',
       }}>
       <Stack.Screen
         name="HomeStack"
