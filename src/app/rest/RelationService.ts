@@ -86,7 +86,7 @@ export async function postRelation(apartmentId: number, type: RELATION_TYPE) {
     Alert.alert('Relation Error', errorData.message || 'An error occurred while posting relation.');
   }
 
-  return (await response.json()) as RelationInfo;
+  return true;
 }
 
 export async function updateRelation(apartmentId: number, type: RELATION_TYPE) {
@@ -99,9 +99,9 @@ export async function updateRelation(apartmentId: number, type: RELATION_TYPE) {
     true,
   );
 
-  if (await alertOnError(response, 'Relation', 'updating relation')) return;
+  if (await alertOnError(response, 'Relation', 'updating relation')) return false;
 
-  return (await response.json()) as RelationInfo;
+  return true;
 }
 
 export async function deleteRelation(apartmentId: number) {
@@ -109,12 +109,14 @@ export async function deleteRelation(apartmentId: number) {
     Endpoints.RELATIONS.DELETE_RELATION,
     {
       method: 'DELETE',
-      body: JSON.stringify({ apartment_id: apartmentId }),
+      body: JSON.stringify({ aptId: apartmentId }),
     },
     true,
   );
 
-  if (await alertOnError(response, 'Relation', 'deleting relation')) return;
+  if (response.status === 404) return true;
 
-  return (await response.json()) as RelationInfo;
+  if (await alertOnError(response, 'Relation', 'deleting relation')) return false;
+
+  return true;
 }

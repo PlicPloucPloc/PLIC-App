@@ -130,7 +130,11 @@ export type ProfilStackScreenProps<T extends keyof ProfilStackParamList> = Compo
 
 // ------- Shared stack -------
 export type SharedStackParamList = {
-  ApartmentDetails: { apartment?: ApartmentInfo; apartmentId?: number };
+  ApartmentDetails: {
+    apartment?: ApartmentInfo;
+    apartmentId?: number;
+    enableRelationButtons?: boolean;
+  };
   OtherProfil: { userId: number };
   DirectMessage: { userId: number };
 };

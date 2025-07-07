@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo } from '@app/definitions';
+import { RELATION_TYPE } from '@app/definitions/rest/RelationService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { getApartmentInfoById } from '@app/rest/ApartmentService';
+import { postRelation } from '@app/rest/RelationService';
 import { getApartmentImages } from '@app/rest/S3Service.ts';
 import { Images } from '@assets/index';
+import SwipeButton from '@components/ActionButton';
+import Loader from '@components/Loader';
 import { Ionicons } from '@expo/vector-icons';
 import { SharedStackScreenProps } from '@navigation/Types';
 import { Image } from 'expo-image';
 import PagerView from 'react-native-pager-view';
+
+const ICON_SIZE = 38;
 
 function InfoItem({
   icon,
@@ -45,6 +51,7 @@ export default function ApartmentDetailsScreen({
   const styles = createStyles(colors);
 
   const [loading, setLoading] = useState(true);
+  const [isContactingApi, setIsContactingApi] = useState(false);
   const [apartment, setApartment] = useState<ApartmentInfo>();
   const [showFullDescription, setShowFullDescription] = useState(false);
   const MAX_LINES = 4;
@@ -74,11 +81,19 @@ export default function ApartmentDetailsScreen({
     })();
   }, [route.params]);
 
+  async function handlePostRelation(apartmentId: number, relationType: RELATION_TYPE) {
+    setIsContactingApi(true);
+    await postRelation(apartmentId, relationType);
+    navigation.goBack();
+    setIsContactingApi(false);
+  }
+
   if (loading || !apartment) {
-    return <Text>Loading...</Text>;
+    return <Loader loading={true} />;
   }
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
+      <Loader loading={isContactingApi} />
       <View style={styles.pagerWrapper}>
         <PagerView
           style={styles.pagerView}
@@ -160,6 +175,37 @@ export default function ApartmentDetailsScreen({
           contentFit="cover"
         />
       </View>
+
+      {route.params.enableRelationButtons && (
+        <>
+          <Divider />
+
+          <View style={styles.buttonsContainer}>
+            <SwipeButton style={styles.button} onPress={navigation.goBack}>
+              <Ionicons name="arrow-back" size={ICON_SIZE - 10} color={colors.contrast} />
+            </SwipeButton>
+            <SwipeButton
+              style={styles.button}
+              onPress={() => {
+                handlePostRelation(apartment.apartment_id, RELATION_TYPE.DISLIKE);
+              }}>
+              <Ionicons name="close" size={ICON_SIZE} color="red" />
+            </SwipeButton>
+            <SwipeButton
+              style={styles.button}
+              onPress={() => {
+                handlePostRelation(apartment.apartment_id, RELATION_TYPE.LIKE);
+              }}>
+              <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
+            </SwipeButton>
+            <SwipeButton
+              style={styles.button}
+              onPress={() => Alert.alert('Chat not implemented yet')}>
+              <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />
+            </SwipeButton>
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 }
@@ -259,5 +305,23 @@ const createStyles = (colors: ColorTheme) =>
     description: {
       fontSize: 14,
       color: colors.textPrimary,
+    },
+
+    buttonsContainer: {
+      flex: 1,
+      paddingBottom: 5,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-evenly',
+    },
+    button: {
+      padding: 10,
+      borderRadius: 40,
+      aspectRatio: 1,
+      backgroundColor: colors.background,
+      elevation: 4,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: 'black',
     },
   });
