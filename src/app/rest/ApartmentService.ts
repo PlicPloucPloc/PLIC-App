@@ -24,6 +24,26 @@ export async function getApartmentsInfoPaginated(offset: number) {
   return apartments;
 }
 
+export async function getApartmentsNoRelationPaginated(offset: number) {
+  const response = await apiFetch(
+    Endpoints.APARTMENT.NO_RELATIONS_PAGINATED(offset),
+    {
+      method: 'GET',
+    },
+    true,
+  );
+
+  if (await alertOnError(response, 'Apartment', 'fetching apartments without relations')) return;
+
+  const apartments: ApartmentInfo[] = await response.json();
+
+  for (const apt of apartments) {
+    apt.image_thumbnail = await getApartmentThumbnail(apt);
+  }
+
+  return apartments;
+}
+
 export async function getApartmentInfoById(id: number) {
   const response = await apiFetch(
     Endpoints.APARTMENT.GET_INFO_BY_ID(id),
