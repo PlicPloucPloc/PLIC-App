@@ -2,6 +2,7 @@ import { ActivityIndicator, Modal, View } from 'react-native';
 
 type LoaderProps = {
   loading: boolean;
+  invisible?: boolean;
 };
 
 export default function Loader(props: LoaderProps): JSX.Element | null {
@@ -13,7 +14,7 @@ export default function Loader(props: LoaderProps): JSX.Element | null {
         style={{
           flex: 1,
           backgroundColor: 'white',
-          opacity: 0.6,
+          opacity: props.invisible ? 0 : 0.6,
           justifyContent: 'center',
           alignItems: 'center',
         }}>

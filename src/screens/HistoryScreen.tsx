@@ -12,7 +12,7 @@ export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'Hi
         onPress={() =>
           navigation.navigate('SharedStack', {
             screen: 'ApartmentDetails',
-            params: { apartmentId: 42 },
+            params: { apartmentId: 42, enableRelationButtons: true },
           })
         }
       />

@@ -1,4 +1,4 @@
-import { ApartmentResponse } from '@app/definitions';
+import { ApartmentInfo } from '@app/definitions';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { StackScreenProps } from '@react-navigation/stack';
@@ -130,7 +130,11 @@ export type ProfilStackScreenProps<T extends keyof ProfilStackParamList> = Compo
 
 // ------- Shared stack -------
 export type SharedStackParamList = {
-  ApartmentDetails: { apartment?: ApartmentResponse; apartmentId?: number };
+  ApartmentDetails: {
+    apartment?: ApartmentInfo;
+    apartmentId?: number;
+    enableRelationButtons?: boolean;
+  };
   OtherProfil: { userId: number };
   DirectMessage: { userId: number };
 };

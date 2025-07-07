@@ -10,11 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 
 import Endpoints from './Endpoints';
 
-const PORT = 4242; // gateway
-// const HOST = '10.68.250.54';
-const HOST = '192.168.1.58';
-const API_URL = `http://${HOST}:${PORT}`;
-const TIMEOUT = 5000;
+const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const TIMEOUT = parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '5000');
 
 /**
  * Fetches data from the API with optional authentication.
@@ -37,7 +34,7 @@ export async function apiFetch(
 
   let response: Response;
   try {
-    response = await fetchWithTimeout(`${API_URL}${endpoint}`, { ...options, headers }, TIMEOUT);
+    response = await fetchWithTimeout(`${API_URL}${endpoint}`, { ...options, headers });
   } catch (error: any) {
     if (error.name === 'AbortError') {
       console.error(`Request ID: ${requestId} | Request timed out after ${TIMEOUT}ms`);
@@ -80,13 +77,9 @@ async function prepareHeaders(
   return headers;
 }
 
-async function fetchWithTimeout(
-  url: string,
-  options: RequestInit,
-  timeout: number,
-): Promise<Response> {
+export async function fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeout);
+  const id = setTimeout(() => controller.abort(), TIMEOUT);
   try {
     return await fetch(url, {
       ...options,
@@ -104,7 +97,9 @@ async function handleErrorResponse(
   withAuth: boolean,
   requestId: string,
 ): Promise<Response> {
-  const data = await response.text();
+  const clone = response.clone();
+
+  const data = await clone.text();
 
   if (data.includes('token is expired')) {
     console.log('--- Token expired, begin rotation ---');
@@ -117,11 +112,13 @@ async function handleErrorResponse(
     return await apiFetch(endpoint, options, withAuth);
   }
 
-  console.error(
-    `Request ID: ${requestId} | Failed with status: ${response.status}, error: ${data}`,
-  );
+  if (clone.status === 403 || clone.status === 401) {
+    return userNeedsLogin(requestId);
+  }
 
-  return response.clone();
+  console.error(`Request ID: ${requestId} | Failed with status: ${clone.status}, error: ${data}`);
+
+  return response;
 }
 
 /**
@@ -180,4 +177,15 @@ function userNeedsLogin(requestId: string): Response {
     status: 401,
     statusText: 'Unauthorized',
   });
+}
+
+export async function alertOnError(response: Response, service: string, message: string) {
+  const hasError = !response.ok;
+
+  if (hasError) {
+    const errorData = await response.json();
+    Alert.alert(`${service} Error`, errorData.message || `An error occurred while ${message}.`);
+  }
+
+  return hasError;
 }
