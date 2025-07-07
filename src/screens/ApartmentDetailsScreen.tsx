@@ -1,14 +1,22 @@
-import React, { useState } from 'react';
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { ApartmentResponse } from '@app/definitions';
+import { ApartmentInfo } from '@app/definitions';
+import { RELATION_TYPE } from '@app/definitions/rest/RelationService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { getApartmentInfoById } from '@app/rest/ApartmentService';
+import { postRelation } from '@app/rest/RelationService';
+import { getApartmentImages } from '@app/rest/S3Service.ts';
 import { Images } from '@assets/index';
+import SwipeButton from '@components/ActionButton';
+import Loader from '@components/Loader';
 import { Ionicons } from '@expo/vector-icons';
 import { SharedStackScreenProps } from '@navigation/Types';
 import { Image } from 'expo-image';
 import PagerView from 'react-native-pager-view';
+
+const ICON_SIZE = 38;
 
 function InfoItem({
   icon,
@@ -42,36 +50,60 @@ export default function ApartmentDetailsScreen({
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const apartment = route.params.apartment ?? ({} as ApartmentResponse);
-  const fullRent = apartment.rent + 0; // TODO: add estimated charges here
-
+  const [loading, setLoading] = useState(true);
+  const [isContactingApi, setIsContactingApi] = useState(false);
+  const [apartment, setApartment] = useState<ApartmentInfo>();
   const [showFullDescription, setShowFullDescription] = useState(false);
   const MAX_LINES = 4;
 
   const [currentPage, setCurrentPage] = useState(0);
 
-  const images = {
-    urls: [
-      'https://picsum.photos/id/1011/800/600',
-      'https://picsum.photos/id/1025/800/600',
-      'https://picsum.photos/id/1043/800/600',
-      'https://picsum.photos/id/1062/800/600',
-      'https://picsum.photos/id/1084/800/600',
-    ],
-  };
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
 
+      let apartmentTmp: ApartmentInfo;
+      if (route.params?.apartment) {
+        apartmentTmp = { ...route.params.apartment };
+      } else if (route.params?.apartmentId) {
+        const apartmentResponse = await getApartmentInfoById(route.params.apartmentId);
+        if (!apartmentResponse) return;
+
+        apartmentTmp = apartmentResponse;
+      } else {
+        console.warn('No apartment data provided in route params');
+        return;
+      }
+
+      apartmentTmp.images = await getApartmentImages(apartmentTmp);
+      setApartment(apartmentTmp);
+      setLoading(false);
+    })();
+  }, [route.params]);
+
+  async function handlePostRelation(apartmentId: number, relationType: RELATION_TYPE) {
+    setIsContactingApi(true);
+    await postRelation(apartmentId, relationType);
+    navigation.goBack();
+    setIsContactingApi(false);
+  }
+
+  if (loading || !apartment) {
+    return <Loader loading={true} />;
+  }
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
+      <Loader loading={isContactingApi} />
       <View style={styles.pagerWrapper}>
         <PagerView
           style={styles.pagerView}
           initialPage={0}
           onPageSelected={(e) => setCurrentPage(e.nativeEvent.position)}>
-          {images.urls.map((uri, index) => (
+          {apartment.images.map((uri, index) => (
             <Pressable
               key={index}
               style={styles.imageContainer}
-              onPress={() => navigation.navigate('ImageList', { images: images.urls })}>
+              onPress={() => navigation.navigate('ImageList', { images: apartment.images })}>
               <Image contentFit="cover" source={uri} style={styles.image} />
             </Pressable>
           ))}
@@ -79,7 +111,7 @@ export default function ApartmentDetailsScreen({
 
         <View style={styles.imageCounter}>
           <Text style={styles.imageCounterText}>
-            {currentPage + 1} / {images.urls.length}
+            {currentPage + 1} / {apartment.images.length}
           </Text>
         </View>
       </View>
@@ -91,7 +123,8 @@ export default function ApartmentDetailsScreen({
           {apartment.rent} € <Text style={styles.lightText}>no charges</Text>
         </Text>
         <Text style={styles.priceText}>
-          {fullRent} € <Text style={styles.lightText}>with charges</Text>
+          {apartment.rent + 0} € <Text style={styles.lightText}>with charges</Text>{' '}
+          {/* TODO: change charges */}
         </Text>
 
         <View style={styles.criteriaContainerGrid}>
@@ -142,6 +175,37 @@ export default function ApartmentDetailsScreen({
           contentFit="cover"
         />
       </View>
+
+      {route.params.enableRelationButtons && (
+        <>
+          <Divider />
+
+          <View style={styles.buttonsContainer}>
+            <SwipeButton style={styles.button} onPress={navigation.goBack}>
+              <Ionicons name="arrow-back" size={ICON_SIZE - 10} color={colors.contrast} />
+            </SwipeButton>
+            <SwipeButton
+              style={styles.button}
+              onPress={() => {
+                handlePostRelation(apartment.apartment_id, RELATION_TYPE.DISLIKE);
+              }}>
+              <Ionicons name="close" size={ICON_SIZE} color="red" />
+            </SwipeButton>
+            <SwipeButton
+              style={styles.button}
+              onPress={() => {
+                handlePostRelation(apartment.apartment_id, RELATION_TYPE.LIKE);
+              }}>
+              <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
+            </SwipeButton>
+            <SwipeButton
+              style={styles.button}
+              onPress={() => Alert.alert('Chat not implemented yet')}>
+              <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />
+            </SwipeButton>
+          </View>
+        </>
+      )}
     </ScrollView>
   );
 }
@@ -241,5 +305,23 @@ const createStyles = (colors: ColorTheme) =>
     description: {
       fontSize: 14,
       color: colors.textPrimary,
+    },
+
+    buttonsContainer: {
+      flex: 1,
+      paddingBottom: 5,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-evenly',
+    },
+    button: {
+      padding: 10,
+      borderRadius: 40,
+      aspectRatio: 1,
+      backgroundColor: colors.background,
+      elevation: 4,
+      justifyContent: 'center',
+      alignItems: 'center',
+      shadowColor: 'black',
     },
   });

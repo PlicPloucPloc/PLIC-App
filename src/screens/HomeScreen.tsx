@@ -2,10 +2,16 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { ApartmentResponse } from '@app/definitions';
+import { ApartmentInfo } from '@app/definitions';
+import { RELATION_TYPE } from '@app/definitions/rest/RelationService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { getApartments } from '@app/rest/ApartmentService';
+import {
+  getApartmentsInfoPaginated,
+  getApartmentsNoRelationPaginated,
+} from '@app/rest/ApartmentService';
+import { deleteRelation, postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
+import Loader from '@components/Loader';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
@@ -22,10 +28,11 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
   // ============= Hooks ============= //
   const [loading, setLoading] = useState(true);
+  const [isContactingApi, setIsContactingApi] = useState(false);
 
   const [swiperIndex, setSwiperIndex] = useState(0);
-  const apartmentsRef = useRef<ApartmentResponse[]>([]); // used to render the appart info
-  const [apartments, setApartments] = useState<ApartmentResponse[]>([]); // used to update the swiper
+  const apartmentsRef = useRef<ApartmentInfo[]>([]); // used to render the appart info
+  const [apartments, setApartments] = useState<ApartmentInfo[]>([]); // used to update the swiper
   const [allSwiped, setAllSwiped] = useState(false);
   const [apartmentInfo, setApartmentInfo] = useState<{
     title?: string;
@@ -35,19 +42,8 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const response = await getApartments();
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      Alert.alert(
-        'Apartment Error',
-        errorData.message || 'An error occurred while fetching the apartments.',
-      );
-      return;
-    }
-
-    const apartmentsResponse: ApartmentResponse[] = await response.json();
-    console.log('Fetched apartments:', apartmentsResponse);
+    const apartmentsResponse = await getApartmentsNoRelationPaginated(0);
+    if (!apartmentsResponse) return;
 
     setApartments(apartmentsResponse);
     apartmentsRef.current = apartmentsResponse;
@@ -60,11 +56,10 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   }, [fetchData]);
 
   const onIndexChange = useCallback((index: number) => {
-    console.log('onIndexChange called with index:', index);
     const currentApartments = apartmentsRef.current;
-    if (!currentApartments || index >= currentApartments.length) return;
-
     setSwiperIndex(index);
+
+    if (index >= currentApartments.length) return;
 
     const apartment = currentApartments[index];
     setApartmentInfo({
@@ -74,11 +69,34 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     });
   }, []);
 
-  if (loading) return <Text>Loading...</Text>;
+  async function handlePostRelation(apartmentId: number, type: RELATION_TYPE) {
+    setIsContactingApi(true);
+
+    const hasPostedSuccesfully = await postRelation(apartmentId, type);
+    if (!hasPostedSuccesfully) {
+      Alert.alert(
+        'Error',
+        `An error occurred while ${type == RELATION_TYPE.LIKE ? 'Liking' : 'Disliking'} the apartment.`,
+      );
+      return;
+    }
+    setIsContactingApi(false);
+  }
+
+  async function handleDeleteRelation(apartmentId: number) {
+    setIsContactingApi(true);
+    await deleteRelation(apartmentId);
+    setIsContactingApi(false);
+  }
+
+  if (loading) {
+    return <Loader loading={true} />;
+  }
 
   return (
     <View style={styles.container}>
       <View style={styles.swiperContainer}>
+        <Loader loading={isContactingApi} invisible={true} />
         {/* End screen */}
         {allSwiped && (
           <View style={styles.endScreenContainer}>
@@ -106,7 +124,10 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
           onPress={() =>
             navigation.navigate('SharedStack', {
               screen: 'ApartmentDetails',
-              params: { apartment: apartmentsRef.current[swiperIndex] },
+              params: {
+                apartment: apartmentsRef.current[swiperIndex],
+                enableRelationButtons: true,
+              },
             })
           }>
           <Swiper
@@ -121,12 +142,23 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
                 setApartmentInfo({});
                 setAllSwiped(true);
               }, SWIPE_DELAY);
-              console.log('All cards swiped');
+              // console.log('All cards swiped');
             }}
-            renderCard={(apartment: ApartmentResponse) => (
+            onSwipeRight={() => {
+              handlePostRelation(
+                apartmentsRef.current[swiperIndex].apartment_id,
+                RELATION_TYPE.LIKE,
+              );
+            }}
+            onSwipeLeft={() => {
+              handlePostRelation(
+                apartmentsRef.current[swiperIndex].apartment_id,
+                RELATION_TYPE.DISLIKE,
+              );
+            }}
+            renderCard={(apartment: ApartmentInfo) => (
               <Image
-                // source={{ uri: apartment.additional_info.images.urls[0] }}
-                source={{ uri: `https://picsum.photos/id/${apartment.apartment_id}/800/600` }}
+                source={{ uri: apartment.image_thumbnail }}
                 style={styles.renderCardImage}
                 resizeMode="cover"
               />
@@ -161,30 +193,45 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
       {/* Buttons */}
       <View style={styles.buttonsContainer}>
         <SwipeButton
+          disabled={swiperIndex <= 0}
           style={styles.button}
-          onTap={() => {
+          onPress={() => {
+            if (isContactingApi) return;
             if (allSwiped) {
               setAllSwiped(false);
             }
+            console.log(swiperIndex);
+            handleDeleteRelation(apartmentsRef.current[swiperIndex - 1].apartment_id);
+
             ref.current?.swipeBack();
           }}>
           <Ionicons name="arrow-undo" size={ICON_SIZE - 10} color={colors.contrast} />
         </SwipeButton>
         <SwipeButton
+          disabled={allSwiped}
           style={styles.button}
-          onTap={() => {
+          onPress={() => {
+            if (isContactingApi) return;
             ref.current?.swipeLeft();
           }}>
           <Ionicons name="close" size={ICON_SIZE} color="red" />
         </SwipeButton>
         <SwipeButton
           style={styles.button}
-          onTap={() => {
+          disabled={allSwiped}
+          onPress={() => {
+            if (isContactingApi) return;
             ref.current?.swipeRight();
           }}>
           <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
         </SwipeButton>
-        <SwipeButton style={styles.button} onTap={() => Alert.alert('Chat not implemented yet')}>
+        <SwipeButton
+          style={styles.button}
+          disabled={allSwiped}
+          onPress={() => {
+            if (isContactingApi) return;
+            Alert.alert('Chat not implemented yet');
+          }}>
           <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />
         </SwipeButton>
       </View>
