@@ -18,57 +18,53 @@ import { ColorTheme } from '@app/Colors';
 import { RELATION_TYPE, RelationInfo } from '@app/definitions/rest/RelationService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { deleteRelation, getAllRelationsPaginated } from '@app/rest/RelationService';
-import LikeItem from '@components/LikeItem';
+import ApartmentListItem from '@components/LikeItem';
 import { ProfilStackScreenProps } from '@navigation/Types';
-import { GestureHandlerRootView, Swipeable } from 'react-native-gesture-handler';
+import { Swipeable } from 'react-native-gesture-handler';
 
 export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'History'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const [data, setData] = useState<RelationInfo[]>([]);
+  // ---------- Data Handling ---------- //
+  const [relations, setRelations] = useState<RelationInfo[]>([]);
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState('');
 
   const fetchInitialData = useCallback(async () => {
     setLoading(true);
-    const response = await getAllRelationsPaginated(0);
-    if (response) {
-      setData(response);
+    const relationsResponse = await getAllRelationsPaginated(0);
+    if (relationsResponse) {
+      setRelations(relationsResponse);
     }
     setLoading(false);
   }, []);
 
   const fetchMoreData = useCallback(async () => {
     if (loading) return;
-    const response = await getAllRelationsPaginated(data.length);
-    if (response) {
-      setData((prev) => [...prev, ...response]);
+
+    const relationsResponse = await getAllRelationsPaginated(relations.length);
+    if (relationsResponse) {
+      setRelations((prev) => [...prev, ...relationsResponse]);
     }
-  }, [data.length, loading]);
+  }, [relations.length, loading]);
 
   useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      fetchInitialData();
-    });
+    const unsubscribe = navigation.addListener('focus', fetchInitialData);
     return unsubscribe;
   }, [fetchInitialData, navigation]);
 
-  async function handleDeleteRelation(apartment_id: number) {
-    setLoading(true);
-    const deleted = await deleteRelation(apartment_id);
-    if (deleted) {
-      setData((prev) => prev.filter((apt) => apt.apt.apartment_id !== apartment_id));
-    } else {
-      Alert.alert('Error', 'Failed to delete the apartment from your history.');
-    }
-    setLoading(false);
-  }
+  // ---------- Data Filtering ---------- //
+  const [search, setSearch] = useState('');
 
-  function onPressDelete(apartment_id: number) {
+  const filteredData = relations.filter((relation) =>
+    relation.apt.name.toLowerCase().includes(search.toLowerCase()),
+  );
+
+  // ---------- Deletion ---------- //
+  const onPressDelete = (apartment_id: number) => {
     Alert.alert(
       'Confirm Deletion',
-      'Are you sure you want to delete this apartment from your history?',
+      'Are you sure you want to delete the apartment from your likes?',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -78,34 +74,21 @@ export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'Hi
         },
       ],
     );
-  }
+  };
 
-  function renderRightAction(
-    progress: Animated.AnimatedInterpolation<number>,
-    apartment_id: number,
-  ) {
-    const translateX = progress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [100, 0],
-    });
-
-    return (
-      <Animated.View style={[styles.rightAction, { transform: [{ translateX }] }]}>
-        <TouchableOpacity
-          onPress={() => onPressDelete(apartment_id)}
-          style={styles.actionTouchable}>
-          <Text style={styles.actionText}>Delete</Text>
-        </TouchableOpacity>
-      </Animated.View>
-    );
-  }
-
-  const filteredData = data.filter((apt) =>
-    apt.apt.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const handleDeleteRelation = async (apartment_id: number) => {
+    setLoading(true);
+    const deleted = await deleteRelation(apartment_id);
+    if (deleted) {
+      setRelations((prev) => prev.filter((relation) => relation.apt.apartment_id !== apartment_id));
+    } else {
+      Alert.alert('Error', 'Failed to delete the apartment from your history.');
+    }
+    setLoading(false);
+  };
 
   return (
-    <GestureHandlerRootView style={styles.container}>
+    <View style={styles.container}>
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.topContainer}>
           <TextInput
@@ -119,29 +102,42 @@ export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'Hi
 
       <FlatList
         data={filteredData}
-        keyExtractor={(apt) => apt.apt.name}
-        renderItem={({ item: apt }) => (
+        keyExtractor={(relation) => relation.apt.name}
+        renderItem={({ item: relation }) => (
           <Swipeable
-            renderRightActions={(progress) => renderRightAction(progress, apt.apt.apartment_id)}>
+            renderRightActions={(progress) => {
+              const translateX = progress.interpolate({
+                inputRange: [0, 1],
+                outputRange: [100, 0],
+              });
+
+              return (
+                <Animated.View style={[styles.rightAction, { transform: [{ translateX }] }]}>
+                  <TouchableOpacity
+                    onPress={() => onPressDelete(relation.apt.apartment_id)}
+                    style={styles.actionTouchable}>
+                    <Text style={styles.actionText}>Delete</Text>
+                  </TouchableOpacity>
+                </Animated.View>
+              );
+            }}>
             <Pressable
               onPress={() =>
                 navigation.navigate('SharedStack', {
                   screen: 'ApartmentDetails',
-                  params: { apartment: apt.apt },
+                  params: { apartment: relation.apt },
                 })
               }>
               <View
-                style={[
-                  styles.itemWrapper,
-                  {
-                    backgroundColor: apt.type == RELATION_TYPE.LIKE ? '#d0f5dd' : '#fddddd',
-                  },
-                ]}>
-                <LikeItem
-                  title={apt.apt.name}
-                  surface={apt.apt.surface}
-                  description={apt.apt.description}
-                  imageUrl={apt.apt.image_thumbnail}
+                style={{
+                  backgroundColor: relation.type == RELATION_TYPE.LIKE ? '#d0f5dd' : '#fddddd',
+                }}>
+                <ApartmentListItem
+                  title={relation.apt.name}
+                  location={relation.apt.location}
+                  surface={relation.apt.surface}
+                  rent={relation.apt.rent}
+                  imageUrl={relation.apt.image_thumbnail}
                 />
               </View>
             </Pressable>
@@ -153,7 +149,7 @@ export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'Hi
         contentContainerStyle={{ paddingBottom: 20 }}
         keyboardShouldPersistTaps="handled"
       />
-    </GestureHandlerRootView>
+    </View>
   );
 }
 
@@ -193,8 +189,5 @@ const createStyles = (colors: ColorTheme) =>
     actionText: {
       color: '#fff',
       fontWeight: 'bold',
-    },
-    itemWrapper: {
-      paddingVertical: 5,
     },
   });
