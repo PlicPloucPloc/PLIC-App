@@ -23,7 +23,7 @@ export async function getAllRelationsPaginated(offset: number) {
     relation.apt.image_thumbnail = await getApartmentThumbnail(relation.apt);
   }
 
-  return (await response.json()) as RelationInfo[];
+  return relationsInfo;
 }
 
 export async function getLikedApartmentsPaginated(isFilterColoc: boolean, offset: number) {

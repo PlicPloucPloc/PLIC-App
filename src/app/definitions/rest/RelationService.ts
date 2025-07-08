@@ -1,8 +1,8 @@
 import { ApartmentInfo } from './ApartmentService';
 
 export enum RELATION_TYPE {
-  LIKE = 'like',
-  DISLIKE = 'dislike',
+  LIKE = 'LIKE',
+  DISLIKE = 'DISLIKE',
 }
 
 export type RelationInfo = {
