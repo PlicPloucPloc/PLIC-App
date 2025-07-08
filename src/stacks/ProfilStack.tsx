@@ -5,8 +5,6 @@ import HistoryScreen from '@screens/HistoryScreen';
 import ProfilScreen from '@screens/ProfilScreen';
 import SettingsScreen from '@screens/SettingsScreen';
 
-import SharedStack from './SharedStack';
-
 const Stack = createStackNavigator<ProfilStackParamList>();
 
 function headerOptions(title: string): StackNavigationOptions {
@@ -35,7 +33,6 @@ export default function ProfilStack(_: BottomTabStackScreenProps<'ProfilStack'>)
         component={HistoryScreen}
         options={() => headerOptions('History')}
       />
-      <Stack.Screen name="SharedStack" component={SharedStack} />
     </Stack.Navigator>
   );
 }
