@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
-  StyleSheet,
-  Text,
-  View,
-  TouchableOpacity,
+  ActivityIndicator,
   FlatList,
   Image,
-  ActivityIndicator,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from 'react-native';
+
 import { MessageStackScreenProps } from '@navigation/Types';
 
 type MessageItem = {
@@ -19,9 +20,7 @@ type MessageItem = {
   unread?: boolean;
 };
 
-export default function MessageListScreen({
-  navigation,
-}: MessageStackScreenProps<'MessageList'>) {
+export default function MessageListScreen({ navigation }: MessageStackScreenProps<'MessageList'>) {
   const [messages, setMessages] = useState<MessageItem[] | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -69,8 +68,7 @@ export default function MessageListScreen({
         <Text style={styles.headerTitle}>Messages</Text>
         <TouchableOpacity
           style={styles.roomiesButton}
-          onPress={() => navigation.navigate('GroupMessage', { groupId: 1 })}
-        >
+          onPress={() => navigation.navigate('GroupMessage', { groupId: 1 })}>
           <Text style={styles.roomiesText}>Roomies</Text>
         </TouchableOpacity>
       </View>
@@ -89,10 +87,9 @@ export default function MessageListScreen({
               onPress={() =>
                 navigation.navigate('SharedStack', {
                   screen: 'DirectMessage',
-                  params: { userId: Number(item.id)},
+                  params: { userId: Number(item.id) },
                 })
-              }
-            >
+              }>
               <Image source={{ uri: item.avatar }} style={styles.avatar} />
               <View style={styles.messageContent}>
                 <View style={styles.messageHeader}>
@@ -101,11 +98,7 @@ export default function MessageListScreen({
                 </View>
                 <Text
                   numberOfLines={1}
-                  style={[
-                    styles.lastMessage,
-                    item.unread && styles.unreadMessage,
-                  ]}
-                >
+                  style={[styles.lastMessage, item.unread && styles.unreadMessage]}>
                   {item.lastMessage}
                 </Text>
               </View>
