@@ -4,14 +4,21 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 
-type LikeItemProps = {
+type ApartmentListItemProps = {
   title: string;
+  location: string;
   surface: number;
-  description: string;
+  rent: number;
   imageUrl: string;
 };
 
-export default function LikeItem({ title, surface, description, imageUrl }: LikeItemProps) {
+export default function ApartmentListItem({
+  title,
+  surface,
+  rent,
+  location,
+  imageUrl,
+}: ApartmentListItemProps) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -23,17 +30,17 @@ export default function LikeItem({ title, surface, description, imageUrl }: Like
           {title}
         </Text>
         <Text numberOfLines={1} ellipsizeMode="tail">
-          {surface} m²
+          {location}
         </Text>
         <Text numberOfLines={1} ellipsizeMode="tail">
-          {description}
+          {surface} m² / {rent} €
         </Text>
       </View>
     </View>
   );
 }
 
-const createStyles = (colors: ColorTheme) =>
+const createStyles = (_: ColorTheme) =>
   StyleSheet.create({
     likesContainer: {
       flexDirection: 'row',
