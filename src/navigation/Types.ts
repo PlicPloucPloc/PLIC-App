@@ -42,6 +42,7 @@ export type RegisterStackScreenProps<T extends keyof RegisterStackParamList> = C
 // ------- Inside stack -------
 export type InsideStackParamList = {
   BottomTabStack: NavigatorScreenParams<BottomTabStackParamList>;
+  SharedStack: NavigatorScreenParams<SharedStackParamList>;
   ImageList: { images: string[] };
   ImageGallery: { images: string[]; index: number };
 };
@@ -49,6 +50,22 @@ export type InsideStackParamList = {
 export type InsideStackScreenProps<T extends keyof InsideStackParamList> = StackScreenProps<
   InsideStackParamList,
   T
+>;
+
+// ------- Shared stack -------
+export type SharedStackParamList = {
+  ApartmentDetails: {
+    apartment?: ApartmentInfo;
+    apartmentId?: number;
+    enableRelationButtons?: boolean;
+  };
+  OtherProfil: { userId: number };
+  DirectMessage: { userId: number };
+};
+
+export type SharedStackScreenProps<T extends keyof SharedStackParamList> = CompositeScreenProps<
+  StackScreenProps<SharedStackParamList, T>,
+  InsideStackScreenProps<keyof InsideStackParamList>
 >;
 
 // ------- Bottom Tab stack -------
@@ -69,7 +86,6 @@ export type BottomTabStackScreenProps<T extends keyof BottomTabStackParamList> =
 // ------- Home stack -------
 export type HomeStackParamList = {
   Home: undefined;
-  SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };
 
 export type HomeStackScreenProps<T extends keyof HomeStackParamList> = CompositeScreenProps<
@@ -82,7 +98,6 @@ export type MessageStackParamList = {
   MessageList: undefined;
   GroupMessage: { groupId: number };
   GroupInfo: { groupId: number };
-  SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };
 
 export type MessageStackScreenProps<T extends keyof MessageStackParamList> = CompositeScreenProps<
@@ -93,7 +108,6 @@ export type MessageStackScreenProps<T extends keyof MessageStackParamList> = Com
 // ------- Likes stack -------
 export type LikesStackParamList = {
   LikesList: undefined;
-  SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };
 
 export type LikesStackScreenProps<T extends keyof LikesStackParamList> = CompositeScreenProps<
@@ -105,7 +119,6 @@ export type LikesStackScreenProps<T extends keyof LikesStackParamList> = Composi
 export type ColocFinderStackParamList = {
   ColocFinder: undefined;
   ColocFinderForHouse: { houseId: number };
-  SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };
 
 export type ColocFinderStackScreenProps<T extends keyof ColocFinderStackParamList> =
@@ -120,26 +133,9 @@ export type ProfilStackParamList = {
   Settings: undefined;
   Filters: undefined;
   History: undefined;
-  SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };
 
 export type ProfilStackScreenProps<T extends keyof ProfilStackParamList> = CompositeScreenProps<
   StackScreenProps<ProfilStackParamList, T>,
   BottomTabStackScreenProps<keyof BottomTabStackParamList>
->;
-
-// ------- Shared stack -------
-export type SharedStackParamList = {
-  ApartmentDetails: {
-    apartment?: ApartmentInfo;
-    apartmentId?: number;
-    enableRelationButtons?: boolean;
-  };
-  OtherProfil: { userId: number };
-  DirectMessage: { userId: number };
-};
-
-export type SharedStackScreenProps<T extends keyof SharedStackParamList> = CompositeScreenProps<
-  StackScreenProps<SharedStackParamList, T>,
-  HomeStackScreenProps<keyof HomeStackParamList>
 >;

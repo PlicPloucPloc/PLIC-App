@@ -5,10 +5,7 @@ import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo } from '@app/definitions';
 import { RELATION_TYPE } from '@app/definitions/rest/RelationService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import {
-  getApartmentsInfoPaginated,
-  getApartmentsNoRelationPaginated,
-} from '@app/rest/ApartmentService';
+import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
 import Loader from '@components/Loader';

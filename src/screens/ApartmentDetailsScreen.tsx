@@ -103,7 +103,9 @@ export default function ApartmentDetailsScreen({
             <Pressable
               key={index}
               style={styles.imageContainer}
-              onPress={() => navigation.navigate('ImageList', { images: apartment.images })}>
+              onPress={() => {
+                navigation.navigate('ImageList', { images: apartment.images });
+              }}>
               <Image contentFit="cover" source={uri} style={styles.image} />
             </Pressable>
           ))}
