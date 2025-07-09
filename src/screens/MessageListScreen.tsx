@@ -42,7 +42,7 @@ export default function MessageListScreen({ navigation }: MessageStackScreenProp
         {
           id: '2',
           name: 'Marie Claire',
-          lastMessage: 'Évidemment !',
+          lastMessage: 'Evidemment !',
           time: '09:51',
           avatar: 'https://i.pravatar.cc/100?img=2',
         },

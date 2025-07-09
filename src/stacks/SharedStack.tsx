@@ -8,6 +8,7 @@ import {
 } from '@react-navigation/stack';
 import ApartmentDetailsScreen from '@screens/ApartmentDetailsScreen';
 import DirectMessageScreen from '@screens/DirectMessage';
+import GroupInfoScreen from '@screens/GroupInfoScreen';
 import OtherProfilScreen from '@screens/OtherProfilScreen';
 
 const Stack = createStackNavigator<SharedStackParamList>();

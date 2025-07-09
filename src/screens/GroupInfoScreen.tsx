@@ -1,18 +1,19 @@
-import React, { useState, useRef, useEffect } from 'react';
-import DirectMessageStack, { User } from '@stacks/DirectMessageStack';
-import { AntDesign, Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  View,
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  ListRenderItem,
+  Platform,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
-  ListRenderItem,
+  View,
 } from 'react-native';
+
+import { AntDesign, Ionicons } from '@expo/vector-icons';
+import DirectMessageStack, { User } from '@stacks/DirectMessageStack';
 
 interface Message {
   id: number;
@@ -22,6 +23,28 @@ interface Message {
   sender: User;
 }
 
+const mockAppart: User[] = [
+  {
+    id: 1,
+    name: 'Appartement Paris 12e',
+    lastMessage: 'Visite prévue demain à 18h.',
+    avatar: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=100&q=80',
+    //unread: true,
+  },
+  {
+    id: 2,
+    name: 'Loft Nation - Duplex',
+    lastMessage: 'Le contrat est prêt à être signé.',
+    avatar: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=100&q=80',
+  },
+  {
+    id: 3,
+    name: 'Studio Michel-Ange',
+    lastMessage: 'Le propriétaire a répondu.',
+    avatar: 'https://images.unsplash.com/photo-1598928506313-a24bb3c1d742?auto=format&fit=crop&w=100&q=80',
+  },
+
+];
 const mockUsers: User[] = [
   {
     id: 1,
@@ -42,8 +65,8 @@ const mockUsers: User[] = [
     lastMessage: 'Ca me va :)',
   },
 ];
-
 const GroupInfoScreen: React.FC = () => {
+  const currentAppart: User = mockAppart[0];
   const currentUser: User = mockUsers[0];
   const [inputText, setInputText] = useState<string>('');
   const flatListRef = useRef<FlatList<Message>>(null);
@@ -65,7 +88,7 @@ const GroupInfoScreen: React.FC = () => {
     },
     {
       id: 3,
-      text: 'On commence quand ?',
+      text: 'On commence la visio quand ?',
       isMe: false,
       timestamp: '14:32',
       sender: mockUsers[2],
@@ -123,15 +146,14 @@ const GroupInfoScreen: React.FC = () => {
   };
 
   return (
-    <KeyboardAvoidingView 
+    <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-    >
-      <DirectMessageStack 
-        user={currentUser} 
-        onBackPress={() => console.log('Back pressed')} 
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <DirectMessageStack
+        user={currentAppart}
+        onBackPress={(): void => console.log('Back pressed')}
       />
-      
+
       <FlatList
         ref={flatListRef}
         data={messages}
