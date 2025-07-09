@@ -1,7 +1,7 @@
 import { ApartmentInfo } from '@app/definitions';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
-import { StackScreenProps } from '@react-navigation/stack';
+import { StackAnimationName, StackScreenProps } from '@react-navigation/stack';
 
 // ...ParamList is the list of all the screens in the navigator
 // and the types of the props used by the screen
@@ -42,7 +42,9 @@ export type RegisterStackScreenProps<T extends keyof RegisterStackParamList> = C
 // ------- Inside stack -------
 export type InsideStackParamList = {
   BottomTabStack: NavigatorScreenParams<BottomTabStackParamList>;
-  SharedStack: NavigatorScreenParams<SharedStackParamList>;
+  SharedStack: NavigatorScreenParams<SharedStackParamList> & {
+    animation?: StackAnimationName;
+  };
   ImageList: { images: string[] };
   ImageGallery: { images: string[]; index: number };
 };
