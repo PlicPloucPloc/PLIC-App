@@ -120,6 +120,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
           style={[styles.touchableContainer, allSwiped ? { width: '0%', height: '0%' } : {}]}
           onPress={() =>
             navigation.navigate('SharedStack', {
+              animation: 'slide_from_bottom',
               screen: 'ApartmentDetails',
               params: {
                 apartment: apartmentsRef.current[swiperIndex],
