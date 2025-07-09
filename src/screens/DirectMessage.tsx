@@ -1,28 +1,31 @@
-import React, { useState, useRef, useEffect } from 'react';
-
-import DirectMessageStack, { User } from '@stacks/DirectMessageStack';
-
-import { AntDesign, Ionicons } from '@expo/vector-icons';
+import React, { useEffect, useRef, useState } from 'react';
+import * as ImagePicker from 'expo-image-picker';
 
 import {
-  View,
+  FlatList,
+  Image,
+  KeyboardAvoidingView,
+  ListRenderItem,
+  Platform,
+  StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-  Image,
-  ListRenderItem,
+  View,
 } from 'react-native';
+
+import { AntDesign, Ionicons } from '@expo/vector-icons';
+import DirectMessageStack, { User } from '@stacks/DirectMessageStack';
 
 interface Message {
   id: number;
-  text: string;
+  text: string; // devient optionnel
+  imageUri?: string; // nouvelle propriété
   isMe: boolean;
   timestamp: string;
 }
+
+
 
 const mockUsers: User[] = [
   {
@@ -49,37 +52,37 @@ const DirectMessageScreen: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
-      isMe: false,
+      text: 'Bonjour, j\'aime beaucoup votre appart',
+      isMe: true,
       timestamp: '14:30',
     },
     {
       id: 2,
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc a dapibus dolor. Ut in pharetra tortor. Aenean sed risus gravida, dictum',
-      isMe: true,
+      text: 'Merci',
+      isMe: false,
       timestamp: '14:31',
     },
     {
       id: 3,
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc a dapibus dolor. Ut in pharetra tortor. Aenean sed risus gravida, dictum Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc a dapibus dolor. Ut in pharetra tortor. Aenean sed risus gravida, dictum purus tincidunt, luctus est. Praesent sit amet sapien semper, varius ex eu, vehicula felis',
+      text: 'Est-ce que les voisins font du bruit ?',
       isMe: true,
       timestamp: '14:32',
     },
     {
       id: 4,
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc a dapibus dolor. Ut in pharetra tortor. Aenean sed risus gravida, dictum',
+      text: 'Non',
       isMe: false,
       timestamp: '14:33',
     },
     {
       id: 5,
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      text: 'Je peux venir visiter l\'appart demain ?',
       isMe: true,
       timestamp: '14:34',
     },
     {
       id: 6,
-      text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      text: 'Evidemment !',
       isMe: false,
       timestamp: '14:35',
     },
@@ -87,7 +90,7 @@ const DirectMessageScreen: React.FC = () => {
 
   const [inputText, setInputText] = useState<string>('');
   const flatListRef = useRef<FlatList<Message>>(null);
-  const currentUser: User = mockUsers[0];
+  const currentUser: User = mockUsers[1];
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -115,16 +118,84 @@ const DirectMessageScreen: React.FC = () => {
     }
   };
 
-  const renderMessage: ListRenderItem<Message> = ({ item }) => (
-    <View style={[styles.messageContainer, item.isMe ? styles.myMessage : styles.otherMessage]}>
-      <View style={[styles.messageBubble, item.isMe ? styles.myBubble : styles.otherBubble]}>
-        <Text
-          style={[styles.messageText, item.isMe ? styles.myMessageText : styles.otherMessageText]}>
-          {item.text}
-        </Text>
+
+  const renderMessage = ({ item }: { item: Message }) => {
+    const isImage = item.text.startsWith('file://');
+  
+    return (
+      <View style={[
+        styles.messageContainer, 
+        item.isMe ? styles.myMessage : styles.otherMessage,
+        { alignItems: item.isMe ? 'flex-end' : 'flex-start', marginVertical: 4 }
+      ]}>
+        {isImage ? (
+          <Image
+            source={{ uri: item.text }}
+            style={{
+              width: 200,
+              height: 200,
+              borderRadius: 10,
+            }}
+          />
+        ) : (
+          <View style={[
+            styles.messageBubble, 
+            item.isMe ? styles.myBubble : styles.otherBubble,
+            { maxWidth: '80%' }
+          ]}>
+            <Text style={[
+              styles.messageText,
+              item.isMe ? styles.myMessageText : styles.otherMessageText
+            ]}>
+              {item.text}
+            </Text>
+          </View>
+        )}
       </View>
-    </View>
-  );
+    );
+  };
+  
+  
+  
+  
+
+  const sendImage = async () => {
+    // Demander la permission d'accéder à la galerie
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  
+    if (status !== 'granted') {
+      alert('Permission requise pour accéder à la galerie !');
+      return;
+    }
+  
+    // Ouvrir la galerie pour sélectionner une image
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images, 
+
+
+      allowsEditing: false,
+      quality: 1,
+    });
+  
+    if (!result.canceled && result.assets.length > 0) {
+      const selectedImageUri = result.assets[0].uri;
+  
+      const newMessage: Message = {
+        id: messages.length + 1,
+        text: selectedImageUri, // on stocke l'URI de l'image
+        isMe: true,
+        timestamp: new Date().toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      };
+  
+      setMessages([...messages, newMessage]);
+    }
+  };
+  
+  
+  
 
   return (
     <KeyboardAvoidingView
@@ -142,12 +213,12 @@ const DirectMessageScreen: React.FC = () => {
         keyExtractor={(item) => item.id.toString()}
         style={styles.messagesList}
         contentContainerStyle={styles.messagesContainer}
-        onContentSizeChange={scrollToBottom}
-        onLayout={scrollToBottom}
+        // onContentSizeChange={scrollToBottom}
+        // onLayout={scrollToBottom}
       />
 
       <View style={styles.inputContainer}>
-        <TouchableOpacity style={styles.attachButton}>
+        <TouchableOpacity onPress={sendImage} style={styles.attachButton}>
           <AntDesign name="picture" size={28} color="black" />
         </TouchableOpacity>
 
