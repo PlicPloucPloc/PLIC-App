@@ -1,213 +1,277 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-  ActivityIndicator,
   FlatList,
   Image,
+  KeyboardAvoidingView,
+  ListRenderItem,
+  Platform,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from 'react-native';
 
-import { MessageStackScreenProps } from '@navigation/Types';
+import MessageHeader, { User } from '@components/MessageHeader';
+import { AntDesign, Ionicons } from '@expo/vector-icons';
 
-type MessageItem = {
-  id: string;
-  name: string;
-  lastMessage: string;
-  time: string;
-  avatar: string;
-  unread?: boolean;
-};
+interface Message {
+  id: number;
+  text: string;
+  isMe: boolean;
+  timestamp: string;
+  sender: User;
+}
 
-export default function MessageListScreen({ navigation, route }: MessageStackScreenProps<'MessageList'>) {
-  const [messages, setMessages] = useState<MessageItem[] | null>(null);
-  const [loading, setLoading] = useState(true);
+const mockAppart: User[] = [
+  {
+    id: 1,
+    name: 'Appartement Paris 12e',
+    lastMessage: 'Visite prévue demain à 18h.',
+    avatar:
+      'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=100&q=80',
+    //unread: true,
+  },
+  {
+    id: 2,
+    name: 'Loft Nation - Duplex',
+    lastMessage: 'Le contrat est prêt à être signé.',
+    avatar:
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=100&q=80',
+  },
+  {
+    id: 3,
+    name: 'Studio Michel-Ange',
+    lastMessage: 'Le propriétaire a répondu.',
+    avatar:
+      'https://images.unsplash.com/photo-1598928506313-a24bb3c1d742?auto=format&fit=crop&w=100&q=80',
+  },
+];
+const mockUsers: User[] = [
+  {
+    id: 1,
+    name: 'Jean Baptiste',
+    avatar: 'https://i.pravatar.cc/100?img=1',
+    lastMessage: 'Comment va-t-on sortir de là...',
+  },
+  {
+    id: 2,
+    name: 'Marie Claire',
+    avatar: 'https://i.pravatar.cc/100?img=2',
+    lastMessage: 'Évidemment !',
+  },
+  {
+    id: 3,
+    name: 'Michel',
+    avatar: 'https://i.pravatar.cc/100?img=3',
+    lastMessage: 'Ca me va :)',
+  },
+];
+
+export default function GroupMessageScreen() {
+  const currentAppart: User = mockAppart[0];
+  const currentUser: User = mockUsers[0];
+  const [inputText, setInputText] = useState<string>('');
+  const flatListRef = useRef<FlatList<Message>>(null);
+
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: 1,
+      text: 'Salut à tous !',
+      isMe: false,
+      timestamp: '14:30',
+      sender: mockUsers[1],
+    },
+    {
+      id: 2,
+      text: 'Hello Marie Claire :)',
+      isMe: true,
+      timestamp: '14:31',
+      sender: currentUser,
+    },
+    {
+      id: 3,
+      text: 'On commence la visio quand ?',
+      isMe: false,
+      timestamp: '14:32',
+      sender: mockUsers[2],
+    },
+    {
+      id: 4,
+      text: 'Maintenant si vous êtes prêts',
+      isMe: true,
+      timestamp: '14:33',
+      sender: currentUser,
+    },
+  ]);
+
+  const scrollToBottom = (): void => {
+    flatListRef.current?.scrollToEnd({ animated: true });
+  };
 
   useEffect(() => {
-    // Simuler un appel à une API distante
-    const fetchMessages = async () => {
-      setLoading(true);
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // attente 1 seconde
+    const timer = setTimeout(scrollToBottom, 100);
+    return () => clearTimeout(timer);
+  }, [messages]);
 
-      const mockData: MessageItem[] = [
-          {
-            id: '1',
-            name: 'Appartement Paris 12e',
-            lastMessage: 'Visite prévue demain à 18h',
-            time: '10:24',
-            avatar: 'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=100&q=80',
-            unread: true,
-          },
-          {
-            id: '2',
-            name: 'Loft Nation - Duplex',
-            lastMessage: 'Le contrat est prêt à être signé',
-            time: '09:51',
-            avatar: 'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=100&q=80',
-          },
-          {
-            id: '3',
-            name: 'Studio Michel-Ange',
-            lastMessage: 'Maintenant si vous êtes prêts',
-            time: 'Hier',
-            avatar: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=100&q=80',
-          },
-        
-      ];
+  const handleSend = (): void => {
+    if (inputText.trim()) {
+      const newMessage: Message = {
+        id: messages.length + 1,
+        text: inputText,
+        isMe: true,
+        timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+        sender: currentUser,
+      };
+      setMessages([...messages, newMessage]);
+      setInputText('');
+    }
+  };
 
-      setMessages(mockData);
-      setLoading(false);
-    };
+  const renderMessage: ListRenderItem<Message> = ({ item }) => {
+    const isMe = item.isMe;
 
-    fetchMessages();
-  }, []);
+    return (
+      <View style={[styles.messageContainer, isMe ? styles.myMessage : styles.otherMessage]}>
+        {!isMe && (
+          <View style={styles.senderInfo}>
+            <Image source={{ uri: item.sender.avatar }} style={styles.avatar} />
+            <Text style={styles.senderName}>{item.sender.name}</Text>
+          </View>
+        )}
+        <View style={[styles.messageBubble, isMe ? styles.myBubble : styles.otherBubble]}>
+          <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.otherMessageText]}>
+            {item.text}
+          </Text>
+        </View>
+      </View>
+    );
+  };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Messages</Text>
-        <TouchableOpacity
-          style={styles.roomiesButton}
-          onPress={() => navigation.navigate('MessageList')}>
-          <Text style={styles.roomiesText}>Roomies</Text>
+    <KeyboardAvoidingView
+      style={styles.container}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <MessageHeader user={currentAppart} onBackPress={(): void => console.log('Back pressed')} />
+
+      <FlatList
+        ref={flatListRef}
+        data={messages}
+        renderItem={renderMessage}
+        keyExtractor={(item) => item.id.toString()}
+        style={styles.messagesList}
+        contentContainerStyle={styles.messagesContainer}
+      />
+
+      <View style={styles.inputContainer}>
+        <TouchableOpacity style={styles.attachButton}>
+          <AntDesign name="picture" size={28} color="black" />
+        </TouchableOpacity>
+
+        <TextInput
+          style={styles.textInput}
+          value={inputText}
+          onChangeText={setInputText}
+          placeholder="Entrer un message..."
+          multiline
+        />
+
+        <TouchableOpacity onPress={handleSend} style={styles.sendButton}>
+          <Ionicons name="send" size={24} color="black" />
         </TouchableOpacity>
       </View>
-
-      {/* Loader ou Liste */}
-      {loading ? (
-        <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 20 }} />
-      ) : (
-        <FlatList
-          data={messages}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingHorizontal: 16 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.messageContainer}
-              onPress={() =>
-                // navigation.navigate('SharedStack', {
-                //   screen: 'GroupInfo',
-                //   params: { userId: Number(item.id) },
-                // })
-                navigation.navigate('GroupInfo', { groupId: Number(item.id) })
-
-              }>
-              <Image source={{ uri: item.avatar }} style={styles.avatar} />
-              <View style={styles.messageContent}>
-                <View style={styles.messageHeader}>
-                  <Text style={styles.name}>{item.name}</Text>
-                  <Text style={styles.time}>{item.time}</Text>
-                </View>
-                <Text
-                  numberOfLines={1}
-                  style={[styles.lastMessage, item.unread && styles.unreadMessage]}>
-                  {item.lastMessage}
-                </Text>
-              </View>
-            </TouchableOpacity>
-          )}
-        />
-      )}
-    </View>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    paddingTop: 50,
+    backgroundColor: '#F5F5F5',
   },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+  messagesList: {
+    flex: 1,
+  },
+  messagesContainer: {
     paddingHorizontal: 16,
-    marginBottom: 12,
-  },
-  headerTitle: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  roomiesButton: {
-    backgroundColor: '#D0E8FF',
-    paddingVertical: 6,
-    paddingHorizontal: 16,
-    borderRadius: 20,
-  },
-  roomiesText: {
-    color: '#007AFF',
-    fontWeight: '600',
+    paddingVertical: 8,
   },
   messageContainer: {
+    marginVertical: 8,
+    maxWidth: '80%',
+  },
+  myMessage: {
+    alignSelf: 'flex-end',
+    alignItems: 'flex-end',
+  },
+  otherMessage: {
+    alignSelf: 'flex-start',
+    alignItems: 'flex-start',
+  },
+  senderInfo: {
     flexDirection: 'row',
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-  },
-  messageContent: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  messageHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 4,
   },
-  name: {
-    fontSize: 16,
+  avatar: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    marginRight: 6,
+  },
+  senderName: {
     fontWeight: '600',
+    color: '#333',
   },
-  time: {
-    fontSize: 12,
-    color: '#888',
+  messageBubble: {
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 18,
   },
-  lastMessage: {
-    fontSize: 14,
-    color: '#666',
+  myBubble: {
+    backgroundColor: '#007AFF',
+    borderBottomRightRadius: 4,
   },
-  unreadMessage: {
-    fontWeight: 'bold',
-    color: '#000',
+  otherBubble: {
+    backgroundColor: '#E5E5EA',
+    borderBottomLeftRadius: 4,
+  },
+  messageText: {
+    fontSize: 16,
+    lineHeight: 20,
+  },
+  myMessageText: {
+    color: '#FFFFFF',
+  },
+  otherMessageText: {
+    color: '#000000',
+  },
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: '#FFFFFF',
+    borderTopWidth: 1,
+    borderTopColor: '#E0E0E0',
+  },
+  attachButton: {
+    padding: 8,
+    marginRight: 8,
+  },
+  textInput: {
+    flex: 1,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    maxHeight: 100,
+    fontSize: 16,
+    backgroundColor: '#F8F8F8',
+  },
+  sendButton: {
+    padding: 8,
+    marginLeft: 8,
   },
 });
-
-// import React from 'react';
-// import { Button, StyleSheet, Text, View } from 'react-native';
-
-// import { MessageStackScreenProps } from '@navigation/Types';
-
-// export default function GroupMessageScreen({
-//   navigation,
-//   route,
-// }: MessageStackScreenProps<'GroupMessage'>) {
-//   return (
-//     <View style={styles.container}>
-//       <Text style={styles.title}>Messages with group {route.params.groupId}</Text>
-//       <Button
-//         title="See group info"
-//         onPress={() => navigation.navigate('GroupInfo', { groupId: route.params.groupId })}
-//       />
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#fff',
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   title: {
-//     fontSize: 24,
-//     fontWeight: 'bold',
-//   },
-// });
