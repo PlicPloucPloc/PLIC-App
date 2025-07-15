@@ -148,7 +148,7 @@ export default function ApartmentList({
             onPress={() =>
               navigation.navigate('SharedStack', {
                 screen: 'ApartmentDetails',
-                params: { apartment: relation.apt },
+                params: { apartment: relation.apt, enableRelationButtons: true },
               })
             }>
             <ApartmentListItem

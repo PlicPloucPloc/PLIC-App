@@ -45,44 +45,7 @@ const mockUsers: User[] = [
 ];
 
 export default function DirectMessageScreen() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      id: 1,
-      text: "Bonjour, j'aime beaucoup votre appart",
-      isMe: true,
-      timestamp: '14:30',
-    },
-    {
-      id: 2,
-      text: 'Merci',
-      isMe: false,
-      timestamp: '14:31',
-    },
-    {
-      id: 3,
-      text: 'Est-ce que les voisins font du bruit ?',
-      isMe: true,
-      timestamp: '14:32',
-    },
-    {
-      id: 4,
-      text: 'Non',
-      isMe: false,
-      timestamp: '14:33',
-    },
-    {
-      id: 5,
-      text: "Je peux venir visiter l'appart demain ?",
-      isMe: true,
-      timestamp: '14:34',
-    },
-    {
-      id: 6,
-      text: 'Evidemment !',
-      isMe: false,
-      timestamp: '14:35',
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
 
   const [inputText, setInputText] = useState<string>('');
   const flatListRef = useRef<FlatList<Message>>(null);
