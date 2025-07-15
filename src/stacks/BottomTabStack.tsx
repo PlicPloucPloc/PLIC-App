@@ -8,9 +8,9 @@ import {
 } from '@react-navigation/bottom-tabs';
 import HomeStack from '@stacks/HomeStack';
 import LikesStack from '@stacks/LikesStack';
-import MessageStack from '@stacks/MessageStack';
 
 import ColocFinderStack from './ColocFinderStack';
+import MessageStack from './MessageStack';
 import ProfilStack from './ProfilStack';
 
 const Stack = createBottomTabNavigator<BottomTabStackParamList>();

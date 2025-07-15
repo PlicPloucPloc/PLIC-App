@@ -7,8 +7,8 @@ import {
   StackNavigationProp,
 } from '@react-navigation/stack';
 import ApartmentDetailsScreen from '@screens/ApartmentDetailsScreen';
-import DirectMessageScreen from '@screens/DirectMessage';
-import GroupInfoScreen from '@screens/GroupInfoScreen';
+import DirectMessageScreen from '@screens/DirectMessageScreen';
+import GroupMessageScreen from '@screens/GroupMessageScreen';
 import OtherProfilScreen from '@screens/OtherProfilScreen';
 
 const Stack = createStackNavigator<SharedStackParamList>();

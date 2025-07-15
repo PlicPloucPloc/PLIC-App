@@ -20,7 +20,9 @@ type MessageItem = {
   unread?: boolean;
 };
 
-export default function MessageListScreen({ navigation }: MessageStackScreenProps<'MessageList'>) {
+export default function DirectMessageListScreen({
+  navigation,
+}: MessageStackScreenProps<'DirectMessageList'>) {
   const [messages, setMessages] = useState<MessageItem[] | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -68,7 +70,7 @@ export default function MessageListScreen({ navigation }: MessageStackScreenProp
         <Text style={styles.headerTitle}>Messages</Text>
         <TouchableOpacity
           style={styles.roomiesButton}
-          onPress={() => navigation.navigate('GroupMessage', { groupId: 1 })}>
+          onPress={() => navigation.navigate('GroupMessageList')}>
           <Text style={styles.roomiesText}>Roomies</Text>
         </TouchableOpacity>
       </View>

@@ -1,11 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
-import * as ImagePicker from 'expo-image-picker';
-
 import {
   FlatList,
   Image,
   KeyboardAvoidingView,
-  ListRenderItem,
   Platform,
   StyleSheet,
   Text,
@@ -14,8 +11,9 @@ import {
   View,
 } from 'react-native';
 
+import MessageHeader, { User } from '@components/MessageHeader';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
-import DirectMessageStack, { User } from '@stacks/DirectMessageStack';
+import * as ImagePicker from 'expo-image-picker';
 
 interface Message {
   id: number;
@@ -24,8 +22,6 @@ interface Message {
   isMe: boolean;
   timestamp: string;
 }
-
-
 
 const mockUsers: User[] = [
   {
@@ -52,7 +48,7 @@ const DirectMessageScreen: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: 'Bonjour, j\'aime beaucoup votre appart',
+      text: "Bonjour, j'aime beaucoup votre appart",
       isMe: true,
       timestamp: '14:30',
     },
@@ -76,7 +72,7 @@ const DirectMessageScreen: React.FC = () => {
     },
     {
       id: 5,
-      text: 'Je peux venir visiter l\'appart demain ?',
+      text: "Je peux venir visiter l'appart demain ?",
       isMe: true,
       timestamp: '14:34',
     },
@@ -118,16 +114,16 @@ const DirectMessageScreen: React.FC = () => {
     }
   };
 
-
   const renderMessage = ({ item }: { item: Message }) => {
     const isImage = item.text.startsWith('file://');
-  
+
     return (
-      <View style={[
-        styles.messageContainer, 
-        item.isMe ? styles.myMessage : styles.otherMessage,
-        { alignItems: item.isMe ? 'flex-end' : 'flex-start', marginVertical: 4 }
-      ]}>
+      <View
+        style={[
+          styles.messageContainer,
+          item.isMe ? styles.myMessage : styles.otherMessage,
+          { alignItems: item.isMe ? 'flex-end' : 'flex-start', marginVertical: 4 },
+        ]}>
         {isImage ? (
           <Image
             source={{ uri: item.text }}
@@ -138,15 +134,17 @@ const DirectMessageScreen: React.FC = () => {
             }}
           />
         ) : (
-          <View style={[
-            styles.messageBubble, 
-            item.isMe ? styles.myBubble : styles.otherBubble,
-            { maxWidth: '80%' }
-          ]}>
-            <Text style={[
-              styles.messageText,
-              item.isMe ? styles.myMessageText : styles.otherMessageText
+          <View
+            style={[
+              styles.messageBubble,
+              item.isMe ? styles.myBubble : styles.otherBubble,
+              { maxWidth: '80%' },
             ]}>
+            <Text
+              style={[
+                styles.messageText,
+                item.isMe ? styles.myMessageText : styles.otherMessageText,
+              ]}>
               {item.text}
             </Text>
           </View>
@@ -154,32 +152,27 @@ const DirectMessageScreen: React.FC = () => {
       </View>
     );
   };
-  
-  
-  
-  
 
   const sendImage = async () => {
     // Demander la permission d'accéder à la galerie
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-  
+
     if (status !== 'granted') {
       alert('Permission requise pour accéder à la galerie !');
       return;
     }
-  
+
     // Ouvrir la galerie pour sélectionner une image
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images, 
-
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
 
       allowsEditing: false,
       quality: 1,
     });
-  
+
     if (!result.canceled && result.assets.length > 0) {
       const selectedImageUri = result.assets[0].uri;
-  
+
       const newMessage: Message = {
         id: messages.length + 1,
         text: selectedImageUri, // on stocke l'URI de l'image
@@ -189,22 +182,16 @@ const DirectMessageScreen: React.FC = () => {
           minute: '2-digit',
         }),
       };
-  
+
       setMessages([...messages, newMessage]);
     }
   };
-  
-  
-  
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <DirectMessageStack
-        user={currentUser}
-        onBackPress={(): void => console.log('Back pressed')}
-      />
+      <MessageHeader user={currentUser} onBackPress={(): void => console.log('Back pressed')} />
 
       <FlatList
         ref={flatListRef}
