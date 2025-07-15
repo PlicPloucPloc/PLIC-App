@@ -1,18 +1,19 @@
 import * as React from 'react';
-import { FlatList, Pressable, StyleSheet } from 'react-native';
+import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { InsideStackScreenProps } from '@navigation/Types';
 import { Image } from 'expo-image';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ImageListScreen({
   navigation,
   route,
 }: InsideStackScreenProps<'ImageList'>) {
   const colors = useThemeColors();
-  const styles = createStyles(colors);
+  const insets = useSafeAreaInsets();
+  const styles = createStyles(colors, insets);
 
   const images = route.params.images;
 
@@ -25,21 +26,28 @@ export default function ImageListScreen({
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+    <View style={styles.container}>
       <FlatList
         data={images}
         keyExtractor={(item) => item}
         renderItem={renderItem}
         contentContainerStyle={styles.listContent}
       />
-    </SafeAreaView>
+    </View>
   );
 }
 
-const createStyles = (colors: ColorTheme) =>
+const createStyles = (colors: ColorTheme, insets: { top: number; bottom: number }) =>
   StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+      paddingTop: insets.top,
+      paddingBottom: insets.bottom,
+    },
     listContent: {
-      padding: 8,
+      paddingHorizontal: 8,
+      paddingBottom: 16,
     },
     imageWrapper: {
       overflow: 'hidden',

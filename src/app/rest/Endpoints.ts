@@ -7,10 +7,12 @@ const Endpoints = {
     REFRESH: '/user/refresh',
   },
   RELATIONS: {
-    GET_ALL_PAGINATED: (offset: number) => `/relations/all?skip=${offset}`,
-    GET_LIKES_PAGINATED: (isFilterColoc: boolean, offset: number) =>
-      `/relations/likes/${isFilterColoc}?skip=${offset}`,
-    GET_DISLIKES_PAGINATED: (offset: number) => `/relations/dislikes?skip=${offset}`,
+    GET_ALL_PAGINATED: (offset: number, limit: number) =>
+      `/relations/all?skip=${offset}&limit=${limit}`,
+    GET_LIKES_PAGINATED: (isFilterColoc: boolean, offset: number, limit: number) =>
+      `/relations/likes/${isFilterColoc}?skip=${offset}&limit=${limit}`,
+    GET_DISLIKES_PAGINATED: (offset: number, limit: number) =>
+      `/relations/dislikes?skip=${offset}&limit=${limit}`,
     POST_RELATION: '/relations',
     UPDATE_RELATION: '/relations',
     DELETE_RELATION: '/relations',

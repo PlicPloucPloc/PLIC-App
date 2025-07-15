@@ -9,11 +9,11 @@ type HeaderBackButtonProps = {
   navigation: StackNavigationProp<ParamListBase>;
 };
 
-export default function HeaderBackButton(props: HeaderBackButtonProps) {
+export default function HeaderBackButton({ navigation }: HeaderBackButtonProps) {
   return (
     <TouchableOpacity
       onPress={() => {
-        props.navigation.goBack();
+        navigation.goBack();
         Keyboard.dismiss();
       }}
       style={{ paddingHorizontal: 15 }}>

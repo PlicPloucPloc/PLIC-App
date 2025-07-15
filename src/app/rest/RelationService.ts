@@ -1,14 +1,18 @@
 import { Alert } from 'react-native';
 
 import { RELATION_TYPE, RelationInfo } from '@app/definitions/rest/RelationService';
+import { setShouldRefetchLiked } from '@app/redux/slices/index.ts';
+import store from '@app/redux/Store.ts';
 
 import { alertOnError, apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { getApartmentThumbnail } from './S3Service.ts';
 
-export async function getAllRelationsPaginated(offset: number) {
+const PAGE_SIZE = 10;
+
+export async function getAllRelationsPaginated(offset: number, pageSize: number = PAGE_SIZE) {
   const response = await apiFetch(
-    Endpoints.RELATIONS.GET_ALL_PAGINATED(offset),
+    Endpoints.RELATIONS.GET_ALL_PAGINATED(offset, pageSize),
     {
       method: 'GET',
     },
@@ -23,12 +27,16 @@ export async function getAllRelationsPaginated(offset: number) {
     relation.apt.image_thumbnail = await getApartmentThumbnail(relation.apt);
   }
 
-  return (await response.json()) as RelationInfo[];
+  return relationsInfo;
 }
 
-export async function getLikedApartmentsPaginated(isFilterColoc: boolean, offset: number) {
+export async function getLikedApartmentsPaginated(
+  isFilterColoc: boolean,
+  offset: number,
+  pageSize: number = PAGE_SIZE,
+) {
   const response = await apiFetch(
-    Endpoints.RELATIONS.GET_LIKES_PAGINATED(isFilterColoc, offset),
+    Endpoints.RELATIONS.GET_LIKES_PAGINATED(isFilterColoc, offset, pageSize),
     {
       method: 'GET',
     },
@@ -43,12 +51,12 @@ export async function getLikedApartmentsPaginated(isFilterColoc: boolean, offset
     relation.apt.image_thumbnail = await getApartmentThumbnail(relation.apt);
   }
 
-  return relationsInfo.map((relation) => relation.apt);
+  return relationsInfo;
 }
 
-export async function getDislikedApartmentPaginated(offset: number) {
+export async function getDislikedApartmentPaginated(offset: number, pageSize: number = PAGE_SIZE) {
   const response = await apiFetch(
-    Endpoints.RELATIONS.GET_DISLIKES_PAGINATED(offset),
+    Endpoints.RELATIONS.GET_DISLIKES_PAGINATED(offset, pageSize),
     {
       method: 'GET',
     },
@@ -59,7 +67,7 @@ export async function getDislikedApartmentPaginated(offset: number) {
 
   const relationsInfo = (await response.json()) as RelationInfo[];
 
-  return relationsInfo.map((relation) => relation.apt);
+  return relationsInfo;
 }
 
 export async function postRelation(apartmentId: number, type: RELATION_TYPE) {
@@ -86,6 +94,8 @@ export async function postRelation(apartmentId: number, type: RELATION_TYPE) {
     Alert.alert('Relation Error', errorData.message || 'An error occurred while posting relation.');
   }
 
+  store.dispatch(setShouldRefetchLiked(true));
+
   return true;
 }
 
@@ -100,6 +110,8 @@ export async function updateRelation(apartmentId: number, type: RELATION_TYPE) {
   );
 
   if (await alertOnError(response, 'Relation', 'updating relation')) return false;
+
+  store.dispatch(setShouldRefetchLiked(true));
 
   return true;
 }
@@ -117,6 +129,8 @@ export async function deleteRelation(apartmentId: number) {
   if (response.status === 404) return true;
 
   if (await alertOnError(response, 'Relation', 'deleting relation')) return false;
+
+  store.dispatch(setShouldRefetchLiked(true));
 
   return true;
 }
