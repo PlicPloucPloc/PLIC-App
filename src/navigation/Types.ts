@@ -97,9 +97,11 @@ export type HomeStackScreenProps<T extends keyof HomeStackParamList> = Composite
 
 // ------- Message stack -------
 export type MessageStackParamList = {
-  MessageList: undefined;
-  GroupMessage: { groupId: number };
-  GroupInfo: { groupId: number };
+  DirectMessageList: undefined;
+  DirectMessage: undefined;
+  GroupMessageList: undefined;
+  GroupMessage: undefined;
+  SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };
 
 export type MessageStackScreenProps<T extends keyof MessageStackParamList> = CompositeScreenProps<

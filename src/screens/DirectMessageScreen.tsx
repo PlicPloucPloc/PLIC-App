@@ -3,7 +3,6 @@ import {
   FlatList,
   Image,
   KeyboardAvoidingView,
-  ListRenderItem,
   Platform,
   StyleSheet,
   Text,
@@ -14,39 +13,16 @@ import {
 
 import MessageHeader, { User } from '@components/MessageHeader';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
+import * as ImagePicker from 'expo-image-picker';
 
 interface Message {
   id: number;
-  text: string;
+  text: string; // devient optionnel
+  imageUri?: string; // nouvelle propriété
   isMe: boolean;
   timestamp: string;
-  sender: User;
 }
 
-const mockAppart: User[] = [
-  {
-    id: 1,
-    name: 'Appartement Paris 12e',
-    lastMessage: 'Visite prévue demain à 18h.',
-    avatar:
-      'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=100&q=80',
-    //unread: true,
-  },
-  {
-    id: 2,
-    name: 'Loft Nation - Duplex',
-    lastMessage: 'Le contrat est prêt à être signé.',
-    avatar:
-      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=100&q=80',
-  },
-  {
-    id: 3,
-    name: 'Studio Michel-Ange',
-    lastMessage: 'Le propriétaire a répondu.',
-    avatar:
-      'https://images.unsplash.com/photo-1598928506313-a24bb3c1d742?auto=format&fit=crop&w=100&q=80',
-  },
-];
 const mockUsers: User[] = [
   {
     id: 1,
@@ -68,49 +44,57 @@ const mockUsers: User[] = [
   },
 ];
 
-export default function GroupMessageScreen() {
-  const currentAppart: User = mockAppart[0];
-  const currentUser: User = mockUsers[0];
-  const [inputText, setInputText] = useState<string>('');
-  const flatListRef = useRef<FlatList<Message>>(null);
-
+export default function DirectMessageScreen() {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: 'Salut à tous !',
-      isMe: false,
+      text: "Bonjour, j'aime beaucoup votre appart",
+      isMe: true,
       timestamp: '14:30',
-      sender: mockUsers[1],
     },
     {
       id: 2,
-      text: 'Hello Marie Claire :)',
-      isMe: true,
+      text: 'Merci',
+      isMe: false,
       timestamp: '14:31',
-      sender: currentUser,
     },
     {
       id: 3,
-      text: 'On commence la visio quand ?',
-      isMe: false,
+      text: 'Est-ce que les voisins font du bruit ?',
+      isMe: true,
       timestamp: '14:32',
-      sender: mockUsers[2],
     },
     {
       id: 4,
-      text: 'Maintenant si vous êtes prêts',
-      isMe: true,
+      text: 'Non',
+      isMe: false,
       timestamp: '14:33',
-      sender: currentUser,
+    },
+    {
+      id: 5,
+      text: "Je peux venir visiter l'appart demain ?",
+      isMe: true,
+      timestamp: '14:34',
+    },
+    {
+      id: 6,
+      text: 'Evidemment !',
+      isMe: false,
+      timestamp: '14:35',
     },
   ]);
 
-  const scrollToBottom = (): void => {
-    flatListRef.current?.scrollToEnd({ animated: true });
-  };
+  const [inputText, setInputText] = useState<string>('');
+  const flatListRef = useRef<FlatList<Message>>(null);
+  const currentUser: User = mockUsers[1];
 
   useEffect(() => {
-    const timer = setTimeout(scrollToBottom, 100);
+    const timer = setTimeout(() => {
+      if (flatListRef.current && messages.length > 0) {
+        flatListRef.current.scrollToEnd({ animated: true });
+      }
+    }, 100);
+
     return () => clearTimeout(timer);
   }, [messages]);
 
@@ -120,39 +104,94 @@ export default function GroupMessageScreen() {
         id: messages.length + 1,
         text: inputText,
         isMe: true,
-        timestamp: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
-        sender: currentUser,
+        timestamp: new Date().toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
       };
       setMessages([...messages, newMessage]);
       setInputText('');
     }
   };
 
-  const renderMessage: ListRenderItem<Message> = ({ item }) => {
-    const isMe = item.isMe;
+  const renderMessage = ({ item }: { item: Message }) => {
+    const isImage = item.text.startsWith('file://');
 
     return (
-      <View style={[styles.messageContainer, isMe ? styles.myMessage : styles.otherMessage]}>
-        {!isMe && (
-          <View style={styles.senderInfo}>
-            <Image source={{ uri: item.sender.avatar }} style={styles.avatar} />
-            <Text style={styles.senderName}>{item.sender.name}</Text>
+      <View
+        style={[
+          styles.messageContainer,
+          item.isMe ? styles.myMessage : styles.otherMessage,
+          { alignItems: item.isMe ? 'flex-end' : 'flex-start', marginVertical: 4 },
+        ]}>
+        {isImage ? (
+          <Image
+            source={{ uri: item.text }}
+            style={{
+              width: 200,
+              height: 200,
+              borderRadius: 10,
+            }}
+          />
+        ) : (
+          <View
+            style={[
+              styles.messageBubble,
+              item.isMe ? styles.myBubble : styles.otherBubble,
+              { maxWidth: '80%' },
+            ]}>
+            <Text
+              style={[
+                styles.messageText,
+                item.isMe ? styles.myMessageText : styles.otherMessageText,
+              ]}>
+              {item.text}
+            </Text>
           </View>
         )}
-        <View style={[styles.messageBubble, isMe ? styles.myBubble : styles.otherBubble]}>
-          <Text style={[styles.messageText, isMe ? styles.myMessageText : styles.otherMessageText]}>
-            {item.text}
-          </Text>
-        </View>
       </View>
     );
+  };
+
+  const sendImage = async () => {
+    // Demander la permission d'accéder à la galerie
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (status !== 'granted') {
+      alert('Permission requise pour accéder à la galerie !');
+      return;
+    }
+
+    // Ouvrir la galerie pour sélectionner une image
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+
+      allowsEditing: false,
+      quality: 1,
+    });
+
+    if (!result.canceled && result.assets.length > 0) {
+      const selectedImageUri = result.assets[0].uri;
+
+      const newMessage: Message = {
+        id: messages.length + 1,
+        text: selectedImageUri, // on stocke l'URI de l'image
+        isMe: true,
+        timestamp: new Date().toLocaleTimeString('fr-FR', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      };
+
+      setMessages([...messages, newMessage]);
+    }
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <MessageHeader user={currentAppart} onBackPress={(): void => console.log('Back pressed')} />
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <MessageHeader user={currentUser} onBackPress={(): void => console.log('Back pressed')} />
 
       <FlatList
         ref={flatListRef}
@@ -161,10 +200,12 @@ export default function GroupMessageScreen() {
         keyExtractor={(item) => item.id.toString()}
         style={styles.messagesList}
         contentContainerStyle={styles.messagesContainer}
+        // onContentSizeChange={scrollToBottom}
+        // onLayout={scrollToBottom}
       />
 
       <View style={styles.inputContainer}>
-        <TouchableOpacity style={styles.attachButton}>
+        <TouchableOpacity onPress={sendImage} style={styles.attachButton}>
           <AntDesign name="picture" size={28} color="black" />
         </TouchableOpacity>
 
@@ -172,7 +213,7 @@ export default function GroupMessageScreen() {
           style={styles.textInput}
           value={inputText}
           onChangeText={setInputText}
-          placeholder="Entrer un message..."
+          placeholder="Entrer text to chat..."
           multiline
         />
 
@@ -197,33 +238,16 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   messageContainer: {
-    marginVertical: 8,
-    maxWidth: '80%',
+    marginVertical: 4,
   },
   myMessage: {
-    alignSelf: 'flex-end',
     alignItems: 'flex-end',
   },
   otherMessage: {
-    alignSelf: 'flex-start',
     alignItems: 'flex-start',
   },
-  senderInfo: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 4,
-  },
-  avatar: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    marginRight: 6,
-  },
-  senderName: {
-    fontWeight: '600',
-    color: '#333',
-  },
   messageBubble: {
+    maxWidth: '80%',
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 18,
@@ -259,6 +283,11 @@ const styles = StyleSheet.create({
     padding: 8,
     marginRight: 8,
   },
+  attachIcon: {
+    width: 24,
+    height: 24,
+    tintColor: '#666666',
+  },
   textInput: {
     flex: 1,
     borderRadius: 20,
@@ -273,5 +302,9 @@ const styles = StyleSheet.create({
   sendButton: {
     padding: 8,
     marginLeft: 8,
+  },
+  sendIcon: {
+    fontSize: 24,
+    color: '#007AFF',
   },
 });
