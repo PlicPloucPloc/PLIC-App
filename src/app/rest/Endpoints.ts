@@ -18,9 +18,10 @@ const Endpoints = {
     DELETE_RELATION: '/relations',
   },
   APARTMENT: {
-    GET_INFO_PAGINATED: (offset: number) => `/apt?offset=${offset}`,
+    NO_RELATIONS_PAGINATED: (offset: number, limit: number) =>
+      `/apt/noRelations?offset=${offset}&limit=${limit}`,
+    GET_INFO_PAGINATED: (offset: number, limit: number) => `/apt?offset=${offset}&limit=${limit}`,
     GET_INFO_BY_ID: (id: number) => `/apartment/${id}`,
-    NO_RELATIONS_PAGINATED: (offset: number) => `/apt/noRelations?offset=${offset}`,
   },
 };
 

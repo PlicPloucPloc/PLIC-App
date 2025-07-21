@@ -4,9 +4,11 @@ import { alertOnError, apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { getApartmentImages, getApartmentThumbnail } from './S3Service.ts';
 
+const PAGE_SIZE = 10;
+
 export async function getApartmentsInfoPaginated(offset: number) {
   const response = await apiFetch(
-    Endpoints.APARTMENT.GET_INFO_PAGINATED(offset),
+    Endpoints.APARTMENT.GET_INFO_PAGINATED(offset, PAGE_SIZE),
     {
       method: 'GET',
     },
@@ -26,7 +28,7 @@ export async function getApartmentsInfoPaginated(offset: number) {
 
 export async function getApartmentsNoRelationPaginated(offset: number) {
   const response = await apiFetch(
-    Endpoints.APARTMENT.NO_RELATIONS_PAGINATED(offset),
+    Endpoints.APARTMENT.NO_RELATIONS_PAGINATED(offset, PAGE_SIZE),
     {
       method: 'GET',
     },

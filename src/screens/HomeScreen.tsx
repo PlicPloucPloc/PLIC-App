@@ -35,6 +35,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     title?: string;
     surface?: number;
     location?: string;
+    rent?: number;
   }>({});
 
   const fetchData = useCallback(async () => {
@@ -63,6 +64,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
       title: apartment.name,
       surface: apartment.surface,
       location: apartment.location,
+      rent: apartment.rent,
     });
   }, []);
 
@@ -182,7 +184,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
               {apartmentInfo.location}
             </Text>
             <Text numberOfLines={1} ellipsizeMode="tail" style={styles.textSubtitle}>
-              {apartmentInfo.surface} m²
+              {apartmentInfo.surface} m² / {apartmentInfo.rent} €
             </Text>
           </>
         )}

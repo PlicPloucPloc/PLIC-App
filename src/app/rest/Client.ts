@@ -173,6 +173,9 @@ function userNeedsLogin(requestId: string): Response {
 
   console.error(`Request ID: ${requestId} | Token rotation failed, user needs to login`);
 
+  SecureStore.deleteItemAsync('token');
+  SecureStore.deleteItemAsync('refresh_token');
+
   return new Response(null, {
     status: 401,
     statusText: 'Unauthorized',
