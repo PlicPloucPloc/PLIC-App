@@ -9,7 +9,7 @@ export interface IAppState {
 
 const initialState: IAppState = {
   root: RootEnum.ROOT_AUTH,
-  shouldRefetchLiked: true,
+  shouldRefetchLiked: false,
 };
 
 export const appStateSlice = createSlice({

@@ -19,7 +19,9 @@ export async function getAllRelationsPaginated(offset: number, pageSize: number 
     true,
   );
 
-  if (await alertOnError(response, 'Relation', 'getting all relations')) return;
+  if (await alertOnError(response, 'Relation', 'getting all relations')) {
+    return [];
+  }
 
   const relationsInfo = (await response.json()) as RelationInfo[];
 
@@ -43,7 +45,9 @@ export async function getLikedApartmentsPaginated(
     true,
   );
 
-  if (await alertOnError(response, 'Relation', 'getting likes')) return;
+  if (await alertOnError(response, 'Relation', 'getting likes')) {
+    return [];
+  }
 
   const relationsInfo = (await response.json()) as RelationInfo[];
 
@@ -63,7 +67,9 @@ export async function getDislikedApartmentPaginated(offset: number, pageSize: nu
     true,
   );
 
-  if (await alertOnError(response, 'Relation', 'getting dislikes')) return;
+  if (await alertOnError(response, 'Relation', 'getting dislikes')) {
+    return [];
+  }
 
   const relationsInfo = (await response.json()) as RelationInfo[];
 

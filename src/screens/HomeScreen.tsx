@@ -9,10 +9,10 @@ import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
 import Loader from '@components/Loader';
+import { Swiper, type SwiperCardRefType } from '@ellmos/rn-swiper-list';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
-import { Swiper, type SwiperCardRefType } from 'rn-swiper-list';
 
 const ICON_SIZE = 38;
 const SWIPE_DELAY = 300;
@@ -75,6 +75,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     if (!hasPostedSuccesfully) {
       Alert.alert(
         'Error',
+
         `An error occurred while ${type == RELATION_TYPE.LIKE ? 'Liking' : 'Disliking'} the apartment.`,
       );
       return;
@@ -164,7 +165,9 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
               />
             )}
             OverlayLabelRight={() => (
-              <View style={[styles.overlayLabelContainer, { backgroundColor: '#4BA3C3' }]} />
+              <View style={[styles.overlayLabelContainer, { backgroundColor: colors.primary }]}>
+                <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
+              </View>
             )}
             OverlayLabelLeft={() => (
               <View style={[styles.overlayLabelContainer, { backgroundColor: 'red' }]} />
@@ -253,16 +256,14 @@ const createStyles = (colors: ColorTheme) =>
       zIndex: 1,
     },
     touchableContainer: {
-      width: '100%',
-      height: '100%',
+      width: '95%',
+      height: '98%',
       justifyContent: 'center',
       alignItems: 'center',
     },
     cardStyle: {
-      width: '95%',
-      height: '95%',
-      borderRadius: 15,
-      marginVertical: 20,
+      width: '100%',
+      height: '100%',
     },
     renderCardImage: {
       height: '100%',
@@ -271,8 +272,6 @@ const createStyles = (colors: ColorTheme) =>
     },
     overlayLabelContainer: {
       flex: 1,
-      width: '100%',
-      height: '100%',
       borderRadius: 15,
       opacity: 0.5,
     },

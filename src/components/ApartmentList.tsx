@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback } from 'react';
 import {
   ActivityIndicator,
   Alert,
   Animated,
+  FlatList,
   Pressable,
   RefreshControl,
   StyleSheet,
@@ -12,12 +13,13 @@ import {
 
 import { ColorTheme } from '@app/Colors';
 import { RelationInfo } from '@app/definitions/rest/RelationService';
+import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setShouldRefetchLiked } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
 import { deleteRelation } from '@app/rest/RelationService';
 import { useFocusEffect } from '@react-navigation/native';
-import { FlatList, Swipeable } from 'react-native-gesture-handler';
+import { Swipeable } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 
 import ApartmentListItem from './ApartmentListItem';
@@ -27,7 +29,7 @@ const PAGE_SIZE = 10;
 type ApartmentListProps = {
   navigation: any;
   search: string;
-  fetchData: (offset: number, pageSize: number) => Promise<RelationInfo[] | undefined>;
+  fetchData: (offset: number, pageSize: number) => Promise<RelationInfo[]>;
   isHistory: boolean;
 };
 
@@ -39,61 +41,32 @@ export default function ApartmentList({
 }: ApartmentListProps) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
-
-  // ---------- Data Handling ---------- //
-  const [relations, setRelations] = useState<RelationInfo[]>([]);
-
-  const [loading, setLoading] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [listInitialized, setListInitialized] = useState(false);
-
-  const fetchInitialData = useCallback(async () => {
-    setLoading(true);
-    setHasMore(true);
-    const apartmentsResponse = await fetchData(0, PAGE_SIZE);
-    if (apartmentsResponse) {
-      setRelations(apartmentsResponse);
-      if (apartmentsResponse.length < PAGE_SIZE) {
-        setHasMore(false);
-      }
-    }
-    setLoading(false);
-  }, [fetchData]);
-
-  const fetchMoreData = useCallback(async () => {
-    if (loading || loadingMore || !hasMore) return;
-
-    setLoadingMore(true);
-    const apartmentsResponse = await fetchData(relations.length, PAGE_SIZE);
-    if (apartmentsResponse) {
-      setRelations((prevData) => [...prevData, ...apartmentsResponse]);
-      if (apartmentsResponse.length < PAGE_SIZE) {
-        setHasMore(false);
-      }
-    }
-    setLoadingMore(false);
-  }, [relations.length, loading, loadingMore, fetchData, hasMore]);
+  const {
+    data: relations,
+    setData: setRelations,
+    loadingMore,
+    refresh,
+    fetchMore,
+    refreshing,
+  } = usePaginatedQuery<RelationInfo>(fetchData, PAGE_SIZE);
 
   const shouldRefetch = useSelector((state: RootState) => state.appState.shouldRefetchLiked);
 
   useFocusEffect(
     useCallback(() => {
       if (shouldRefetch) {
-        fetchInitialData();
+        refresh();
         store.dispatch(setShouldRefetchLiked(false));
       }
-    }, [fetchInitialData, shouldRefetch]),
+    }, [refresh, shouldRefetch]),
   );
 
-  // ---------- Data Filtering ---------- //
   const filteredRelations = relations.filter(
     (relation) =>
       relation.apt.name.toLowerCase().includes(search.toLowerCase()) ||
       relation.apt.location.toLowerCase().includes(search.toLowerCase()),
   );
 
-  // ---------- Deletion ---------- //
   const onPressDelete = (apartment_id: number) => {
     Alert.alert(
       'Confirm Deletion',
@@ -110,22 +83,20 @@ export default function ApartmentList({
   };
 
   async function handleDeleteRelation(apartment_id: number) {
-    setLoading(true);
     const deleted = await deleteRelation(apartment_id);
     if (deleted) {
-      setRelations((prevData) =>
-        prevData.filter((relation) => relation.apt.apartment_id !== apartment_id),
-      );
+      setRelations((prev) => prev.filter((relation) => relation.apt.apartment_id !== apartment_id));
     } else {
       Alert.alert('Error', 'Failed to delete the apartment from your likes.');
     }
-    setLoading(false);
   }
 
   return (
     <FlatList
       data={filteredRelations}
       keyExtractor={(relation) => relation.apt.name}
+      style={{ flex: 1 }}
+      contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}
       renderItem={({ item: relation }) => (
         <Swipeable
           renderLeftActions={(progress) => {
@@ -153,9 +124,9 @@ export default function ApartmentList({
             }>
             <ApartmentListItem
               title={relation.apt.name}
-              location={relation.apt.location}
               surface={relation.apt.surface}
               rent={relation.apt.rent}
+              location={relation.apt.location}
               imageUrl={relation.apt.image_thumbnail}
               relationType={isHistory ? relation.type : undefined}
             />
@@ -164,29 +135,19 @@ export default function ApartmentList({
       )}
       refreshControl={
         <RefreshControl
-          refreshing={loading}
+          refreshing={refreshing}
+          onRefresh={refresh}
           colors={[colors.primary]}
           tintColor={colors.primary}
-          onRefresh={fetchInitialData}
         />
       }
-      onLayout={() => {
-        setListInitialized(true);
-        console.log('List initialized');
-      }}
-      onEndReached={() => {
-        if (listInitialized) {
-          fetchMoreData();
-        }
-      }}
-      onEndReachedThreshold={0}
+      onEndReached={fetchMore}
+      onEndReachedThreshold={0.2}
       ListFooterComponent={
         loadingMore ? (
           <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 20 }} />
         ) : null
       }
-      contentContainerStyle={{ paddingBottom: 20 }}
-      keyboardShouldPersistTaps="handled"
     />
   );
 }
