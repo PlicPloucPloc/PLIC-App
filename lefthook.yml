@@ -5,5 +5,5 @@ pre-commit:
       glob: "*.{js,ts,jsx,tsx}"
       run: yarn eslint . --config eslint.full.config.mjs --max-warnings=0 {staged_files}
     typecheck:
-      glob: "*.{js,ts, jsx, tsx}"
+      glob: "*.{js,ts,jsx,tsx}"
       run: yarn tsc --noEmit
