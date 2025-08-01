@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
@@ -15,45 +15,42 @@ type ApartmentListItemProps = {
   relationType?: RELATION_TYPE;
 };
 
-export default function ApartmentListItem({
-  title,
-  surface,
-  rent,
-  location,
-  imageUrl,
-  relationType,
-}: ApartmentListItemProps) {
-  const colors = useThemeColors();
-  const styles = createStyles(colors);
+const ApartmentListItem = memo(
+  ({ title, surface, rent, location, imageUrl, relationType }: ApartmentListItemProps) => {
+    const colors = useThemeColors();
+    const styles = createStyles(colors);
 
-  return (
-    <View style={styles.likesContainer}>
-      <View style={styles.imageWrapper}>
-        <Image source={{ uri: imageUrl }} style={styles.image} />
-        {relationType && (
-          <View style={styles.iconOverlay}>
-            {relationType === 'LIKE' ? (
-              <Ionicons name="heart" size={16} color={colors.primary} />
-            ) : (
-              <Ionicons name="close" size={16} color="red" />
-            )}
-          </View>
-        )}
+    return (
+      <View style={styles.likesContainer}>
+        <View style={styles.imageWrapper}>
+          <Image source={{ uri: imageUrl }} style={styles.image} />
+          {relationType && (
+            <View style={styles.iconOverlay}>
+              {relationType === 'LIKE' ? (
+                <Ionicons name="heart" size={16} color={colors.primary} />
+              ) : (
+                <Ionicons name="close" size={16} color="red" />
+              )}
+            </View>
+          )}
+        </View>
+        <View style={styles.likesContent}>
+          <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>
+            {title}
+          </Text>
+          <Text numberOfLines={1} ellipsizeMode="tail">
+            {location}
+          </Text>
+          <Text numberOfLines={1} ellipsizeMode="tail">
+            {surface} m² / {rent} €
+          </Text>
+        </View>
       </View>
-      <View style={styles.likesContent}>
-        <Text numberOfLines={1} ellipsizeMode="tail" style={styles.title}>
-          {title}
-        </Text>
-        <Text numberOfLines={1} ellipsizeMode="tail">
-          {location}
-        </Text>
-        <Text numberOfLines={1} ellipsizeMode="tail">
-          {surface} m² / {rent} €
-        </Text>
-      </View>
-    </View>
-  );
-}
+    );
+  },
+);
+
+export default ApartmentListItem;
 
 const createStyles = (_: ColorTheme) =>
   StyleSheet.create({

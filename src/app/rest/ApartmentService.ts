@@ -1,14 +1,13 @@
+import { API_PAGE_SIZE } from '@app/config/constants.ts';
 import { ApartmentInfo } from '@app/definitions';
 
 import { alertOnError, apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { getApartmentImages, getApartmentThumbnail } from './S3Service.ts';
 
-const PAGE_SIZE = 10;
-
-export async function getApartmentsInfoPaginated(offset: number) {
+export async function getApartmentsInfoPaginated(offset: number, pageSize: number = API_PAGE_SIZE) {
   const response = await apiFetch(
-    Endpoints.APARTMENT.GET_INFO_PAGINATED(offset, PAGE_SIZE),
+    Endpoints.APARTMENT.GET_INFO_PAGINATED(offset, pageSize),
     {
       method: 'GET',
     },
@@ -26,16 +25,19 @@ export async function getApartmentsInfoPaginated(offset: number) {
   return apartments;
 }
 
-export async function getApartmentsNoRelationPaginated(offset: number) {
+export async function getApartmentsNoRelationPaginated(
+  offset: number,
+  pageSize: number = API_PAGE_SIZE,
+) {
   const response = await apiFetch(
-    Endpoints.APARTMENT.NO_RELATIONS_PAGINATED(offset, PAGE_SIZE),
+    Endpoints.APARTMENT.NO_RELATIONS_PAGINATED(offset, pageSize),
     {
       method: 'GET',
     },
     true,
   );
 
-  if (await alertOnError(response, 'Apartment', 'fetching apartments without relations')) return;
+  if (await alertOnError(response, 'Apartment', 'fetching apartments without relations')) return [];
 
   const apartments: ApartmentInfo[] = await response.json();
 

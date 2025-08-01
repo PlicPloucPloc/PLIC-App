@@ -4,6 +4,7 @@ import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-na
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo } from '@app/definitions';
 import { RELATION_TYPE } from '@app/definitions/rest/RelationService';
+import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
@@ -21,15 +22,9 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const ref = useRef<SwiperCardRefType>();
+  const swiperRef = useRef<SwiperCardRefType>();
 
-  // ============= Hooks ============= //
-  const [loading, setLoading] = useState(true);
   const [isContactingApi, setIsContactingApi] = useState(false);
-
-  const [swiperIndex, setSwiperIndex] = useState(0);
-  const apartmentsRef = useRef<ApartmentInfo[]>([]); // used to render the appart info
-  const [apartments, setApartments] = useState<ApartmentInfo[]>([]); // used to update the swiper
   const [allSwiped, setAllSwiped] = useState(false);
   const [apartmentInfo, setApartmentInfo] = useState<{
     title?: string;
@@ -38,35 +33,48 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     rent?: number;
   }>({});
 
-  const fetchData = useCallback(async () => {
-    setLoading(true);
-    const apartmentsResponse = await getApartmentsNoRelationPaginated(0);
-    if (!apartmentsResponse) return;
+  const fetchApartments = useCallback(
+    (offset: number) => getApartmentsNoRelationPaginated(offset),
+    [],
+  );
 
-    setApartments(apartmentsResponse);
-    apartmentsRef.current = apartmentsResponse;
+  const {
+    data: apartments,
+    refreshing,
+    fetchMore,
+  } = usePaginatedQuery<ApartmentInfo>(fetchApartments);
 
-    setLoading(false);
-  }, []);
+  const onIndexChange = useCallback(
+    (index: number) => {
+      if (index >= apartments.length) {
+        return;
+      }
 
+      const PREFETCH_OFFSET = 3; // Number of remaining cards before prefetching
+      if (index >= apartments.length - PREFETCH_OFFSET) {
+        fetchMore(PREFETCH_OFFSET);
+      }
+
+      const apartment = apartments[index];
+      setApartmentInfo({
+        title: apartment.name,
+        surface: apartment.surface,
+        location: apartment.location,
+        rent: apartment.rent,
+      });
+    },
+    [apartments, fetchMore],
+  );
+
+  // ===============tmp
   useEffect(() => {
-    fetchData();
-  }, [fetchData]);
-
-  const onIndexChange = useCallback((index: number) => {
-    const currentApartments = apartmentsRef.current;
-    setSwiperIndex(index);
-
-    if (index >= currentApartments.length) return;
-
-    const apartment = currentApartments[index];
-    setApartmentInfo({
-      title: apartment.name,
-      surface: apartment.surface,
-      location: apartment.location,
-      rent: apartment.rent,
-    });
-  }, []);
+    console.log('apartments state changed: ', apartments.length, 'length');
+    console.log(
+      'apartments ids: ',
+      apartments.map((apartment) => apartment.apartment_id),
+    );
+  }, [apartments]);
+  // ===============tmp
 
   async function handlePostRelation(apartmentId: number, type: RELATION_TYPE) {
     setIsContactingApi(true);
@@ -89,14 +97,14 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     setIsContactingApi(false);
   }
 
-  if (loading) {
+  if (refreshing) {
     return <Loader loading={true} />;
   }
 
   return (
     <View style={styles.container}>
+      <Loader loading={isContactingApi} invisible={true} />
       <View style={styles.swiperContainer}>
-        <Loader loading={isContactingApi} invisible={true} />
         {/* End screen */}
         {allSwiped && (
           <View style={styles.endScreenContainer}>
@@ -119,20 +127,9 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
         )}
 
         {/* Swiper */}
-        <TouchableWithoutFeedback
-          style={[styles.touchableContainer, allSwiped ? { width: '0%', height: '0%' } : {}]}
-          onPress={() =>
-            navigation.navigate('SharedStack', {
-              animation: 'slide_from_bottom',
-              screen: 'ApartmentDetails',
-              params: {
-                apartment: apartmentsRef.current[swiperIndex],
-                enableRelationButtons: true,
-              },
-            })
-          }>
+        <View style={[styles.touchableContainer, allSwiped ? { width: '0%', height: '0%' } : {}]}>
           <Swiper
-            ref={ref}
+            ref={swiperRef}
             cardStyle={styles.cardStyle}
             data={apartments}
             disableBottomSwipe={true}
@@ -147,22 +144,35 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             }}
             onSwipeRight={() => {
               handlePostRelation(
-                apartmentsRef.current[swiperIndex].apartment_id,
+                apartments[swiperRef.current?.activeIndex || 0].apartment_id,
                 RELATION_TYPE.LIKE,
               );
             }}
             onSwipeLeft={() => {
               handlePostRelation(
-                apartmentsRef.current[swiperIndex].apartment_id,
+                apartments[swiperRef.current?.activeIndex || 0].apartment_id,
                 RELATION_TYPE.DISLIKE,
               );
             }}
             renderCard={(apartment: ApartmentInfo) => (
-              <Image
-                source={{ uri: apartment.image_thumbnail }}
-                style={styles.renderCardImage}
-                resizeMode="cover"
-              />
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  console.log('Tapped on swiper, navigating to details...');
+                  navigation.navigate('SharedStack', {
+                    animation: 'slide_from_bottom',
+                    screen: 'ApartmentDetails',
+                    params: {
+                      apartment: apartments[swiperRef.current?.activeIndex || 0],
+                      enableRelationButtons: true,
+                    },
+                  });
+                }}>
+                <Image
+                  source={{ uri: apartment.image_thumbnail }}
+                  style={styles.renderCardImage}
+                  resizeMode="cover"
+                />
+              </TouchableWithoutFeedback>
             )}
             OverlayLabelRight={() => (
               <View style={[styles.overlayLabelContainer, { backgroundColor: colors.primary }]}>
@@ -173,7 +183,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
               <View style={[styles.overlayLabelContainer, { backgroundColor: 'red' }]} />
             )}
           />
-        </TouchableWithoutFeedback>
+        </View>
       </View>
 
       {/* Apartment Info */}
@@ -196,17 +206,17 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
       {/* Buttons */}
       <View style={styles.buttonsContainer}>
         <SwipeButton
-          disabled={swiperIndex <= 0}
+          disabled={swiperRef.current && swiperRef.current?.activeIndex <= 0}
           style={styles.button}
           onPress={() => {
             if (isContactingApi) return;
             if (allSwiped) {
               setAllSwiped(false);
             }
-            console.log(swiperIndex);
-            handleDeleteRelation(apartmentsRef.current[swiperIndex - 1].apartment_id);
+            console.log(swiperRef.current?.activeIndex || 0);
+            handleDeleteRelation(apartments[swiperRef.current?.activeIndex || 0 - 1].apartment_id);
 
-            ref.current?.swipeBack();
+            swiperRef.current?.swipeBack();
           }}>
           <Ionicons name="arrow-undo" size={ICON_SIZE - 10} color={colors.contrast} />
         </SwipeButton>
@@ -215,7 +225,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
           style={styles.button}
           onPress={() => {
             if (isContactingApi) return;
-            ref.current?.swipeLeft();
+            swiperRef.current?.swipeLeft();
           }}>
           <Ionicons name="close" size={ICON_SIZE} color="red" />
         </SwipeButton>
@@ -224,7 +234,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
           disabled={allSwiped}
           onPress={() => {
             if (isContactingApi) return;
-            ref.current?.swipeRight();
+            swiperRef.current?.swipeRight();
           }}>
           <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
         </SwipeButton>
@@ -251,6 +261,8 @@ const createStyles = (colors: ColorTheme) =>
 
     swiperContainer: {
       flex: 6,
+      width: '100%',
+      height: '100%',
       justifyContent: 'center',
       alignItems: 'center',
       zIndex: 1,

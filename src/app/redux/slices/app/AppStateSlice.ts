@@ -4,12 +4,14 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export interface IAppState {
   root: RootEnum;
-  shouldRefetchLiked: boolean;
+  shouldRefetchLikeList: boolean;
+  shouldRefetchHistory: boolean;
 }
 
 const initialState: IAppState = {
   root: RootEnum.ROOT_AUTH,
-  shouldRefetchLiked: false,
+  shouldRefetchLikeList: false,
+  shouldRefetchHistory: false,
 };
 
 export const appStateSlice = createSlice({
@@ -19,12 +21,15 @@ export const appStateSlice = createSlice({
     setRoot: (state, action: PayloadAction<RootEnum>) => {
       state.root = action.payload;
     },
-    setShouldRefetchLiked: (state, action: PayloadAction<boolean>) => {
-      state.shouldRefetchLiked = action.payload;
+    setShouldRefetchLikeList: (state, action: PayloadAction<boolean>) => {
+      state.shouldRefetchLikeList = action.payload;
+    },
+    setShouldRefetchHistory: (state, action: PayloadAction<boolean>) => {
+      state.shouldRefetchHistory = action.payload;
     },
   },
 });
 
-export const { setRoot, setShouldRefetchLiked } = appStateSlice.actions;
+export const { setRoot, setShouldRefetchLikeList, setShouldRefetchHistory } = appStateSlice.actions;
 
 export default appStateSlice.reducer;

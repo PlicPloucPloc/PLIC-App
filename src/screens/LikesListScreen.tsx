@@ -29,7 +29,7 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
       <ApartmentList
         navigation={navigation}
         search={search}
-        fetchData={(offset, pageSize) => getLikedApartmentsPaginated(true, offset, pageSize)}
+        fetchData={(offset) => getLikedApartmentsPaginated(true, offset)}
         isHistory={false}
       />
     </View>

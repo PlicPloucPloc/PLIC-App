@@ -29,7 +29,7 @@ export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'Hi
       <ApartmentList
         navigation={navigation}
         search={search}
-        fetchData={(offset, pageSize) => getAllRelationsPaginated(offset, pageSize)}
+        fetchData={(offset) => getAllRelationsPaginated(offset)}
         isHistory={true}
       />
     </View>

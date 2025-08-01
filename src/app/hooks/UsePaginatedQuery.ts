@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
 
-type FetchFunction<T> = (offset: number, limit: number) => Promise<T[]>;
+import { API_PAGE_SIZE } from '@app/config/constants';
 
-export function usePaginatedQuery<T>(fetchFunction: FetchFunction<T>, pageSize: number) {
+export function usePaginatedQuery<T>(fetchFunction: (offset: number) => Promise<T[]>) {
   const [data, setData] = useState<T[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -12,29 +12,33 @@ export function usePaginatedQuery<T>(fetchFunction: FetchFunction<T>, pageSize: 
     setRefreshing(true);
     setHasMore(true);
     try {
-      const result = await fetchFunction(0, pageSize);
+      const result = await fetchFunction(0);
       setData(result);
-      setHasMore(result.length === pageSize);
+      setHasMore(result.length === API_PAGE_SIZE);
     } catch (err) {
       console.error(err);
     } finally {
       setRefreshing(false);
     }
-  }, [fetchFunction, pageSize]);
+  }, [fetchFunction]);
 
-  const fetchMore = useCallback(async () => {
-    if (loadingMore || refreshing || !hasMore) return;
-    setLoadingMore(true);
-    try {
-      const result = await fetchFunction(data.length, pageSize);
-      setData((prev) => [...prev, ...result]);
-      if (result.length < pageSize) setHasMore(false);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingMore(false);
-    }
-  }, [loadingMore, refreshing, hasMore, fetchFunction, data.length, pageSize]);
+  const fetchMore = useCallback(
+    async (offset?: number) => {
+      if (loadingMore || refreshing || !hasMore) return;
+      setLoadingMore(true);
+      try {
+        const offsetValue = typeof offset === 'number' ? offset : data.length;
+        const result = await fetchFunction(offsetValue);
+        setData((prev) => [...prev, ...result]);
+        if (result.length < API_PAGE_SIZE) setHasMore(false);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoadingMore(false);
+      }
+    },
+    [loadingMore, refreshing, hasMore, fetchFunction, data.length],
+  );
 
   useEffect(() => {
     fetchInitialData();
@@ -45,7 +49,6 @@ export function usePaginatedQuery<T>(fetchFunction: FetchFunction<T>, pageSize: 
     setData,
     loadingMore,
     refreshing,
-    hasMore,
     fetchMore,
     refresh: fetchInitialData,
   };

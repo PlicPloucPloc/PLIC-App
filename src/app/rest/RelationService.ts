@@ -1,16 +1,15 @@
 import { Alert } from 'react-native';
 
+import { API_PAGE_SIZE } from '@app/config/constants.ts';
 import { RELATION_TYPE, RelationInfo } from '@app/definitions/rest/RelationService';
-import { setShouldRefetchLiked } from '@app/redux/slices/index.ts';
+import { setShouldRefetchHistory, setShouldRefetchLikeList } from '@app/redux/slices/index.ts';
 import store from '@app/redux/Store.ts';
 
 import { alertOnError, apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { getApartmentThumbnail } from './S3Service.ts';
 
-const PAGE_SIZE = 10;
-
-export async function getAllRelationsPaginated(offset: number, pageSize: number = PAGE_SIZE) {
+export async function getAllRelationsPaginated(offset: number, pageSize: number = API_PAGE_SIZE) {
   const response = await apiFetch(
     Endpoints.RELATIONS.GET_ALL_PAGINATED(offset, pageSize),
     {
@@ -35,7 +34,7 @@ export async function getAllRelationsPaginated(offset: number, pageSize: number 
 export async function getLikedApartmentsPaginated(
   isFilterColoc: boolean,
   offset: number,
-  pageSize: number = PAGE_SIZE,
+  pageSize: number = API_PAGE_SIZE,
 ) {
   const response = await apiFetch(
     Endpoints.RELATIONS.GET_LIKES_PAGINATED(isFilterColoc, offset, pageSize),
@@ -58,7 +57,10 @@ export async function getLikedApartmentsPaginated(
   return relationsInfo;
 }
 
-export async function getDislikedApartmentPaginated(offset: number, pageSize: number = PAGE_SIZE) {
+export async function getDislikedApartmentPaginated(
+  offset: number,
+  pageSize: number = API_PAGE_SIZE,
+) {
   const response = await apiFetch(
     Endpoints.RELATIONS.GET_DISLIKES_PAGINATED(offset, pageSize),
     {
@@ -100,7 +102,7 @@ export async function postRelation(apartmentId: number, type: RELATION_TYPE) {
     Alert.alert('Relation Error', errorData.message || 'An error occurred while posting relation.');
   }
 
-  store.dispatch(setShouldRefetchLiked(true));
+  updateShouldRefetchStates(type === RELATION_TYPE.LIKE);
 
   return true;
 }
@@ -117,7 +119,7 @@ export async function updateRelation(apartmentId: number, type: RELATION_TYPE) {
 
   if (await alertOnError(response, 'Relation', 'updating relation')) return false;
 
-  store.dispatch(setShouldRefetchLiked(true));
+  updateShouldRefetchStates(true);
 
   return true;
 }
@@ -136,7 +138,12 @@ export async function deleteRelation(apartmentId: number) {
 
   if (await alertOnError(response, 'Relation', 'deleting relation')) return false;
 
-  store.dispatch(setShouldRefetchLiked(true));
+  updateShouldRefetchStates(true);
 
   return true;
 }
+
+const updateShouldRefetchStates = (shouldRefreshLikeList: boolean) => {
+  store.dispatch(setShouldRefetchLikeList(shouldRefreshLikeList));
+  store.dispatch(setShouldRefetchHistory(true));
+};
