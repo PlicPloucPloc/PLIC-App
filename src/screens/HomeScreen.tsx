@@ -50,7 +50,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
         return;
       }
 
-      const PREFETCH_OFFSET = 3; // Number of remaining cards before prefetching
+      const PREFETCH_OFFSET = 3; // Number of remaining cards before fetching more data
       if (index >= apartments.length - PREFETCH_OFFSET) {
         fetchMore(PREFETCH_OFFSET);
       }
@@ -65,16 +65,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     },
     [apartments, fetchMore],
   );
-
-  // ===============tmp
-  useEffect(() => {
-    console.log('apartments state changed: ', apartments.length, 'length');
-    console.log(
-      'apartments ids: ',
-      apartments.map((apartment) => apartment.apartment_id),
-    );
-  }, [apartments]);
-  // ===============tmp
 
   async function handlePostRelation(apartmentId: number, type: RELATION_TYPE) {
     setIsContactingApi(true);
@@ -132,6 +122,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             ref={swiperRef}
             cardStyle={styles.cardStyle}
             data={apartments}
+            prerenderItems={5}
             disableBottomSwipe={true}
             disableTopSwipe={true}
             onIndexChange={onIndexChange}
@@ -140,7 +131,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
                 setApartmentInfo({});
                 setAllSwiped(true);
               }, SWIPE_DELAY);
-              // console.log('All cards swiped');
             }}
             onSwipeRight={() => {
               handlePostRelation(
@@ -157,7 +147,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             renderCard={(apartment: ApartmentInfo) => (
               <TouchableWithoutFeedback
                 onPress={() => {
-                  console.log('Tapped on swiper, navigating to details...');
                   navigation.navigate('SharedStack', {
                     animation: 'slide_from_bottom',
                     screen: 'ApartmentDetails',
@@ -175,12 +164,14 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
               </TouchableWithoutFeedback>
             )}
             OverlayLabelRight={() => (
-              <View style={[styles.overlayLabelContainer, { backgroundColor: colors.primary }]}>
-                <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
+              <View style={[styles.overlayLabelContainer, { backgroundColor: colors.secondary }]}>
+                <Ionicons name="heart" size={150} color={colors.primary} />
               </View>
             )}
             OverlayLabelLeft={() => (
-              <View style={[styles.overlayLabelContainer, { backgroundColor: 'red' }]} />
+              <View style={[styles.overlayLabelContainer, { backgroundColor: '#761717' }]}>
+                <Ionicons name="close" size={150} color={'#FF0000'} />
+              </View>
             )}
           />
         </View>
@@ -213,8 +204,9 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             if (allSwiped) {
               setAllSwiped(false);
             }
-            console.log(swiperRef.current?.activeIndex || 0);
-            handleDeleteRelation(apartments[swiperRef.current?.activeIndex || 0 - 1].apartment_id);
+            handleDeleteRelation(
+              apartments[(swiperRef.current?.activeIndex || 1) - 1].apartment_id,
+            );
 
             swiperRef.current?.swipeBack();
           }}>
@@ -284,8 +276,10 @@ const createStyles = (colors: ColorTheme) =>
     },
     overlayLabelContainer: {
       flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
       borderRadius: 15,
-      opacity: 0.5,
+      opacity: 0.8,
     },
 
     textContainer: {

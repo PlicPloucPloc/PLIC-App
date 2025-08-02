@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { ActivityIndicator, Alert, FlatList, RefreshControl } from 'react-native';
 
 import { RelationInfo } from '@app/definitions/rest/RelationService';
@@ -35,6 +35,16 @@ export default function ApartmentList({
     fetchMore,
   } = usePaginatedQuery<RelationInfo>(fetchData);
 
+  const filteredRelations = useMemo(() => {
+    if (!search) return relations;
+    const lowerSearch = search.toLowerCase();
+    return relations.filter(
+      (r) =>
+        r.apt.name.toLowerCase().includes(lowerSearch) ||
+        r.apt.location.toLowerCase().includes(lowerSearch),
+    );
+  }, [relations, search]);
+
   const shouldRefetch = useSelector((state: RootState) =>
     isHistory ? state.appState.shouldRefetchHistory : state.appState.shouldRefetchLikeList,
   );
@@ -50,12 +60,6 @@ export default function ApartmentList({
         }
       }
     }, [refresh, shouldRefetch, isHistory]),
-  );
-
-  const filteredRelations = relations.filter(
-    (relation) =>
-      relation.apt.name.toLowerCase().includes(search.toLowerCase()) ||
-      relation.apt.location.toLowerCase().includes(search.toLowerCase()),
   );
 
   const handleDeleteRelation = useCallback(

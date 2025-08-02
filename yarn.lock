@@ -1130,10 +1130,10 @@
   dependencies:
     "@types/hammerjs" "^2.0.36"
 
-"@ellmos/rn-swiper-list@1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@ellmos/rn-swiper-list/-/rn-swiper-list-1.1.0.tgz#be53b9662e032fedc473073c96a0b21975b93414"
-  integrity sha512-dBltS4I8i7D9qe//uzr77U6uvVqIQFB7d2KVua/06ihnZFuixnjY0ljFLAUN5QLg/I7zWvzI7VukrSQGjkjyJQ==
+"@ellmos/rn-swiper-list@1.1.1":
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/@ellmos/rn-swiper-list/-/rn-swiper-list-1.1.1.tgz#394e49f320dd78dd374b3c3bed521d2fc4c40eaf"
+  integrity sha512-XA3bAo0NiLV6b2LrdBySMdST+N+4UQSUSOcMeXdNv52Mq5vOdCfT3opr6TgUihZsWcHm+0tmaUgEzfrUjwm59A==
   dependencies:
     react-native-gesture-handler "*"
     react-native-reanimated "*"
