@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo } from '@app/definitions';
@@ -183,23 +183,23 @@ export default function ApartmentDetailsScreen({
           <Divider />
 
           <View style={styles.buttonsContainer}>
-            {/* <SwipeButton style={styles.button} onPress={navigation.goBack}> */}
-            {/*   <Ionicons name="arrow-back" size={ICON_SIZE - 10} color={colors.contrast} /> */}
-            {/* </SwipeButton> */}
-            {/* <SwipeButton */}
-            {/*   style={styles.button} */}
-            {/*   onPress={() => { */}
-            {/*     handlePostRelation(apartment.apartment_id, RELATION_TYPE.DISLIKE); */}
-            {/*   }}> */}
-            {/*   <Ionicons name="close" size={ICON_SIZE} color="red" /> */}
-            {/* </SwipeButton> */}
-            {/* <SwipeButton */}
-            {/*   style={styles.button} */}
-            {/*   onPress={() => { */}
-            {/*     handlePostRelation(apartment.apartment_id, RELATION_TYPE.LIKE); */}
-            {/*   }}> */}
-            {/*   <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} /> */}
-            {/* </SwipeButton> */}
+            <SwipeButton style={styles.button} onPress={navigation.goBack}>
+              <Ionicons name="arrow-back" size={ICON_SIZE - 10} color={colors.contrast} />
+            </SwipeButton>
+            <SwipeButton
+              style={styles.button}
+              onPress={() => {
+                handlePostRelation(apartment.apartment_id, RELATION_TYPE.DISLIKE);
+              }}>
+              <Ionicons name="close" size={ICON_SIZE} color="red" />
+            </SwipeButton>
+            <SwipeButton
+              style={styles.button}
+              onPress={() => {
+                handlePostRelation(apartment.apartment_id, RELATION_TYPE.LIKE);
+              }}>
+              <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
+            </SwipeButton>
             <SwipeButton
               style={styles.button}
               onPress={() =>

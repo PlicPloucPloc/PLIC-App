@@ -13,7 +13,7 @@ interface ChatHeaderProps {
   onBackPress: () => void;
 }
 
-export default function MessageHeader({ user, onBackPress }: ChatHeaderProps) {
+export default function MessageHeader({ user }: ChatHeaderProps) {
   return (
     <View style={styles.container}>
       <Image source={{ uri: user.avatar }} style={styles.avatar} />

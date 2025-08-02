@@ -110,7 +110,7 @@ export default function ImageGalleryScreen({
   );
 }
 
-const createStyles = (colors: ColorTheme) =>
+const createStyles = (_: ColorTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,

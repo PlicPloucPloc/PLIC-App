@@ -8,6 +8,11 @@ import pluginExpo from 'eslint-plugin-expo';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
 import tsParser from '@typescript-eslint/parser';
+import tsPlugin from '@typescript-eslint/eslint-plugin';
+import globals from 'globals';
+
+const cleanGlobals = (obj) =>
+  Object.fromEntries(Object.entries(obj).map(([key, val]) => [key.trim(), val]));
 
 export const baseConfig = defineConfig([
   {
@@ -27,6 +32,11 @@ export const baseConfig = defineConfig([
         sourceType: 'module',
         project: './tsconfig.json',
       },
+      globals: {
+        ...cleanGlobals(globals.node),
+        ...cleanGlobals(globals.browser),
+        JSX: true,
+      },
     },
     plugins: {
       import: pluginImport,
@@ -34,6 +44,7 @@ export const baseConfig = defineConfig([
       expo: pluginExpo,
       react: pluginReact,
       'react-hooks': pluginReactHooks,
+      typescript: tsPlugin,
     },
     settings: {
       react: {
@@ -43,6 +54,8 @@ export const baseConfig = defineConfig([
     rules: {
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
+      'prefer-const': 'error',
+      'no-undef': 'error',
     },
   },
 ]);

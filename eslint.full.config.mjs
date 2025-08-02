@@ -33,6 +33,15 @@ const overrideRules = {
       },
     },
   ],
+  'no-unused-vars': 'off',
+  'typescript/no-unused-vars': [
+    'error',
+    {
+      argsIgnorePattern: '^_',
+      varsIgnorePattern: '^_',
+      ignoreRestSiblings: true,
+    },
+  ],
 };
 
 const fullConfig = baseConfig.map((entry) => {
