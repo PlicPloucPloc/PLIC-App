@@ -2,6 +2,7 @@ import { Alert } from 'react-native';
 
 import 'react-native-get-random-values';
 
+import { API_TIMEOUT } from '@app/config/constants';
 import { RootEnum, TokenResponse } from '@app/definitions';
 import { setRoot } from '@app/redux/slices';
 import store from '@app/redux/Store';
@@ -11,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import Endpoints from './Endpoints';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL;
-const TIMEOUT = parseInt(process.env.EXPO_PUBLIC_API_TIMEOUT || '5000');
+const TIMEOUT = API_TIMEOUT;
 
 /**
  * Fetches data from the API with optional authentication.
