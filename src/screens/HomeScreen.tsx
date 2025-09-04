@@ -6,14 +6,18 @@ import { ApartmentInfo } from '@app/definitions';
 import { RELATION_TYPE } from '@app/definitions/rest/RelationService';
 import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { setSwipeDirection } from '@app/redux/slices';
+import store, { RootState } from '@app/redux/Store';
 import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
 import Loader from '@components/Loader';
-import { Swiper, type SwiperCardRefType } from '@ellmos/rn-swiper-list';
+import { SwipeDirection, Swiper, type SwiperCardRefType } from '@ellmos/rn-swiper-list';
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
+import { useFocusEffect } from '@react-navigation/native';
 import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
 
 const ICON_SIZE = 38;
 const SWIPE_DELAY = 300;
@@ -23,9 +27,27 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   const styles = createStyles(colors);
 
   const swiperRef = useRef<SwiperCardRefType>();
+  const swipeDirection = useSelector((state: RootState) => state.appState.swipeDirection);
 
-  const [isContactingApi, setIsContactingApi] = useState(false);
+  useFocusEffect(
+    useCallback(() => {
+      if (swipeDirection) {
+        store.dispatch(setSwipeDirection(undefined));
+
+        setTimeout(() => {
+          // Delay to wait for the screen to be visible
+          if (swipeDirection === SwipeDirection.RIGHT) {
+            swiperRef.current?.swipeRight();
+          } else if (swipeDirection === SwipeDirection.LEFT) {
+            swiperRef.current?.swipeLeft();
+          }
+        }, 100);
+      }
+    }, [swipeDirection]),
+  );
+
   const [allSwiped, setAllSwiped] = useState(false);
+  const [backButtonDisabled, setBackButtonDisabled] = useState(false);
   const [apartmentInfo, setApartmentInfo] = useState<{
     title?: string;
     surface?: number;
@@ -50,6 +72,10 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
         return;
       }
 
+      if (index == 0) {
+        setBackButtonDisabled(true);
+      }
+
       const PREFETCH_OFFSET = 3; // Number of remaining cards before fetching more data
       if (index >= apartments.length - PREFETCH_OFFSET) {
         fetchMore(PREFETCH_OFFSET);
@@ -67,8 +93,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   );
 
   async function handlePostRelation(apartmentId: number, type: RELATION_TYPE) {
-    setIsContactingApi(true);
-
     const hasPostedSuccesfully = await postRelation(apartmentId, type);
     if (!hasPostedSuccesfully) {
       Alert.alert(
@@ -78,13 +102,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
       );
       return;
     }
-    setIsContactingApi(false);
-  }
-
-  async function handleDeleteRelation(apartmentId: number) {
-    setIsContactingApi(true);
-    await deleteRelation(apartmentId);
-    setIsContactingApi(false);
   }
 
   if (refreshing) {
@@ -93,7 +110,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
   return (
     <View style={styles.container}>
-      <Loader loading={isContactingApi} invisible={true} />
       <View style={styles.swiperContainer}>
         {/* End screen */}
         {allSwiped && (
@@ -123,6 +139,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             cardStyle={styles.cardStyle}
             data={apartments}
             prerenderItems={5}
+            swipeVelocityThreshold={1200}
             disableBottomSwipe={true}
             disableTopSwipe={true}
             onIndexChange={onIndexChange}
@@ -137,12 +154,14 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
                 apartments[swiperRef.current?.activeIndex || 0].apartment_id,
                 RELATION_TYPE.LIKE,
               );
+              setBackButtonDisabled(false);
             }}
             onSwipeLeft={() => {
               handlePostRelation(
                 apartments[swiperRef.current?.activeIndex || 0].apartment_id,
                 RELATION_TYPE.DISLIKE,
               );
+              setBackButtonDisabled(false);
             }}
             renderCard={(apartment: ApartmentInfo) => (
               <TouchableWithoutFeedback
@@ -197,44 +216,35 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
       {/* Buttons */}
       <View style={styles.buttonsContainer}>
         <SwipeButton
-          disabled={swiperRef.current && swiperRef.current?.activeIndex <= 0}
+          disabled={backButtonDisabled}
           style={styles.button}
           onPress={() => {
-            if (isContactingApi) return;
-            if (allSwiped) {
-              setAllSwiped(false);
-            }
-            handleDeleteRelation(
-              apartments[(swiperRef.current?.activeIndex || 1) - 1].apartment_id,
-            );
+            const currentIndex = swiperRef.current?.activeIndex || 0;
+            if (currentIndex <= 0) return;
+
+            deleteRelation(apartments[currentIndex - 1].apartment_id);
 
             swiperRef.current?.swipeBack();
+            setBackButtonDisabled(true);
           }}>
           <Ionicons name="arrow-undo" size={ICON_SIZE - 10} color={colors.contrast} />
         </SwipeButton>
         <SwipeButton
           disabled={allSwiped}
           style={styles.button}
-          onPress={() => {
-            if (isContactingApi) return;
-            swiperRef.current?.swipeLeft();
-          }}>
+          onPress={() => swiperRef.current?.swipeLeft()}>
           <Ionicons name="close" size={ICON_SIZE} color="red" />
         </SwipeButton>
         <SwipeButton
           style={styles.button}
           disabled={allSwiped}
-          onPress={() => {
-            if (isContactingApi) return;
-            swiperRef.current?.swipeRight();
-          }}>
+          onPress={() => swiperRef.current?.swipeRight()}>
           <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
         </SwipeButton>
         <SwipeButton
           style={styles.button}
           disabled={allSwiped}
           onPress={() => {
-            if (isContactingApi) return;
             Alert.alert('Chat not implemented yet');
           }}>
           <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />

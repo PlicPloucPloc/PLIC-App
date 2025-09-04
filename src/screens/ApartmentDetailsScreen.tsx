@@ -3,14 +3,15 @@ import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react
 
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo } from '@app/definitions';
-import { RELATION_TYPE } from '@app/definitions/rest/RelationService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { setSwipeDirection } from '@app/redux/slices';
+import store from '@app/redux/Store';
 import { getApartmentInfoById } from '@app/rest/ApartmentService';
-import { postRelation } from '@app/rest/RelationService';
 import { getApartmentImages } from '@app/rest/S3Service.ts';
 import { Images } from '@assets/index';
 import SwipeButton from '@components/ActionButton';
 import Loader from '@components/Loader';
+import { SwipeDirection } from '@ellmos/rn-swiper-list';
 import { Ionicons } from '@expo/vector-icons';
 import { SharedStackScreenProps } from '@navigation/Types';
 import { Image } from 'expo-image';
@@ -51,7 +52,6 @@ export default function ApartmentDetailsScreen({
   const styles = createStyles(colors);
 
   const [loading, setLoading] = useState(true);
-  const [isContactingApi, setIsContactingApi] = useState(false);
   const [apartment, setApartment] = useState<ApartmentInfo>();
   const [showFullDescription, setShowFullDescription] = useState(false);
   const MAX_LINES = 4;
@@ -81,19 +81,11 @@ export default function ApartmentDetailsScreen({
     })();
   }, [route.params]);
 
-  async function handlePostRelation(apartmentId: number, relationType: RELATION_TYPE) {
-    setIsContactingApi(true);
-    await postRelation(apartmentId, relationType);
-    navigation.goBack();
-    setIsContactingApi(false);
-  }
-
   if (loading || !apartment) {
     return <Loader loading={true} />;
   }
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
-      <Loader loading={isContactingApi} />
       <View style={styles.pagerWrapper}>
         <PagerView
           style={styles.pagerView}
@@ -189,14 +181,16 @@ export default function ApartmentDetailsScreen({
             <SwipeButton
               style={styles.button}
               onPress={() => {
-                handlePostRelation(apartment.apartment_id, RELATION_TYPE.DISLIKE);
+                store.dispatch(setSwipeDirection(SwipeDirection.LEFT));
+                navigation.goBack();
               }}>
               <Ionicons name="close" size={ICON_SIZE} color="red" />
             </SwipeButton>
             <SwipeButton
               style={styles.button}
               onPress={() => {
-                handlePostRelation(apartment.apartment_id, RELATION_TYPE.LIKE);
+                store.dispatch(setSwipeDirection(SwipeDirection.RIGHT));
+                navigation.goBack();
               }}>
               <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
             </SwipeButton>
