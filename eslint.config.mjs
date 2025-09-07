@@ -35,6 +35,7 @@ export const baseConfig = defineConfig([
       globals: {
         ...cleanGlobals(globals.node),
         ...cleanGlobals(globals.browser),
+        NodeJS: true,
         JSX: true,
       },
     },

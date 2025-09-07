@@ -35,13 +35,13 @@ export default function LoginScreen(_: AuthStackScreenProps<'Login'>) {
   const [password, setPassword] = useState('');
 
   async function handleLogin() {
-    var emailValidation = checkEmail(email);
+    const emailValidation = checkEmail(email);
     if (emailValidation) {
       Alert.alert('Error', emailValidation);
       return;
     }
 
-    var passwordValidation = checkPassword(password);
+    const passwordValidation = checkPassword(password);
     if (passwordValidation) {
       Alert.alert('Error', passwordValidation);
       return;

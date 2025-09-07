@@ -1,29 +1,75 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { RootState } from '@app/redux/Store';
+import { resendVerificationEmail } from '@app/rest/UserService';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
 import { Ionicons } from '@expo/vector-icons';
 import { RegisterStackScreenProps } from '@navigation/Types';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { useSelector } from 'react-redux';
 
 export default function RegisterSuccessfulScreen({
   navigation,
 }: RegisterStackScreenProps<'Successful'>) {
   const styles = createStyles(useThemeColors());
+  const authState = useSelector((state: RootState) => state.authState);
+
+  const [cooldown, setCooldown] = useState(0);
+
+  async function handleResendEmail() {
+    setCooldown(60);
+
+    const emailResent = await resendVerificationEmail({
+      email: authState.email,
+    });
+    if (emailResent) {
+      Alert.alert('Success', 'Verification email resent. Please check your inbox.');
+    } else {
+      setCooldown(0);
+    }
+  }
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (cooldown > 0) {
+      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+    }
+    return () => clearTimeout(timer);
+  }, [cooldown]);
 
   return (
     <View style={styles.container}>
-      <View style={styles.messageContainer}>
+      <View style={styles.header}>
         <Ionicons name="mail-unread" size={100} color={'green'} />
         <Text style={styles.title}>Account created!</Text>
-        <Text style={styles.message}>
-          We've sent you a confirmation email. Please click the link in the email to verify your
-          registration.
-        </Text>
-        <Text style={styles.message}>After verifying, you can log in with your credentials.</Text>
+        <Text style={styles.subtitle}>Welcome aboard 🎉</Text>
+      </View>
 
+      <View style={styles.body}>
+        <Text style={styles.message}>We’ve sent a confirmation email to:</Text>
+        <Text style={styles.email}>{authState.email}</Text>
+        <Text style={[styles.message, { marginTop: 20 }]}>
+          Please click the link in the email to verify your registration. Once verified, you can log
+          in with your credentials.
+        </Text>
+
+        <View style={styles.resendEmail}>
+          <Text style={styles.message}>Didn't receive the email? </Text>
+          {cooldown > 0 ? (
+            <Text style={styles.cooldownText}>Resend in {cooldown}s</Text>
+          ) : (
+            <TouchableOpacity onPress={handleResendEmail}>
+              <Text style={styles.resendEmailLink}>Resend</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
+      <View style={styles.buttonContainer}>
         <AuthStackButton
           title="Go to Login"
           onPress={() => {
@@ -44,12 +90,6 @@ export default function RegisterSuccessfulScreen({
             });
           }}
         />
-        <AuthStackButton
-          title="Resend email"
-          onPress={() => {
-            Alert.alert('Feature not implemented', 'This feature is not yet available.');
-          }}
-        />
       </View>
 
       <BackgroundBuildings />
@@ -64,23 +104,67 @@ const createStyles = (colors: ColorTheme) =>
       justifyContent: 'center',
       backgroundColor: colors.background,
     },
-    messageContainer: {
-      flex: 3,
+
+    header: {
+      flex: 2,
       alignItems: 'center',
-      justifyContent: 'space-evenly',
-      paddingTop: 50,
-      paddingHorizontal: 30,
-      marginHorizontal: 16,
+      justifyContent: 'flex-end',
+      paddingTop: 60,
     },
     title: {
       fontSize: 28,
       fontWeight: 'bold',
-      textAlign: 'center',
       color: colors.textPrimary,
+      textAlign: 'center',
+      marginTop: 12,
+    },
+    subtitle: {
+      fontSize: 18,
+      color: colors.textSecondary,
+      textAlign: 'center',
+      marginTop: 2,
+    },
+
+    body: {
+      flex: 2,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: 10,
+      marginTop: 20,
     },
     message: {
-      fontSize: 16,
+      fontSize: 15,
       textAlign: 'center',
       color: colors.textSecondary,
+    },
+    email: {
+      fontSize: 16,
+      fontWeight: 'bold',
+      color: colors.contrast,
+      textAlign: 'center',
+    },
+    resendEmail: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingHorizontal: 10,
+      marginTop: 20,
+    },
+    resendEmailLink: {
+      fontSize: 15,
+      color: colors.primary,
+      fontWeight: 'bold',
+    },
+    cooldownText: {
+      fontSize: 15,
+      color: colors.textSecondary,
+      fontStyle: 'italic',
+    },
+
+    buttonContainer: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 20,
     },
   });

@@ -5,7 +5,10 @@ import { alertOnError, apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { getApartmentImages, getApartmentThumbnail } from './S3Service.ts';
 
-export async function getApartmentsInfoPaginated(offset: number, pageSize: number = API_PAGE_SIZE) {
+export async function getApartmentsInfoPaginated(
+  offset: number,
+  pageSize: number = API_PAGE_SIZE,
+): Promise<ApartmentInfo[] | undefined> {
   const response = await apiFetch(
     Endpoints.APARTMENT.GET_INFO_PAGINATED(offset, pageSize),
     {
@@ -14,7 +17,9 @@ export async function getApartmentsInfoPaginated(offset: number, pageSize: numbe
     true,
   );
 
-  if (await alertOnError(response, 'Apartment', 'fetching the apartments')) return;
+  if (await alertOnError(response, 'Apartment', 'fetching the apartments')) {
+    return;
+  }
 
   const apartments: ApartmentInfo[] = await response.json();
 
@@ -28,7 +33,7 @@ export async function getApartmentsInfoPaginated(offset: number, pageSize: numbe
 export async function getApartmentsNoRelationPaginated(
   offset: number,
   pageSize: number = API_PAGE_SIZE,
-) {
+): Promise<ApartmentInfo[]> {
   const response = await apiFetch(
     Endpoints.APARTMENT.NO_RELATIONS_PAGINATED(offset, pageSize),
     {
@@ -37,7 +42,9 @@ export async function getApartmentsNoRelationPaginated(
     true,
   );
 
-  if (await alertOnError(response, 'Apartment', 'fetching apartments without relations')) return [];
+  if (await alertOnError(response, 'Apartment', 'fetching apartments without relations')) {
+    return [];
+  }
 
   const apartments: ApartmentInfo[] = await response.json();
 
@@ -48,7 +55,7 @@ export async function getApartmentsNoRelationPaginated(
   return apartments;
 }
 
-export async function getApartmentInfoById(id: number) {
+export async function getApartmentInfoById(id: number): Promise<ApartmentInfo | undefined> {
   const response = await apiFetch(
     Endpoints.APARTMENT.GET_INFO_BY_ID(id),
     {
@@ -57,7 +64,9 @@ export async function getApartmentInfoById(id: number) {
     true,
   );
 
-  if (await alertOnError(response, 'Apartment', 'fetching an apartment')) return;
+  if (await alertOnError(response, 'Apartment', 'fetching an apartment')) {
+    return;
+  }
 
   const apartment: ApartmentInfo = await response.json();
 

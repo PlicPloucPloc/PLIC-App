@@ -3,7 +3,7 @@ const Endpoints = {
     LOGIN: '/user/login',
     REGISTER: '/user/register',
     CHECK_EMAIL: (email: string) => `/user/checkEmail/${email.toLowerCase()}`,
-    GET_ID: '/user/id',
+    RESEND_EMAIL: () => '/user/resend',
     REFRESH: '/user/refresh',
   },
   RELATIONS: {

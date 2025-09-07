@@ -24,3 +24,7 @@ export type RegisterRequest = {
   birthdate: string;
   password: string;
 };
+
+export type ResendEmailRequest = {
+  email: string;
+};

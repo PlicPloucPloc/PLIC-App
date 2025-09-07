@@ -9,7 +9,10 @@ import { alertOnError, apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { getApartmentThumbnail } from './S3Service.ts';
 
-export async function getAllRelationsPaginated(offset: number, pageSize: number = API_PAGE_SIZE) {
+export async function getAllRelationsPaginated(
+  offset: number,
+  pageSize: number = API_PAGE_SIZE,
+): Promise<RelationInfo[]> {
   const response = await apiFetch(
     Endpoints.RELATIONS.GET_ALL_PAGINATED(offset, pageSize),
     {
@@ -35,7 +38,7 @@ export async function getLikedApartmentsPaginated(
   isFilterColoc: boolean,
   offset: number,
   pageSize: number = API_PAGE_SIZE,
-) {
+): Promise<RelationInfo[]> {
   const response = await apiFetch(
     Endpoints.RELATIONS.GET_LIKES_PAGINATED(isFilterColoc, offset, pageSize),
     {
@@ -60,7 +63,7 @@ export async function getLikedApartmentsPaginated(
 export async function getDislikedApartmentPaginated(
   offset: number,
   pageSize: number = API_PAGE_SIZE,
-) {
+): Promise<RelationInfo[]> {
   const response = await apiFetch(
     Endpoints.RELATIONS.GET_DISLIKES_PAGINATED(offset, pageSize),
     {
@@ -78,7 +81,7 @@ export async function getDislikedApartmentPaginated(
   return relationsInfo;
 }
 
-export async function postRelation(apartmentId: number, type: RELATION_TYPE) {
+export async function postRelation(apartmentId: number, type: RELATION_TYPE): Promise<boolean> {
   const response = await apiFetch(
     Endpoints.RELATIONS.POST_RELATION,
     {
@@ -107,7 +110,7 @@ export async function postRelation(apartmentId: number, type: RELATION_TYPE) {
   return true;
 }
 
-export async function updateRelation(apartmentId: number, type: RELATION_TYPE) {
+export async function updateRelation(apartmentId: number, type: RELATION_TYPE): Promise<boolean> {
   const response = await apiFetch(
     Endpoints.RELATIONS.UPDATE_RELATION,
     {
@@ -124,7 +127,7 @@ export async function updateRelation(apartmentId: number, type: RELATION_TYPE) {
   return true;
 }
 
-export async function deleteRelation(apartmentId: number) {
+export async function deleteRelation(apartmentId: number): Promise<boolean> {
   const response = await apiFetch(
     Endpoints.RELATIONS.DELETE_RELATION,
     {

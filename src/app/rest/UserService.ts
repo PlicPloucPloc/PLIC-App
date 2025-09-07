@@ -1,6 +1,10 @@
-import { LoginRequest, RegisterRequest } from '@app/definitions/rest/UserService';
+import {
+  LoginRequest,
+  RegisterRequest,
+  ResendEmailRequest,
+} from '@app/definitions/rest/UserService';
 
-import { apiFetch } from './Client';
+import { alertOnError, apiFetch } from './Client';
 import Endpoints from './Endpoints';
 
 export async function loginUser(credentials: LoginRequest): Promise<Response> {
@@ -35,15 +39,21 @@ export async function checkEmailExists(email: string): Promise<Response> {
   );
 }
 
-// TODO: Resend email
-// TODO: Forgot password
-
-export async function getUserId(): Promise<Response> {
-  return apiFetch(
-    Endpoints.USER.GET_ID,
+export async function resendVerificationEmail(body: ResendEmailRequest): Promise<boolean> {
+  const response = await apiFetch(
+    Endpoints.USER.RESEND_EMAIL(),
     {
-      method: 'GET',
+      method: 'POST',
+      body: JSON.stringify(body),
     },
-    true,
+    false,
   );
+
+  if (await alertOnError(response, 'User', 'resending verification email')) {
+    return false;
+  }
+
+  return true;
 }
+
+// TODO: Forgot password
