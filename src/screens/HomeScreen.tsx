@@ -245,7 +245,12 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
           style={styles.button}
           disabled={allSwiped}
           onPress={() => {
-            Alert.alert('Chat not implemented yet');
+            navigation.navigate('BottomTabStack', {
+              screen: 'MessageStack',
+              params: {
+                screen: 'DirectMessage',
+              },
+            });
           }}>
           <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />
         </SwipeButton>

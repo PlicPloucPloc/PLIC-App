@@ -80,7 +80,7 @@ export default function ApartmentList({
     (relation: RelationInfo) => {
       navigation.navigate('SharedStack', {
         screen: 'ApartmentDetails',
-        params: { apartment: relation.apt, enableRelationButtons: true },
+        params: { apartment: relation.apt, enableRelationButtons: false },
       });
     },
     [navigation],
