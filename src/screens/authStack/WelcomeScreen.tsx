@@ -25,10 +25,7 @@ export default function WelcomeScreen({ navigation }: AuthStackScreenProps<'Welc
           onPress={() => navigation.navigate('Login', {})}
           containerStyle={{ backgroundColor: colors.background }}
         />
-        <AuthStackButton
-          title="Register"
-          onPress={() => navigation.navigate('RegisterStack', { screen: 'Email' })}
-        />
+        <AuthStackButton title="Register" onPress={() => navigation.navigate('RegisterEmail')} />
       </View>
 
       <BackgroundBuildings />

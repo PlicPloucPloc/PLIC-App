@@ -14,28 +14,16 @@ import { StackAnimationName, StackScreenProps } from '@react-navigation/stack';
 // ------- Auth stack -------
 export type AuthStackParamList = {
   Welcome: undefined;
-  Login: {
-    navigateFromRegister?: boolean;
-  };
-  RegisterStack: NavigatorScreenParams<RegisterStackParamList>;
+  Login: { navigateFromRegister?: boolean };
+  RegisterEmail: undefined;
+  RegisterUserInfo: undefined;
+  RegisterPassword: undefined;
+  VerifyEmail: { isNewlyRegistered: boolean };
 };
 
 export type AuthStackScreenProps<T extends keyof AuthStackParamList> = StackScreenProps<
   AuthStackParamList,
   T
->;
-
-// ------- Register stack -------
-export type RegisterStackParamList = {
-  Email: undefined;
-  UserInfo: undefined;
-  Password: undefined;
-  Successful: undefined;
-};
-
-export type RegisterStackScreenProps<T extends keyof RegisterStackParamList> = CompositeScreenProps<
-  StackScreenProps<RegisterStackParamList, T>,
-  AuthStackScreenProps<keyof AuthStackParamList>
 >;
 
 // =================== Inside navigator ===================

@@ -1,4 +1,5 @@
 import React from 'react';
+import { View } from 'react-native';
 
 import { AuthStackParamList } from '@navigation/Types';
 import {
@@ -7,13 +8,16 @@ import {
   StackNavigationProp,
 } from '@react-navigation/stack';
 import LoginScreen from '@screens/authStack/LoginScreen';
+import RegisterEmailScreen from '@screens/authStack/RegisterEmailScreen';
+import RegisterPasswordScreen from '@screens/authStack/RegisterPasswordScreen';
+import RegisterUserInfoScreen from '@screens/authStack/RegisterUserInfoScreen';
+import VerifyEmailScreen from '@screens/authStack/VerifyEmailScreen';
 import WelcomeScreen from '@screens/authStack/WelcomeScreen';
 import HeaderBackButton from 'components/HeaderBackButton';
 import HeaderLogo from 'components/HeaderLogo';
+import { Bar } from 'react-native-progress';
 
-import RegisterStack from './RegisterStack';
-
-function authStackHeaderOptions(
+function LoginScreenHeaderOptions(
   navigation: StackNavigationProp<AuthStackParamList>,
 ): StackNavigationOptions {
   return {
@@ -22,6 +26,31 @@ function authStackHeaderOptions(
     headerShadowVisible: false,
     headerLeft: () => <HeaderBackButton navigation={navigation} />,
     headerRight: () => <HeaderLogo />,
+  };
+}
+
+function RegisterScreensHeaderOptions(
+  navigation: StackNavigationProp<AuthStackParamList>,
+  progress: number,
+): StackNavigationOptions {
+  return {
+    animation: 'slide_from_right',
+    headerShown: true,
+    headerShadowVisible: false,
+    headerTitleAlign: 'center',
+    headerLeft: () => <HeaderBackButton navigation={navigation} />,
+    headerRight: () => <HeaderLogo />,
+    headerTitle: () => (
+      <View
+        style={{
+          flex: 1,
+          width: '100%',
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}>
+        <Bar progress={progress} width={200} height={8} />
+      </View>
+    ),
   };
 }
 
@@ -37,11 +66,27 @@ export default function AuthStack() {
         name="Login"
         component={LoginScreen}
         options={({ navigation, route }) => ({
-          ...authStackHeaderOptions(navigation),
+          ...LoginScreenHeaderOptions(navigation),
           animation: route.params?.navigateFromRegister ? 'fade' : 'slide_from_right',
         })}
       />
-      <Stack.Screen name="RegisterStack" component={RegisterStack} />
+      <Stack.Screen
+        name="RegisterEmail"
+        component={RegisterEmailScreen}
+        options={({ navigation }) => RegisterScreensHeaderOptions(navigation, 0.33)}
+      />
+      <Stack.Screen
+        name="RegisterUserInfo"
+        component={RegisterUserInfoScreen}
+        options={({ navigation }) => RegisterScreensHeaderOptions(navigation, 0.66)}
+      />
+      <Stack.Screen
+        name="RegisterPassword"
+        component={RegisterPasswordScreen}
+        options={({ navigation }) => RegisterScreensHeaderOptions(navigation, 1)}
+      />
+
+      <Stack.Screen name="VerifyEmail" component={VerifyEmailScreen} />
     </Stack.Navigator>
   );
 }

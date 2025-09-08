@@ -18,10 +18,10 @@ import { checkEmail } from '@app/utils/Auth';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
 import Loader from '@components/Loader';
-import { RegisterStackScreenProps } from '@navigation/Types';
+import { AuthStackScreenProps } from '@navigation/Types';
 import { useSelector } from 'react-redux';
 
-export default function RegisterEmailScreen({ navigation }: RegisterStackScreenProps<'Email'>) {
+export default function RegisterEmailScreen({ navigation }: AuthStackScreenProps<'RegisterEmail'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -60,7 +60,7 @@ export default function RegisterEmailScreen({ navigation }: RegisterStackScreenP
     }
 
     store.dispatch(AuthActions.setEmail(email));
-    navigation.navigate('UserInfo');
+    navigation.navigate('RegisterUserInfo');
   }
 
   return (

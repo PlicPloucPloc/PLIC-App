@@ -18,12 +18,12 @@ import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
 import Loader from '@components/Loader';
 import PasswordInput from '@components/PasswordInput';
-import { RegisterStackScreenProps } from '@navigation/Types';
+import { AuthStackScreenProps } from '@navigation/Types';
 import { useSelector } from 'react-redux';
 
 export default function RegisterPasswordScreen({
   navigation,
-}: RegisterStackScreenProps<'Password'>) {
+}: AuthStackScreenProps<'RegisterPassword'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -62,7 +62,7 @@ export default function RegisterPasswordScreen({
       return;
     }
 
-    navigation.navigate('Successful');
+    navigation.navigate('VerifyEmail', { isNewlyRegistered: true });
   }
 
   return (

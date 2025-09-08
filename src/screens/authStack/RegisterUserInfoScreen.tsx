@@ -16,13 +16,13 @@ import * as AuthActions from '@app/redux/slices/app/AuthStateSlice';
 import store, { RootState } from '@app/redux/Store';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
-import { RegisterStackScreenProps } from '@navigation/Types';
+import { AuthStackScreenProps } from '@navigation/Types';
 import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useSelector } from 'react-redux';
 
 export default function RegisterUserInfoScreen({
   navigation,
-}: RegisterStackScreenProps<'UserInfo'>) {
+}: AuthStackScreenProps<'RegisterUserInfo'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -59,7 +59,7 @@ export default function RegisterUserInfoScreen({
       return;
     }
 
-    navigation.navigate('Password');
+    navigation.navigate('RegisterPassword');
   }
 
   return (

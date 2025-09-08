@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
@@ -8,50 +8,82 @@ import { resendVerificationEmail } from '@app/rest/UserService';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
 import { Ionicons } from '@expo/vector-icons';
-import { RegisterStackScreenProps } from '@navigation/Types';
+import { AuthStackScreenProps } from '@navigation/Types';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 
-export default function RegisterSuccessfulScreen({
+export default function VerifyEmailScreen({
   navigation,
-}: RegisterStackScreenProps<'Successful'>) {
+  route,
+}: AuthStackScreenProps<'VerifyEmail'>) {
+  const { isNewlyRegistered } = route.params;
   const styles = createStyles(useThemeColors());
   const authState = useSelector((state: RootState) => state.authState);
 
   const [cooldown, setCooldown] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   async function handleResendEmail() {
-    setCooldown(60);
+    setLoading(true);
 
-    const emailResent = await resendVerificationEmail({
-      email: authState.email,
-    });
+    const emailResent = await resendVerificationEmail({ email: authState.email });
+
     if (emailResent) {
       Alert.alert('Success', 'Verification email resent. Please check your inbox.');
-    } else {
-      setCooldown(0);
+      setCooldown(60);
     }
+    setLoading(false);
   }
 
   useEffect(() => {
-    let timer: NodeJS.Timeout;
     if (cooldown > 0) {
-      timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      const timer = setTimeout(() => setCooldown(cooldown - 1), 1000);
+      return () => clearTimeout(timer);
     }
-    return () => clearTimeout(timer);
   }, [cooldown]);
+
+  // Screen configuration based on registration status
+  const screenConfig = isNewlyRegistered
+    ? {
+        icon: { name: 'mail-unread' as const, color: 'green' },
+        title: 'Account created!',
+        subtitle: 'Welcome aboard 🎉',
+        intro: 'We’ve sent a confirmation email to:',
+        boldIntro: false,
+        buttonTitle: 'Go to Login',
+      }
+    : {
+        icon: { name: 'warning' as const, color: 'orange' },
+        title: 'Email not verified',
+        subtitle: 'Please check your inbox 📩',
+        intro: 'Your account is created but not yet verified.',
+        boldIntro: true,
+        buttonTitle: 'Back to Login',
+      };
+
+  const handleButtonClick = isNewlyRegistered
+    ? () => {
+        navigation.reset({
+          index: 1,
+          routes: [{ name: 'Welcome' }, { name: 'Login', params: { navigateFromRegister: true } }],
+        });
+      }
+    : () => navigation.goBack();
 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Ionicons name="mail-unread" size={100} color={'green'} />
-        <Text style={styles.title}>Account created!</Text>
-        <Text style={styles.subtitle}>Welcome aboard 🎉</Text>
+        <Ionicons name={screenConfig.icon.name} size={100} color={screenConfig.icon.color} />
+        <Text style={styles.title}>{screenConfig.title}</Text>
+        <Text style={styles.subtitle}>{screenConfig.subtitle}</Text>
       </View>
 
       <View style={styles.body}>
-        <Text style={styles.message}>We’ve sent a confirmation email to:</Text>
+        <Text style={[styles.message, screenConfig.boldIntro && { fontWeight: 'bold' }]}>
+          {screenConfig.intro}
+        </Text>
         <Text style={styles.email}>{authState.email}</Text>
+
         <Text style={[styles.message, { marginTop: 20 }]}>
           Please click the link in the email to verify your registration. Once verified, you can log
           in with your credentials.
@@ -59,9 +91,11 @@ export default function RegisterSuccessfulScreen({
 
         <View style={styles.resendEmail}>
           <Text style={styles.message}>Didn't receive the email? </Text>
-          {cooldown > 0 ? (
+          {loading && <ActivityIndicator size="small" color={styles.resendEmailLink.color} />}
+          {!loading && cooldown > 0 && (
             <Text style={styles.cooldownText}>Resend in {cooldown}s</Text>
-          ) : (
+          )}
+          {!loading && cooldown === 0 && (
             <TouchableOpacity onPress={handleResendEmail}>
               <Text style={styles.resendEmailLink}>Resend</Text>
             </TouchableOpacity>
@@ -70,26 +104,7 @@ export default function RegisterSuccessfulScreen({
       </View>
 
       <View style={styles.buttonContainer}>
-        <AuthStackButton
-          title="Go to Login"
-          onPress={() => {
-            const parentNavigation = navigation.getParent();
-            if (!parentNavigation) {
-              return navigation.navigate('Welcome');
-            }
-
-            parentNavigation?.reset({
-              index: 1,
-              routes: [
-                { name: 'Welcome' },
-                {
-                  name: 'Login',
-                  params: { navigateFromRegister: true },
-                },
-              ],
-            });
-          }}
-        />
+        <AuthStackButton title={screenConfig.buttonTitle} onPress={handleButtonClick} />
       </View>
 
       <BackgroundBuildings />
@@ -104,7 +119,6 @@ const createStyles = (colors: ColorTheme) =>
       justifyContent: 'center',
       backgroundColor: colors.background,
     },
-
     header: {
       flex: 2,
       alignItems: 'center',
@@ -115,13 +129,11 @@ const createStyles = (colors: ColorTheme) =>
       fontSize: 28,
       fontWeight: 'bold',
       color: colors.textPrimary,
-      textAlign: 'center',
       marginTop: 12,
     },
     subtitle: {
       fontSize: 18,
       color: colors.textSecondary,
-      textAlign: 'center',
       marginTop: 2,
     },
 
@@ -147,7 +159,6 @@ const createStyles = (colors: ColorTheme) =>
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      paddingHorizontal: 10,
       marginTop: 20,
     },
     resendEmailLink: {
