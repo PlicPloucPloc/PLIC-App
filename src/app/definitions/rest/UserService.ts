@@ -1,3 +1,10 @@
+export type UserInfoResponse = {
+  id: string;
+  firstname: string;
+  lastname: string;
+  birthdate: string;
+};
+
 export type TokenResponse = {
   access_token: string;
   refresh_token: string;

@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { RELATION_TYPE } from '@app/definitions/rest/RelationService';
+import { RELATION_TYPE } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { Ionicons } from '@expo/vector-icons';
 

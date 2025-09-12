@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { ActivityIndicator, Alert, FlatList, RefreshControl } from 'react-native';
 
-import { RelationInfo } from '@app/definitions/rest/RelationService';
+import { RelationInfo } from '@app/definitions';
 import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setShouldRefetchHistory, setShouldRefetchLikeList } from '@app/redux/slices';

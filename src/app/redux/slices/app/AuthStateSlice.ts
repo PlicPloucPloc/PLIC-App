@@ -36,10 +36,14 @@ export const authStateSlice = createSlice({
     setBirthdate: (state, action: PayloadAction<string>) => {
       state.birthdate = action.payload;
     },
+    setUserInfo: (_, action: PayloadAction<IAuthState>) => {
+      // state = action.payload; // This does not change the state so we need a return instead
+      return action.payload;
+    },
   },
 });
 
-export const { setEmail, setFirstName, setLastName, setBirthdate, setUserId } =
+export const { setEmail, setFirstName, setLastName, setBirthdate, setUserId, setUserInfo } =
   authStateSlice.actions;
 
 export default authStateSlice.reducer;

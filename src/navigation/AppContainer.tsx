@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
 
-import { RootEnum } from '@app/definitions';
-import { setRoot } from '@app/redux/slices';
+import { RootEnum, UserInfoResponse } from '@app/definitions';
+import { IAuthState, setRoot, setUserInfo } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
 import { getToken } from '@app/rest/Client';
+import { getUserInfo } from '@app/rest/UserService';
 import { Images } from '@assets/index';
 import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
@@ -32,12 +33,25 @@ export default function AppContainer() {
     await Promise.all([loadAssetsAsync(), Font.loadAsync(Ionicons.font)]);
   }
 
+  const toIAuthState = (userInfo: UserInfoResponse) => {
+    return {
+      userId: userInfo.id,
+      email: '',
+      firstName: userInfo.firstname,
+      lastName: userInfo.lastname,
+      birthdate: userInfo.birthdate,
+    } as IAuthState;
+  };
+
   useEffect(() => {
     (async () => {
       try {
         await loadResources();
 
         const token = await getToken();
+        const userInfo = await getUserInfo();
+
+        store.dispatch(setUserInfo(toIAuthState(userInfo)));
         store.dispatch(setRoot(token ? RootEnum.ROOT_INSIDE : RootEnum.ROOT_AUTH));
       } catch (e) {
         console.warn(e);

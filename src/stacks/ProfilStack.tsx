@@ -25,7 +25,11 @@ export default function ProfilStack(_: BottomTabStackScreenProps<'ProfilStack'>)
     <Stack.Navigator
       initialRouteName="Profil"
       screenOptions={{ headerShown: false, animation: 'fade_from_right' }}>
-      <Stack.Screen name="Profil" component={ProfilScreen} />
+      <Stack.Screen
+        name="Profil"
+        component={ProfilScreen}
+        options={() => headerOptions('My Account')}
+      />
       <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Filters" component={FiltersScreen} />
       <Stack.Screen

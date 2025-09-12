@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
+import { IoniconName } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { resendVerificationEmail } from '@app/rest/UserService';
@@ -11,6 +12,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { AuthStackScreenProps } from '@navigation/Types';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
+
+type screenConfigType = {
+  icon: { name: IoniconName; color: string };
+  title: string;
+  subtitle: string;
+  intro: string;
+  boldIntro: boolean;
+  buttonTitle: string;
+};
 
 export default function VerifyEmailScreen({
   navigation,
@@ -43,23 +53,25 @@ export default function VerifyEmailScreen({
   }, [cooldown]);
 
   // Screen configuration based on registration status
-  const screenConfig = isNewlyRegistered
-    ? {
-        icon: { name: 'mail-unread' as const, color: 'green' },
-        title: 'Account created!',
-        subtitle: 'Welcome aboard 🎉',
-        intro: 'We’ve sent a confirmation email to:',
-        boldIntro: false,
-        buttonTitle: 'Go to Login',
-      }
-    : {
-        icon: { name: 'warning' as const, color: 'orange' },
-        title: 'Email not verified',
-        subtitle: 'Please check your inbox 📩',
-        intro: 'Your account is created but not yet verified.',
-        boldIntro: true,
-        buttonTitle: 'Back to Login',
-      };
+  const screenConfig = (
+    isNewlyRegistered
+      ? {
+          icon: { name: 'mail-unread', color: 'green' },
+          title: 'Account created!',
+          subtitle: 'Welcome aboard 🎉',
+          intro: 'We’ve sent a confirmation email to:',
+          boldIntro: false,
+          buttonTitle: 'Go to Login',
+        }
+      : {
+          icon: { name: 'warning', color: 'orange' },
+          title: 'Email not verified',
+          subtitle: 'Please check your inbox 📩',
+          intro: 'Your account is created but not yet verified.',
+          boldIntro: true,
+          buttonTitle: 'Back to Login',
+        }
+  ) as screenConfigType;
 
   const handleButtonClick = isNewlyRegistered
     ? () => {

@@ -2,8 +2,7 @@ import React, { useCallback, useRef, useState } from 'react';
 import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { ApartmentInfo } from '@app/definitions';
-import { RELATION_TYPE } from '@app/definitions/rest/RelationService';
+import { ApartmentInfo, RELATION_TYPE } from '@app/definitions';
 import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setSwipeDirection } from '@app/redux/slices';

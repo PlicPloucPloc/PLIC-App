@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { Alert, Animated, Pressable, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { RelationInfo } from '@app/definitions/rest/RelationService';
+import { RelationInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { Swipeable } from 'react-native-gesture-handler';
 
@@ -51,7 +51,10 @@ const ApartmentListRow = memo(({ relation, onPress, onDelete, isHistory }: Props
 
   return (
     <Swipeable renderLeftActions={renderLeftActions}>
-      <Pressable onPress={() => onPress(relation)}>
+      <Pressable
+        onPress={() => onPress(relation)}
+        android_ripple={{ color: `${colors.primary}50` }}
+        unstable_pressDelay={100}>
         <ApartmentListItem
           title={relation.apt.name}
           surface={relation.apt.surface}
