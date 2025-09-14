@@ -14,6 +14,7 @@ import {
 import MessageHeader, { User } from '@components/MessageHeader';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+//import dotenv from "dotenv";
 
 interface Message {
   id: number;
@@ -21,6 +22,104 @@ interface Message {
   imageUri?: string; // nouvelle propriété
   isMe: boolean;
   timestamp: string;
+}
+// Types pour le client WebSocket Swappart Chat
+// interface MessageData {
+//     room_id: number;
+//     message: string;
+//     message_temp_id: string;
+// }
+
+// interface SendMessageCommand {
+//     type: "SendMessage";
+//     data: MessageData;
+// }
+
+// interface MessageReceivedData {
+//     room_id: number;
+//     sender_id: string;
+//     message: string;
+// }
+
+// interface MessageSentConfirmationData {
+//     confirmed: boolean;
+//     reason: string;
+//     message_id: string;
+// }
+
+// interface ServerResponse {
+//     type: "MessageReceived" | "MessageSentConfirmation" | "Disconnection";
+//     data: MessageReceivedData | MessageSentConfirmationData | any;
+// }
+
+type EventCallback = (data: any) => void;
+
+class SwappartChatClient {
+  private token: string | undefined = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  private ws: WebSocket | null = null;
+  private isConnected: boolean = false;
+
+  private messageCallbacks: Map<string, EventCallback> = new Map();
+  connect(): Promise<void> {
+    return new Promise((resolve, reject) => {
+      try {
+        this.ws = new WebSocket(`ws://192.168.1.34:3030?token=${this.token}`);
+
+        this.ws.onopen = () => {
+          console.log('Connecté au chat Swappart');
+          this.isConnected = true;
+          resolve();
+        };
+
+        // this.ws.onmessage = (event: MessageEvent) => {
+        // };
+
+        // this.ws.onclose = (event: CloseEvent) => {
+        //     this.isConnected = false;
+        //     console.log('Connexion fermée:');
+        // };
+
+        this.ws.onerror = (error: Event) => {
+          console.error('Erreur WebSocket:', error);
+          reject(error);
+        };
+      } catch (error) {
+        reject(error);
+      }
+    });
+  }
+  on(eventType: string, callback: EventCallback): void {
+    this.messageCallbacks.set(eventType, callback);
+  }
+  sendMessage(roomId: number, message: string) {
+    if (!this.isConnected) {
+      throw new Error('Non connecté au serveur');
+    }
+    if (!this.ws) {
+      throw new Error('WebSocket non initialisé');
+    }
+
+    const messageTempId = this.generateUUID();
+
+    const messageData = {
+      type: 'SendMessage',
+      data: {
+        room_id: roomId,
+        message: message,
+        message_temp_id: messageTempId,
+      },
+    };
+    this.ws.send(JSON.stringify(messageData));
+
+    return messageTempId;
+  }
+  private generateUUID(): string {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+      const r = (Math.random() * 16) | 0;
+      const v = c == 'x' ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
+  }
 }
 
 const mockUsers: User[] = [
@@ -45,6 +144,22 @@ const mockUsers: User[] = [
 ];
 
 export default function DirectMessageScreen() {
+  const [chatClient] = useState(() => new SwappartChatClient());
+  useEffect(() => {
+    const connectToChat = async () => {
+      try {
+        await chatClient.connect();
+
+        chatClient.on('messageReceived', (data) => {
+          console.log('Nouveau message reçu:', data);
+        });
+      } catch (error) {
+        console.error('Erreur de connexion:', error);
+      }
+    };
+    connectToChat();
+  });
+
   const [messages, setMessages] = useState<Message[]>([]);
 
   const [inputText, setInputText] = useState<string>('');
@@ -63,17 +178,23 @@ export default function DirectMessageScreen() {
 
   const handleSend = (): void => {
     if (inputText.trim()) {
-      const newMessage: Message = {
-        id: messages.length + 1,
-        text: inputText,
-        isMe: true,
-        timestamp: new Date().toLocaleTimeString('fr-FR', {
-          hour: '2-digit',
-          minute: '2-digit',
-        }),
-      };
-      setMessages([...messages, newMessage]);
-      setInputText('');
+      try {
+        //const tempId = chatClient.sendMessage(123, inputText.trim());
+
+        const newMessage: Message = {
+          id: messages.length + 1,
+          text: inputText,
+          isMe: true,
+          timestamp: new Date().toLocaleTimeString('fr-FR', {
+            hour: '2-digit',
+            minute: '2-digit',
+          }),
+        };
+        setMessages([...messages, newMessage]);
+        setInputText('');
+      } catch (error) {
+        console.error("Erreur lors de l'envoi:", error);
+      }
     }
   };
 
@@ -117,7 +238,6 @@ export default function DirectMessageScreen() {
   };
 
   const sendImage = async () => {
-    // Demander la permission d'accéder à la galerie
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
     if (status !== 'granted') {
@@ -125,7 +245,6 @@ export default function DirectMessageScreen() {
       return;
     }
 
-    // Ouvrir la galerie pour sélectionner une image
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
 
@@ -138,7 +257,7 @@ export default function DirectMessageScreen() {
 
       const newMessage: Message = {
         id: messages.length + 1,
-        text: selectedImageUri, // on stocke l'URI de l'image
+        text: selectedImageUri,
         isMe: true,
         timestamp: new Date().toLocaleTimeString('fr-FR', {
           hour: '2-digit',
