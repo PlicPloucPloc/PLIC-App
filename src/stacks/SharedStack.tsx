@@ -7,18 +7,18 @@ import {
 } from '@react-navigation/stack';
 import ApartmentDetailsScreen from '@screens/ApartmentDetailsScreen';
 import DirectMessageScreen from '@screens/DirectMessageScreen';
-import OtherProfileScreen from '@screens/OtherProfileScreen';
+import ProfileScreen from '@screens/ProfileScreen';
 
 const Stack = createStackNavigator<SharedStackParamList>();
 
 function headerOptions(
   navigation: StackNavigationProp<SharedStackParamList>,
-  title: string,
+  title: string | null,
 ): StackNavigationOptions {
   return {
     headerShown: true,
     headerShadowVisible: false,
-    headerTitle: title,
+    headerTitle: title ?? '',
     headerTitleAlign: 'left',
     headerTitleStyle: {
       fontWeight: '600',
@@ -37,9 +37,9 @@ export default function SharedStack() {
         options={({ navigation }) => headerOptions(navigation, 'Details')}
       />
       <Stack.Screen
-        name="OtherProfile"
-        component={OtherProfileScreen}
-        options={({ navigation }) => headerOptions(navigation, 'Profile')}
+        name="Profile"
+        component={ProfileScreen}
+        options={({ navigation }) => headerOptions(navigation, null)}
       />
       <Stack.Screen name="DirectMessage" component={DirectMessageScreen} />
     </Stack.Navigator>

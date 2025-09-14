@@ -6,12 +6,12 @@ import {
   BottomTabNavigationOptions,
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
-import HomeStack from '@stacks/HomeStack';
-import LikesStack from '@stacks/LikesStack';
 
+import AccountStack from './AccountStack';
 import ColocFinderStack from './ColocFinderStack';
+import HomeStack from './HomeStack';
+import LikesStack from './LikesStack';
 import MessageStack from './MessageStack';
-import ProfileStack from './ProfileStack';
 
 const Stack = createBottomTabNavigator<BottomTabStackParamList>();
 
@@ -62,9 +62,9 @@ export default function BottomTabStack() {
         options={tabBarOptions('Coloc', 'search-outline', 'search')}
       />
       <Stack.Screen
-        name="ProfileStack"
-        component={ProfileStack}
-        options={tabBarOptions('Profile', 'person-outline', 'person')}
+        name="AccountStack"
+        component={AccountStack}
+        options={tabBarOptions('Account', 'person-outline', 'person')}
       />
     </Stack.Navigator>
   );

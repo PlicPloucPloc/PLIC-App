@@ -1,11 +1,10 @@
-import { BottomTabStackScreenProps, ProfileStackParamList } from '@navigation/Types';
+import { AccountStackParamList, BottomTabStackScreenProps } from '@navigation/Types';
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
+import AccountScreen from '@screens/AccountScreen';
 import FiltersScreen from '@screens/FiltersScreen';
 import HistoryScreen from '@screens/HistoryScreen';
-import ProfileScreen from '@screens/ProfileScreen';
-import SettingsScreen from '@screens/SettingsScreen';
 
-const Stack = createStackNavigator<ProfileStackParamList>();
+const Stack = createStackNavigator<AccountStackParamList>();
 
 function headerOptions(title: string): StackNavigationOptions {
   return {
@@ -20,17 +19,16 @@ function headerOptions(title: string): StackNavigationOptions {
   };
 }
 
-export default function ProfileStack(_: BottomTabStackScreenProps<'ProfileStack'>) {
+export default function AccountStack(_: BottomTabStackScreenProps<'AccountStack'>) {
   return (
     <Stack.Navigator
-      initialRouteName="Profile"
+      initialRouteName="Account"
       screenOptions={{ headerShown: false, animation: 'fade_from_right' }}>
       <Stack.Screen
-        name="Profile"
-        component={ProfileScreen}
-        options={() => headerOptions('My Account')}
+        name="Account"
+        component={AccountScreen}
+        options={() => headerOptions('Account')}
       />
-      <Stack.Screen name="Settings" component={SettingsScreen} />
       <Stack.Screen name="Filters" component={FiltersScreen} />
       <Stack.Screen
         name="History"

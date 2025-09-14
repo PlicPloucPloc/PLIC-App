@@ -14,7 +14,7 @@ export default function ColocFinderForHouseScreen({
         title="user 1"
         onPress={() =>
           navigation.navigate('SharedStack', {
-            screen: 'OtherProfile',
+            screen: 'Profile',
             params: { userId: '132-654-sfj' },
           })
         }
@@ -23,7 +23,7 @@ export default function ColocFinderForHouseScreen({
         title="user 2"
         onPress={() =>
           navigation.navigate('SharedStack', {
-            screen: 'OtherProfile',
+            screen: 'Profile',
             params: { userId: '987-321-fgh' },
           })
         }
@@ -32,7 +32,7 @@ export default function ColocFinderForHouseScreen({
         title="user 3"
         onPress={() =>
           navigation.navigate('SharedStack', {
-            screen: 'OtherProfile',
+            screen: 'Profile',
             params: { userId: '456-789-dfg' },
           })
         }

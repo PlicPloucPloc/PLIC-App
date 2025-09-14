@@ -1,9 +1,9 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
-import { ProfileStackScreenProps } from '@navigation/Types';
+import { AccountStackScreenProps } from '@navigation/Types';
 
-export default function FiltersScreen(_: ProfileStackScreenProps<'Filters'>) {
+export default function FiltersScreen(_: AccountStackScreenProps<'Filters'>) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Filters</Text>
