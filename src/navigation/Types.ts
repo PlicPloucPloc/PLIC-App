@@ -50,7 +50,7 @@ export type SharedStackParamList = {
     apartmentId?: number;
     enableRelationButtons?: boolean;
   };
-  OtherProfil: { userId: string };
+  OtherProfile: { userId: string };
   DirectMessage: { userId: string };
 };
 
@@ -65,7 +65,7 @@ export type BottomTabStackParamList = {
   MessageStack: NavigatorScreenParams<MessageStackParamList>;
   LikesStack: NavigatorScreenParams<LikesStackParamList>;
   ColocFinderStack: NavigatorScreenParams<ColocFinderStackParamList>;
-  ProfilStack: NavigatorScreenParams<ProfilStackParamList>;
+  ProfileStack: NavigatorScreenParams<ProfileStackParamList>;
 };
 
 export type BottomTabStackScreenProps<T extends keyof BottomTabStackParamList> =
@@ -120,15 +120,15 @@ export type ColocFinderStackScreenProps<T extends keyof ColocFinderStackParamLis
     BottomTabStackScreenProps<keyof BottomTabStackParamList>
   >;
 
-// ------- Profil stack -------
-export type ProfilStackParamList = {
-  Profil: undefined;
+// ------- Profile stack -------
+export type ProfileStackParamList = {
+  Profile: undefined;
   Settings: undefined;
   Filters: undefined;
   History: undefined;
 };
 
-export type ProfilStackScreenProps<T extends keyof ProfilStackParamList> = CompositeScreenProps<
-  StackScreenProps<ProfilStackParamList, T>,
+export type ProfileStackScreenProps<T extends keyof ProfileStackParamList> = CompositeScreenProps<
+  StackScreenProps<ProfileStackParamList, T>,
   BottomTabStackScreenProps<keyof BottomTabStackParamList>
 >;

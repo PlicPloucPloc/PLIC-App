@@ -11,7 +11,7 @@ import LikesStack from '@stacks/LikesStack';
 
 import ColocFinderStack from './ColocFinderStack';
 import MessageStack from './MessageStack';
-import ProfilStack from './ProfilStack';
+import ProfileStack from './ProfileStack';
 
 const Stack = createBottomTabNavigator<BottomTabStackParamList>();
 
@@ -62,8 +62,8 @@ export default function BottomTabStack() {
         options={tabBarOptions('Coloc', 'search-outline', 'search')}
       />
       <Stack.Screen
-        name="ProfilStack"
-        component={ProfilStack}
+        name="ProfileStack"
+        component={ProfileStack}
         options={tabBarOptions('Profile', 'person-outline', 'person')}
       />
     </Stack.Navigator>

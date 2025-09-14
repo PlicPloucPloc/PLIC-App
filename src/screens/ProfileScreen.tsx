@@ -7,7 +7,7 @@ import { RootState } from '@app/redux/Store';
 import { logoutUser } from '@app/rest/UserService';
 import ProfilePicture from '@components/ProfilePicture';
 import { Ionicons } from '@expo/vector-icons';
-import { ProfilStackScreenProps } from '@navigation/Types';
+import { ProfileStackScreenProps } from '@navigation/Types';
 import { useSelector } from 'react-redux';
 
 type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
@@ -24,7 +24,7 @@ type SettingsSection = {
   data: SettingItem[];
 };
 
-export default function ProfilScreen({ navigation }: ProfilStackScreenProps<'Profil'>) {
+export default function ProfileScreen({ navigation }: ProfileStackScreenProps<'Profile'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -145,7 +145,7 @@ export default function ProfilScreen({ navigation }: ProfilStackScreenProps<'Pro
       <Pressable
         onPress={() =>
           navigation.navigate('SharedStack', {
-            screen: 'OtherProfil',
+            screen: 'OtherProfile',
             params: { userId: authState.userId },
           })
         }

@@ -1,11 +1,11 @@
-import { BottomTabStackScreenProps, ProfilStackParamList } from '@navigation/Types';
+import { BottomTabStackScreenProps, ProfileStackParamList } from '@navigation/Types';
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import FiltersScreen from '@screens/FiltersScreen';
 import HistoryScreen from '@screens/HistoryScreen';
-import ProfilScreen from '@screens/ProfilScreen';
+import ProfileScreen from '@screens/ProfileScreen';
 import SettingsScreen from '@screens/SettingsScreen';
 
-const Stack = createStackNavigator<ProfilStackParamList>();
+const Stack = createStackNavigator<ProfileStackParamList>();
 
 function headerOptions(title: string): StackNavigationOptions {
   return {
@@ -20,14 +20,14 @@ function headerOptions(title: string): StackNavigationOptions {
   };
 }
 
-export default function ProfilStack(_: BottomTabStackScreenProps<'ProfilStack'>) {
+export default function ProfileStack(_: BottomTabStackScreenProps<'ProfileStack'>) {
   return (
     <Stack.Navigator
-      initialRouteName="Profil"
+      initialRouteName="Profile"
       screenOptions={{ headerShown: false, animation: 'fade_from_right' }}>
       <Stack.Screen
-        name="Profil"
-        component={ProfilScreen}
+        name="Profile"
+        component={ProfileScreen}
         options={() => headerOptions('My Account')}
       />
       <Stack.Screen name="Settings" component={SettingsScreen} />

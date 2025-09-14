@@ -118,14 +118,14 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             <TouchableOpacity
               style={styles.modalButton}
               activeOpacity={0.7}
-              onPress={() => navigation.navigate('ProfilStack', { screen: 'History' })}>
+              onPress={() => navigation.navigate('ProfileStack', { screen: 'History' })}>
               <Text style={styles.modalButtonText}>View history</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
               style={[styles.modalButton, { backgroundColor: '#7EC0FD', marginTop: 10 }]}
               activeOpacity={0.7}
-              onPress={() => navigation.navigate('ProfilStack', { screen: 'Filters' })}>
+              onPress={() => navigation.navigate('ProfileStack', { screen: 'Filters' })}>
               <Text style={styles.modalButtonText}>Expand filters</Text>
             </TouchableOpacity>
           </View>

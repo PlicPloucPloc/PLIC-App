@@ -5,9 +5,9 @@ import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { getAllRelationsPaginated } from '@app/rest/RelationService';
 import ApartmentList from '@components/ApartmentList';
-import { ProfilStackScreenProps } from '@navigation/Types';
+import { ProfileStackScreenProps } from '@navigation/Types';
 
-export default function HistoryScreen({ navigation }: ProfilStackScreenProps<'History'>) {
+export default function HistoryScreen({ navigation }: ProfileStackScreenProps<'History'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 

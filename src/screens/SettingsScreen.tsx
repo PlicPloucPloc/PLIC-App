@@ -4,10 +4,10 @@ import { Button, StyleSheet, Text, View } from 'react-native';
 import { RootEnum } from '@app/definitions';
 import { setRoot } from '@app/redux/slices';
 import store from '@app/redux/Store';
-import { ProfilStackScreenProps } from '@navigation/Types';
+import { ProfileStackScreenProps } from '@navigation/Types';
 import * as SecureStore from 'expo-secure-store';
 
-export default function SettingsScreen({ navigation }: ProfilStackScreenProps<'Settings'>) {
+export default function SettingsScreen({ navigation }: ProfileStackScreenProps<'Settings'>) {
   async function handleLogout() {
     await SecureStore.deleteItemAsync('token');
     await SecureStore.deleteItemAsync('refresh_token');
