@@ -30,6 +30,12 @@ export type RegisterRequest = {
   lastName: string;
   birthdate: string;
   password: string;
+  profilePicture?: string | null;
+};
+
+export type RegisterResponse = {
+  path: string;
+  token: string;
 };
 
 export type ResendEmailRequest = {

@@ -34,7 +34,7 @@ function tabBarOptions(
 export default function BottomTabStack() {
   return (
     <Stack.Navigator
-      initialRouteName="ProfilStack"
+      initialRouteName="HomeStack"
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: '#4BA3C3',

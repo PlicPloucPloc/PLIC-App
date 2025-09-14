@@ -10,6 +10,7 @@ import {
 import LoginScreen from '@screens/authStack/LoginScreen';
 import RegisterEmailScreen from '@screens/authStack/RegisterEmailScreen';
 import RegisterPasswordScreen from '@screens/authStack/RegisterPasswordScreen';
+import RegisterPictureScreen from '@screens/authStack/RegisterPictureScreen';
 import RegisterUserInfoScreen from '@screens/authStack/RegisterUserInfoScreen';
 import VerifyEmailScreen from '@screens/authStack/VerifyEmailScreen';
 import WelcomeScreen from '@screens/authStack/WelcomeScreen';
@@ -73,12 +74,17 @@ export default function AuthStack() {
       <Stack.Screen
         name="RegisterEmail"
         component={RegisterEmailScreen}
-        options={({ navigation }) => RegisterScreensHeaderOptions(navigation, 0.33)}
+        options={({ navigation }) => RegisterScreensHeaderOptions(navigation, 0.25)}
       />
       <Stack.Screen
         name="RegisterUserInfo"
         component={RegisterUserInfoScreen}
-        options={({ navigation }) => RegisterScreensHeaderOptions(navigation, 0.66)}
+        options={({ navigation }) => RegisterScreensHeaderOptions(navigation, 0.5)}
+      />
+      <Stack.Screen
+        name="RegisterPicture"
+        component={RegisterPictureScreen}
+        options={({ navigation }) => RegisterScreensHeaderOptions(navigation, 0.75)}
       />
       <Stack.Screen
         name="RegisterPassword"

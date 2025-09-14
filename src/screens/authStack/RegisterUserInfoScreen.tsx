@@ -38,7 +38,7 @@ export default function RegisterUserInfoScreen({
   const maxDate = new Date();
   maxDate.setFullYear(maxDate.getFullYear() - 13); // 13 years old minimum to register
 
-  const showDatePicker = () => {
+  function showDatePicker() {
     DateTimePickerAndroid.open({
       value: birth || new Date(),
       onChange: (_, selectedDate) => {
@@ -51,7 +51,7 @@ export default function RegisterUserInfoScreen({
       maximumDate: maxDate,
       minimumDate: new Date(1900, 0, 1, 1), // Set to 1900
     });
-  };
+  }
 
   function handleNext() {
     if (!firstName || !lastName || !birth) {
@@ -59,7 +59,7 @@ export default function RegisterUserInfoScreen({
       return;
     }
 
-    navigation.navigate('RegisterPassword');
+    navigation.navigate('RegisterPicture');
   }
 
   return (

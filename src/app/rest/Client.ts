@@ -30,7 +30,7 @@ export async function apiFetch(
 
   const headers = await prepareHeaders(options, withAuth);
   if (!headers) {
-    return userNeedsLogin(requestId);
+    return await userNeedsLogin(requestId);
   }
 
   let response: Response;
@@ -106,7 +106,7 @@ async function handleErrorResponse(
     console.log('--- Token expired, begin rotation ---');
     await SecureStore.deleteItemAsync('token');
     if (!(await getToken())) {
-      return userNeedsLogin(requestId);
+      return await userNeedsLogin(requestId);
     }
     console.log('--- End rotation ---');
 
@@ -114,7 +114,7 @@ async function handleErrorResponse(
   }
 
   if (clone.status === 403 || clone.status === 401) {
-    return userNeedsLogin(requestId);
+    return await userNeedsLogin(requestId);
   }
 
   console.error(`Request ID: ${requestId} | Failed with status: ${clone.status}, error: ${data}`);
@@ -162,7 +162,7 @@ async function rotateTokens(refreshToken: string): Promise<string | null> {
   return data.access_token;
 }
 
-function userNeedsLogin(requestId: string): Response {
+async function userNeedsLogin(requestId: string): Promise<Response> {
   Alert.alert('Session expired', 'Please login and retry', [
     {
       text: 'OK',
@@ -174,8 +174,8 @@ function userNeedsLogin(requestId: string): Response {
 
   console.error(`Request ID: ${requestId} | Token rotation failed, user needs to login`);
 
-  SecureStore.deleteItemAsync('token');
-  SecureStore.deleteItemAsync('refresh_token');
+  await SecureStore.deleteItemAsync('token');
+  await SecureStore.deleteItemAsync('refresh_token');
 
   return new Response(null, {
     status: 401,

@@ -11,9 +11,9 @@ import {
 } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { LoginResponse, RootEnum } from '@app/definitions';
+import { RootEnum } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { setRoot, setUserId } from '@app/redux/slices';
+import { setRoot } from '@app/redux/slices';
 import * as AuthActions from '@app/redux/slices/app/AuthStateSlice';
 import store from '@app/redux/Store';
 import { loginUser } from '@app/rest/UserService';
@@ -23,7 +23,6 @@ import BackgroundBuildings from '@components/BackgroundBuildings';
 import PasswordInput from '@components/PasswordInput';
 import { AuthStackScreenProps } from '@navigation/Types';
 import Loader from 'components/Loader';
-import * as SecureStore from 'expo-secure-store';
 
 export default function LoginScreen({ navigation }: AuthStackScreenProps<'Login'>) {
   const colors = useThemeColors();
@@ -52,21 +51,14 @@ export default function LoginScreen({ navigation }: AuthStackScreenProps<'Login'
     const response = await loginUser({ email, password });
     setLoading(false);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-
-      if (errorData.message && errorData.message == 'Email not confirmed') {
-        return navigation.navigate('VerifyEmail', { isNewlyRegistered: false });
-      }
-
-      return Alert.alert('Login Error', errorData.message || 'An error occurred during login.');
+    if (response == null) {
+      return navigation.navigate('VerifyEmail', { isNewlyRegistered: false });
     }
 
-    const userData: LoginResponse = await response.json();
-    SecureStore.setItemAsync('token', userData.session.access_token);
-    SecureStore.setItemAsync('refresh_token', userData.session.refresh_token);
+    if (response == false) {
+      return;
+    }
 
-    store.dispatch(setUserId(userData.session.user.id));
     store.dispatch(setRoot(RootEnum.ROOT_INSIDE));
   }
 

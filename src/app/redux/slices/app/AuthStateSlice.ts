@@ -7,6 +7,7 @@ export interface IAuthState {
   firstName: string;
   lastName: string;
   birthdate: string; // (YYYY-MM-DD)
+  profilePicture: string | null;
 }
 
 const initialState: IAuthState = {
@@ -15,6 +16,7 @@ const initialState: IAuthState = {
   firstName: '',
   lastName: '',
   birthdate: '',
+  profilePicture: '',
 };
 
 export const authStateSlice = createSlice({
@@ -36,14 +38,23 @@ export const authStateSlice = createSlice({
     setBirthdate: (state, action: PayloadAction<string>) => {
       state.birthdate = action.payload;
     },
+    setProfilePicture: (state, action: PayloadAction<string | null>) => {
+      state.profilePicture = action.payload;
+    },
     setUserInfo: (_, action: PayloadAction<IAuthState>) => {
-      // state = action.payload; // This does not change the state so we need a return instead
       return action.payload;
     },
   },
 });
 
-export const { setEmail, setFirstName, setLastName, setBirthdate, setUserId, setUserInfo } =
-  authStateSlice.actions;
+export const {
+  setEmail,
+  setFirstName,
+  setLastName,
+  setBirthdate,
+  setUserId,
+  setProfilePicture,
+  setUserInfo,
+} = authStateSlice.actions;
 
 export default authStateSlice.reducer;

@@ -50,19 +50,12 @@ export default function RegisterPasswordScreen({
     const userInfo = { ...authState, password };
 
     setLoading(true);
-    const response = await registerUser(userInfo);
+    const isRegistered = await registerUser(userInfo);
     setLoading(false);
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      Alert.alert(
-        'Register  Error',
-        errorData.message || 'An error occurred during register checking.',
-      );
-      return;
+    if (isRegistered) {
+      navigation.navigate('VerifyEmail', { isNewlyRegistered: true });
     }
-
-    navigation.navigate('VerifyEmail', { isNewlyRegistered: true });
   }
 
   return (
@@ -77,8 +70,6 @@ export default function RegisterPasswordScreen({
             placeholder="Password"
             placeholderTextColor={colors.textSecondary}
             onSubmitEditing={() => confirmPasswordInputRef.current?.focus()}
-            selectionColor={colors.contrast}
-            cursorColor={colors.contrast}
           />
 
           <PasswordInput
@@ -88,8 +79,6 @@ export default function RegisterPasswordScreen({
             placeholder="Confirm Password"
             placeholderTextColor={colors.textSecondary}
             onSubmitEditing={handleRegister}
-            selectionColor={colors.contrast}
-            cursorColor={colors.contrast}
           />
 
           <AuthStackButton title="Register" onPress={handleRegister} disabled={loading} />

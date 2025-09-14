@@ -6,8 +6,27 @@ import { fetchWithTimeout } from './Client';
 
 const S3_URL = process.env.EXPO_PUBLIC_S3_URL;
 
+export async function postProfilePicture(
+  path: string,
+  token: string,
+  image: Blob,
+): Promise<Response> {
+  return fetch(`${S3_URL}/upload/sign/user-pictures/${path}?token=${token}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'image/png',
+    },
+    body: image,
+  });
+}
+
+export async function checkProfilePictureExists(userId: string): Promise<string | null> {
+  const imageUrl = `${S3_URL}/public/user-pictures/${userId}.png`;
+  return (await checkImageExists(imageUrl)) ? imageUrl : null;
+}
+
 export async function getApartmentThumbnail(apt: ApartmentInfo): Promise<string> {
-  const thumbnailUrl = `${S3_URL}/apartment-pictures/${apt.apartment_id}/0.jpg`;
+  const thumbnailUrl = `${S3_URL}/public/apartment-pictures/${apt.apartment_id}/0.jpg`;
 
   if (await checkImageExists(thumbnailUrl)) {
     return thumbnailUrl;
@@ -26,7 +45,7 @@ export async function getApartmentImages(apt: ApartmentInfo) {
 
   let index = 1;
   while (true) {
-    const imageUrl = `${S3_URL}/apartment-pictures/${apt.apartment_id}/${index}.jpg`;
+    const imageUrl = `${S3_URL}/public/apartment-pictures/${apt.apartment_id}/${index}.jpg`;
     const exists = await checkImageExists(imageUrl);
     if (!exists) break;
     images_url.push(imageUrl);

@@ -16,6 +16,7 @@ export type AuthStackParamList = {
   Welcome: undefined;
   Login: { navigateFromRegister?: boolean };
   RegisterEmail: undefined;
+  RegisterPicture: undefined;
   RegisterUserInfo: undefined;
   RegisterPassword: undefined;
   VerifyEmail: { isNewlyRegistered: boolean };
@@ -49,8 +50,8 @@ export type SharedStackParamList = {
     apartmentId?: number;
     enableRelationButtons?: boolean;
   };
-  OtherProfil: { userId: number };
-  DirectMessage: { userId: number };
+  OtherProfil: { userId: string };
+  DirectMessage: { userId: string };
 };
 
 export type SharedStackScreenProps<T extends keyof SharedStackParamList> = CompositeScreenProps<

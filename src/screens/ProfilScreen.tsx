@@ -5,6 +5,7 @@ import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { logoutUser } from '@app/rest/UserService';
+import ProfilePicture from '@components/ProfilePicture';
 import { Ionicons } from '@expo/vector-icons';
 import { ProfilStackScreenProps } from '@navigation/Types';
 import { useSelector } from 'react-redux';
@@ -123,11 +124,13 @@ export default function ProfilScreen({ navigation }: ProfilStackScreenProps<'Pro
         onPress={item.onPress}
         android_ripple={{ color: `${colors.primary}50` }}
         unstable_pressDelay={100}
-        style={({ pressed }) => [styles.item, pressed && { opacity: 1 }]}>
-        <Ionicons name={item.icon} size={24} color="#bbb" style={styles.icon} />
-        <View>
+        style={styles.item}>
+        <Ionicons name={item.icon} size={24} color={colors.textSecondary} style={styles.icon} />
+        <View style={{ flex: 1 }}>
           <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.subtitle}>{item.subtitle}</Text>
+          <Text style={styles.subtitle} numberOfLines={1} ellipsizeMode="tail">
+            {item.subtitle}
+          </Text>
         </View>
       </Pressable>
     );
@@ -139,18 +142,29 @@ export default function ProfilScreen({ navigation }: ProfilStackScreenProps<'Pro
 
   return (
     <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>R</Text>
-        </View>
+      <Pressable
+        onPress={() =>
+          navigation.navigate('SharedStack', {
+            screen: 'OtherProfil',
+            params: { userId: authState.userId },
+          })
+        }
+        android_ripple={{ color: `${colors.primary}50` }}
+        unstable_pressDelay={100}
+        style={styles.headerContainer}>
+        <ProfilePicture size={60} imageUri={authState.profilePicture} />
         <View style={{ flex: 1 }}>
-          <Text style={styles.username}>
+          <Text style={styles.username} numberOfLines={1} ellipsizeMode="tail">
             {authState.firstName} {authState.lastName}
           </Text>
         </View>
-        <Ionicons name="arrow-forward" size={24} color={colors.primary} style={styles.qrIcon} />
-      </View>
-
+        <Ionicons
+          name="arrow-forward"
+          size={24}
+          color={colors.primary}
+          style={{ marginLeft: 10 }}
+        />
+      </Pressable>
       <SectionList
         sections={settingsSections}
         renderItem={renderItem}
@@ -176,27 +190,11 @@ const createStyles = (colors: ColorTheme) =>
       borderBottomWidth: 0.5,
       borderBottomColor: '#333',
     },
-    avatar: {
-      width: 50,
-      height: 50,
-      borderRadius: 25,
-      backgroundColor: colors.primary,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: 15,
-    },
-    avatarText: {
-      color: colors.contrast,
-      fontSize: 22,
-      fontWeight: 'bold',
-    },
     username: {
       color: colors.textPrimary,
-      fontSize: 18,
+      fontSize: 20,
       fontWeight: '500',
-    },
-    qrIcon: {
-      marginLeft: 10,
+      marginLeft: 15,
     },
 
     sectionHeader: {
