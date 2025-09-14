@@ -9,12 +9,14 @@ import { useSelector } from 'react-redux';
 type ProfilePictureProps = {
   size: number;
   imageUri: string | null;
+  borderRadius?: number;
   showRemove?: boolean;
   onRemove?: () => void;
 };
 
 export default function ProfilePicture({
   size = 100,
+  borderRadius = size / 2,
   imageUri = null,
   showRemove = false,
   onRemove = undefined,
@@ -36,7 +38,7 @@ export default function ProfilePicture({
               {
                 width: size,
                 height: size,
-                borderRadius: size / 2,
+                borderRadius: borderRadius,
               },
             ]}
           />
@@ -55,7 +57,7 @@ export default function ProfilePicture({
             {
               width: size,
               height: size,
-              borderRadius: size / 2,
+              borderRadius: borderRadius,
             },
           ]}>
           <Text style={[styles.placeholderInitials, { fontSize: size * 0.32 }]}>{initials}</Text>
