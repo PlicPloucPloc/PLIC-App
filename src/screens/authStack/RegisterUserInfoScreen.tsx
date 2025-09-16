@@ -12,7 +12,7 @@ import {
 
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import * as AuthActions from '@app/redux/slices/app/AuthStateSlice';
+import * as AuthActions from '@app/redux/slices/AuthStateSlice';
 import store, { RootState } from '@app/redux/Store';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';

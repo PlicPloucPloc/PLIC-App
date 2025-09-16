@@ -1,2 +1,2 @@
-export * from './app/AppStateSlice';
-export * from './app/AuthStateSlice';
+export * from './AppStateSlice';
+export * from './AuthStateSlice';

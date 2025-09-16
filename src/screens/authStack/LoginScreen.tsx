@@ -14,7 +14,7 @@ import { ColorTheme } from '@app/Colors';
 import { RootEnum } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setRoot } from '@app/redux/slices';
-import * as AuthActions from '@app/redux/slices/app/AuthStateSlice';
+import * as AuthActions from '@app/redux/slices/AuthStateSlice';
 import store from '@app/redux/Store';
 import { loginUser } from '@app/rest/UserService';
 import { checkEmail, checkPassword } from '@app/utils/Auth';

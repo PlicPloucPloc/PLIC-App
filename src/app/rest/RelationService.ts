@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 
-import { API_PAGE_SIZE } from '@app/config/constants.ts';
+import { API_PAGE_SIZE } from '@app/config/Constants.ts';
 import { RELATION_TYPE, RelationInfo } from '@app/definitions';
 import { setShouldRefetchHistory, setShouldRefetchLikeList } from '@app/redux/slices/index.ts';
 import store from '@app/redux/Store.ts';

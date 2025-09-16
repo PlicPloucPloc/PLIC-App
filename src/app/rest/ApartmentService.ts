@@ -1,4 +1,4 @@
-import { API_PAGE_SIZE } from '@app/config/constants.ts';
+import { API_PAGE_SIZE } from '@app/config/Constants.ts';
 import { ApartmentInfo } from '@app/definitions';
 import { alertOnResponseError } from '@app/utils/Error.tsx';
 

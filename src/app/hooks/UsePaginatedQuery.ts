@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 
-import { API_PAGE_SIZE } from '@app/config/constants';
+import { API_PAGE_SIZE } from '@app/config/Constants';
 
 export function usePaginatedQuery<T>(fetchFunction: (offset: number) => Promise<T[]>) {
   const [data, setData] = useState<T[]>([]);
