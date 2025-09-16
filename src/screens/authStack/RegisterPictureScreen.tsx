@@ -4,12 +4,12 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import * as AuthActions from '@app/redux/slices/app/AuthStateSlice';
 import store, { RootState } from '@app/redux/Store';
+import { selectImageFromMedia } from '@app/utils/Image';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
 import ProfilePicture from '@components/ProfilePicture';
 import { Ionicons } from '@expo/vector-icons';
 import { AuthStackScreenProps } from '@navigation/Types';
-import * as ImagePicker from 'expo-image-picker';
 import { useSelector } from 'react-redux';
 
 export default function RegisterPictureScreen({
@@ -20,39 +20,17 @@ export default function RegisterPictureScreen({
 
   const authState = useSelector((state: RootState) => state.authState);
 
-  const [imageUri, setImageUri] = useState<string | null>(authState.profilePicture);
+  const [imageUri, setImageUri] = useState<string | null>(authState.profilePictureUri);
 
-  async function handleImageSelection(source: 'camera' | 'gallery') {
-    const permission =
-      source === 'camera'
-        ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permission.granted) {
-      Alert.alert('Permission required', `Please allow access to your ${source}.`);
-      return;
-    }
-
-    const pickerMethod =
-      source === 'camera' ? ImagePicker.launchCameraAsync : ImagePicker.launchImageLibraryAsync;
-
-    const result = await pickerMethod({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
-    });
-
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
+  const handleImageSelection = (source: 'camera' | 'gallery') =>
+    selectImageFromMedia(source, async (uri: string) => {
       setImageUri(uri);
-      store.dispatch(AuthActions.setProfilePicture(uri));
-    }
-  }
+      store.dispatch(AuthActions.setProfilePictureUri(uri));
+    });
 
   function handleRemoveImage() {
     setImageUri(null);
-    store.dispatch(AuthActions.setProfilePicture(null));
+    store.dispatch(AuthActions.setProfilePictureUri(null));
   }
 
   function handleNext() {

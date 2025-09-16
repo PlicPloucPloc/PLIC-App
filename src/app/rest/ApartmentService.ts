@@ -1,7 +1,8 @@
 import { API_PAGE_SIZE } from '@app/config/constants.ts';
 import { ApartmentInfo } from '@app/definitions';
+import { alertOnResponseError } from '@app/utils/Error.tsx';
 
-import { alertOnError, apiFetch } from './Client';
+import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { getApartmentImages, getApartmentThumbnail } from './S3Service.ts';
 
@@ -17,7 +18,7 @@ export async function getApartmentsInfoPaginated(
     true,
   );
 
-  if (await alertOnError(response, 'Apartment', 'fetching the apartments')) {
+  if (await alertOnResponseError(response, 'Apartment', 'fetching the apartments')) {
     return;
   }
 
@@ -42,7 +43,7 @@ export async function getApartmentsNoRelationPaginated(
     true,
   );
 
-  if (await alertOnError(response, 'Apartment', 'fetching apartments without relations')) {
+  if (await alertOnResponseError(response, 'Apartment', 'fetching apartments without relations')) {
     return [];
   }
 
@@ -64,7 +65,7 @@ export async function getApartmentInfoById(id: number): Promise<ApartmentInfo | 
     true,
   );
 
-  if (await alertOnError(response, 'Apartment', 'fetching an apartment')) {
+  if (await alertOnResponseError(response, 'Apartment', 'fetching an apartment')) {
     return;
   }
 

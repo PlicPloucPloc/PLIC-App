@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import Endpoints from './Endpoints';
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL;
+const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:4242';
 const TIMEOUT = API_TIMEOUT;
 
 /**
@@ -21,10 +21,11 @@ export async function apiFetch(
   endpoint: string,
   options: RequestInit = {},
   withAuth: boolean = true,
+  prefix: string = API_URL,
 ): Promise<Response> {
   const requestId = uuidv4();
   console.log(
-    `Request ID: ${requestId} | ${options.method || 'GET'} ${endpoint} | Body:`,
+    `Request ID: ${requestId} ${withAuth ? '(authed)' : ''} | ${options.method || 'GET'} ${endpoint} | Body:`,
     options.body,
   );
 
@@ -35,7 +36,7 @@ export async function apiFetch(
 
   let response: Response;
   try {
-    response = await fetchWithTimeout(`${API_URL}${endpoint}`, { ...options, headers });
+    response = await fetchWithTimeout(`${prefix}${endpoint}`, { ...options, headers });
   } catch (error: any) {
     if (error.name === 'AbortError') {
       console.error(`Request ID: ${requestId} | Request timed out after ${TIMEOUT}ms`);
@@ -181,15 +182,4 @@ async function userNeedsLogin(requestId: string): Promise<Response> {
     status: 401,
     statusText: 'Unauthorized',
   });
-}
-
-export async function alertOnError(response: Response, service: string, message: string) {
-  const hasError = !response.ok;
-
-  if (hasError) {
-    const errorData = await response.json();
-    Alert.alert(`${service} Error`, errorData.message || `An error occurred while ${message}.`);
-  }
-
-  return hasError;
 }

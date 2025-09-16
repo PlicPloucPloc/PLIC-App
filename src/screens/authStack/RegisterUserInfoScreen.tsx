@@ -79,8 +79,6 @@ export default function RegisterUserInfoScreen({
             autoFocus={true}
             onSubmitEditing={() => lastNameInputRef.current?.focus()}
             onBlur={() => store.dispatch(AuthActions.setFirstName(firstName.trim()))}
-            selectionColor={colors.contrast}
-            cursorColor={colors.contrast}
           />
           <TextInput
             ref={lastNameInputRef}
@@ -92,8 +90,6 @@ export default function RegisterUserInfoScreen({
             autoCorrect={false}
             returnKeyType="next"
             onBlur={() => store.dispatch(AuthActions.setLastName(lastName.trim()))}
-            selectionColor={colors.contrast}
-            cursorColor={colors.contrast}
           />
           <TouchableOpacity onPress={showDatePicker} style={{ width: '100%' }}>
             <TextInput
@@ -103,8 +99,6 @@ export default function RegisterUserInfoScreen({
               editable={false}
               value={birth?.toLocaleDateString()}
               pointerEvents="none"
-              selectionColor={colors.contrast}
-              cursorColor={colors.contrast}
             />
           </TouchableOpacity>
 

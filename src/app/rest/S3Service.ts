@@ -1,12 +1,13 @@
 import { Alert } from 'react-native';
 
 import { ApartmentInfo } from '@app/definitions';
+import { alertOnResponseError } from '@app/utils/Error';
 
-import { fetchWithTimeout } from './Client';
+import { apiFetch, fetchWithTimeout } from './Client';
 
 const S3_URL = process.env.EXPO_PUBLIC_S3_URL;
 
-export async function postProfilePicture(
+export async function postProfilePictureFromSignedUrl(
   path: string,
   token: string,
   image: Blob,
@@ -21,8 +22,41 @@ export async function postProfilePicture(
 }
 
 export async function checkProfilePictureExists(userId: string): Promise<string | null> {
-  const imageUrl = `${S3_URL}/public/user-pictures/${userId}.png`;
+  const imageUrl = `${S3_URL}/user-pictures/${userId}.png`;
   return (await checkImageExists(imageUrl)) ? imageUrl : null;
+}
+
+export async function putProfilePicture(userId: string, image: Blob): Promise<void> {
+  const response = await apiFetch(
+    `${S3_URL}/user-pictures/${userId}`,
+    {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'image/png',
+      },
+      body: image,
+    },
+    true,
+    '',
+  );
+
+  alertOnResponseError(response, 'S3', 'updating profile picture');
+}
+
+export async function deleteProfilePicture(userId: string): Promise<void> {
+  const response = await apiFetch(
+    `${S3_URL}/user-pictures/${userId}`,
+    {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'image/png',
+      },
+    },
+    true,
+    '',
+  );
+
+  alertOnResponseError(response, 'S3', 'deleting profile picture');
 }
 
 export async function getApartmentThumbnail(apt: ApartmentInfo): Promise<string> {

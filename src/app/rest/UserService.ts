@@ -11,17 +11,18 @@ import {
 } from '@app/definitions';
 import { IAuthState, setRoot, setUserInfo } from '@app/redux/slices';
 import store from '@app/redux/Store';
-import * as ImageManipulator from 'expo-image-manipulator';
+import { alertOnResponseError } from '@app/utils/Error.tsx';
+import { fetchAndCompressImage } from '@app/utils/Image.tsx';
 import * as SecureStore from 'expo-secure-store';
 
-import { alertOnError, apiFetch } from './Client';
+import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
-import { checkProfilePictureExists, postProfilePicture } from './S3Service.ts';
+import { checkProfilePictureExists, postProfilePictureFromSignedUrl } from './S3Service.ts';
 
 export async function getUserInfo(): Promise<UserInfoResponse | null> {
   const userInfo = await apiFetch(Endpoints.USER.INFO, { method: 'GET' });
 
-  if (await alertOnError(userInfo, 'User', 'fetching user info')) {
+  if (await alertOnResponseError(userInfo, 'User', 'fetching user info')) {
     return null;
   }
 
@@ -41,12 +42,12 @@ export async function loadUserInfo(): Promise<void> {
     firstName: userInfo.firstname,
     lastName: userInfo.lastname,
     birthdate: userInfo.birthdate,
-    profilePicture: null,
+    profilePictureUri: null,
   };
 
   const profilePictureUrl = await checkProfilePictureExists(userInfo.id);
   if (profilePictureUrl) {
-    authState.profilePicture = profilePictureUrl;
+    authState.profilePictureUri = profilePictureUrl;
   }
 
   store.dispatch(setUserInfo(authState));
@@ -82,8 +83,10 @@ export async function loginUser(credentials: LoginRequest): Promise<boolean | nu
 }
 
 export async function logoutUser(): Promise<void> {
-  await SecureStore.deleteItemAsync('token');
-  await SecureStore.deleteItemAsync('refresh_token');
+  await Promise.all([
+    SecureStore.deleteItemAsync('token'),
+    SecureStore.deleteItemAsync('refresh_token'),
+  ]);
 
   store.dispatch(setRoot(RootEnum.ROOT_AUTH));
   store.dispatch(
@@ -93,7 +96,7 @@ export async function logoutUser(): Promise<void> {
       firstName: '',
       lastName: '',
       birthdate: '',
-      profilePicture: null,
+      profilePictureUri: null,
     }),
   );
 }
@@ -109,55 +112,35 @@ export async function registerUser(userInfo: RegisterRequest): Promise<boolean> 
     false,
   );
 
-  if (await alertOnError(response, 'User', 'Error registering user')) {
+  if (await alertOnResponseError(response, 'User', 'Error registering user')) {
     return false;
   }
 
-  if (!userInfo.profilePicture) {
+  if (!userInfo.profilePictureUri) {
     return true;
   }
 
   const registerResponse: RegisterResponse = await response.json();
 
-  return postPictureAfterRegister(userInfo.profilePicture, registerResponse);
+  return postPictureAfterRegister(userInfo.profilePictureUri, registerResponse);
 }
 
 async function postPictureAfterRegister(
   imageUri: string,
   { path, token }: RegisterResponse,
 ): Promise<boolean> {
-  // Convert image to PNG
-  const manipResult = await ImageManipulator.manipulateAsync(imageUri, [], {
-    compress: 1,
-    format: ImageManipulator.SaveFormat.PNG,
-  });
+  const image = await fetchAndCompressImage(imageUri);
 
-  imageUri = manipResult.uri;
-
-  // fetch profile picture from local uri
-  console.log('retrieveing profile picture from local uri');
-  const imageResponse = await fetch(imageUri);
-
-  if (await alertOnError(imageResponse, 'User', 'Error fetching profile picture')) {
+  if (!image) {
     return false;
   }
 
-  console.log('converting profile picture to blob');
-  const imageBlob = await imageResponse.blob();
-  if (!imageBlob) {
-    console.error('Error converting profile picture to blob');
+  const ppResponse = await postProfilePictureFromSignedUrl(path, token, image.blob);
+
+  if (await alertOnResponseError(ppResponse, 'User', 'Error registering user')) {
     return false;
   }
 
-  console.log('uploading profile picture to bucket', path, token);
-  // Upload profile picture to bucket
-  const ppResponse = await postProfilePicture(path, token, imageBlob);
-
-  if (await alertOnError(ppResponse, 'User', 'Error registering user')) {
-    return false;
-  }
-
-  console.log('profile picture uploaded successfully');
   return true;
 }
 
@@ -181,7 +164,7 @@ export async function resendVerificationEmail(body: ResendEmailRequest): Promise
     false,
   );
 
-  if (await alertOnError(response, 'User', 'resending verification email')) {
+  if (await alertOnResponseError(response, 'User', 'resending verification email')) {
     return false;
   }
 

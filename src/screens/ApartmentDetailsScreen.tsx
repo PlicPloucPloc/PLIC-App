@@ -7,7 +7,7 @@ import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setSwipeDirection } from '@app/redux/slices';
 import store from '@app/redux/Store';
 import { getApartmentInfoById } from '@app/rest/ApartmentService';
-import { getApartmentImages } from '@app/rest/S3Service.ts';
+import { getApartmentImages } from '@app/rest/S3Service';
 import { Images } from '@assets/index';
 import SwipeButton from '@components/ActionButton';
 import Loader from '@components/Loader';

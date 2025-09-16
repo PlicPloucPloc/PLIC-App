@@ -146,7 +146,7 @@ export default function AccountScreen({ navigation }: AccountStackScreenProps<'A
         android_ripple={{ color: `${colors.primary}50` }}
         unstable_pressDelay={100}
         style={styles.headerContainer}>
-        <ProfilePicture size={60} imageUri={authState.profilePicture} />
+        <ProfilePicture size={60} imageUri={authState.profilePictureUri} />
         <View style={{ flex: 1 }}>
           <Text style={styles.username} numberOfLines={1} ellipsizeMode="tail">
             {authState.firstName} {authState.lastName}

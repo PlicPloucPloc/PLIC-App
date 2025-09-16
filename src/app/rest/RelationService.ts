@@ -4,8 +4,9 @@ import { API_PAGE_SIZE } from '@app/config/constants.ts';
 import { RELATION_TYPE, RelationInfo } from '@app/definitions';
 import { setShouldRefetchHistory, setShouldRefetchLikeList } from '@app/redux/slices/index.ts';
 import store from '@app/redux/Store.ts';
+import { alertOnResponseError } from '@app/utils/Error.tsx';
 
-import { alertOnError, apiFetch } from './Client';
+import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { getApartmentThumbnail } from './S3Service.ts';
 
@@ -21,7 +22,7 @@ export async function getAllRelationsPaginated(
     true,
   );
 
-  if (await alertOnError(response, 'Relation', 'getting all relations')) {
+  if (await alertOnResponseError(response, 'Relation', 'getting all relations')) {
     return [];
   }
 
@@ -47,7 +48,7 @@ export async function getLikedApartmentsPaginated(
     true,
   );
 
-  if (await alertOnError(response, 'Relation', 'getting likes')) {
+  if (await alertOnResponseError(response, 'Relation', 'getting likes')) {
     return [];
   }
 
@@ -72,7 +73,7 @@ export async function getDislikedApartmentPaginated(
     true,
   );
 
-  if (await alertOnError(response, 'Relation', 'getting dislikes')) {
+  if (await alertOnResponseError(response, 'Relation', 'getting dislikes')) {
     return [];
   }
 
@@ -120,7 +121,7 @@ export async function updateRelation(apartmentId: number, type: RELATION_TYPE): 
     true,
   );
 
-  if (await alertOnError(response, 'Relation', 'updating relation')) return false;
+  if (await alertOnResponseError(response, 'Relation', 'updating relation')) return false;
 
   updateShouldRefetchStates(true);
 
@@ -139,7 +140,7 @@ export async function deleteRelation(apartmentId: number): Promise<boolean> {
 
   if (response.status === 404) return true;
 
-  if (await alertOnError(response, 'Relation', 'deleting relation')) return false;
+  if (await alertOnResponseError(response, 'Relation', 'deleting relation')) return false;
 
   updateShouldRefetchStates(true);
 

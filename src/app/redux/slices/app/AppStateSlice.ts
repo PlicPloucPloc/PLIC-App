@@ -5,7 +5,6 @@ import { createSlice } from '@reduxjs/toolkit';
 
 export interface IAppState {
   root: RootEnum;
-  statusBarBackgroundColor: boolean;
   shouldRefetchLikeList: boolean;
   shouldRefetchHistory: boolean;
   swipeDirection?: SwipeDirection;
@@ -13,7 +12,6 @@ export interface IAppState {
 
 const initialState: IAppState = {
   root: RootEnum.ROOT_AUTH,
-  statusBarBackgroundColor: false,
   shouldRefetchLikeList: false,
   shouldRefetchHistory: false,
   swipeDirection: undefined,
@@ -25,9 +23,6 @@ export const appStateSlice = createSlice({
   reducers: {
     setRoot: (state, action: PayloadAction<RootEnum>) => {
       state.root = action.payload;
-    },
-    setStatusBarBackgroundColor: (state, action: PayloadAction<boolean>) => {
-      state.statusBarBackgroundColor = action.payload;
     },
     setShouldRefetchLikeList: (state, action: PayloadAction<boolean>) => {
       state.shouldRefetchLikeList = action.payload;
@@ -41,12 +36,7 @@ export const appStateSlice = createSlice({
   },
 });
 
-export const {
-  setRoot,
-  setStatusBarBackgroundColor,
-  setShouldRefetchLikeList,
-  setShouldRefetchHistory,
-  setSwipeDirection,
-} = appStateSlice.actions;
+export const { setRoot, setShouldRefetchLikeList, setShouldRefetchHistory, setSwipeDirection } =
+  appStateSlice.actions;
 
 export default appStateSlice.reducer;

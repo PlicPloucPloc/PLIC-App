@@ -7,7 +7,7 @@ export interface IAuthState {
   firstName: string;
   lastName: string;
   birthdate: string; // (YYYY-MM-DD)
-  profilePicture: string | null;
+  profilePictureUri: string | null;
 }
 
 const initialState: IAuthState = {
@@ -16,7 +16,7 @@ const initialState: IAuthState = {
   firstName: '',
   lastName: '',
   birthdate: '',
-  profilePicture: '',
+  profilePictureUri: '',
 };
 
 export const authStateSlice = createSlice({
@@ -38,10 +38,15 @@ export const authStateSlice = createSlice({
     setBirthdate: (state, action: PayloadAction<string>) => {
       state.birthdate = action.payload;
     },
-    setProfilePicture: (state, action: PayloadAction<string | null>) => {
-      state.profilePicture = action.payload;
+    setProfilePictureUri: (state, action: PayloadAction<string | null>) => {
+      const newUri = action.payload ? action.payload + '?t=' + new Date().getTime() : null; // Cache busting
+      state.profilePictureUri = newUri;
     },
     setUserInfo: (_, action: PayloadAction<IAuthState>) => {
+      if (action.payload.profilePictureUri) {
+        action.payload.profilePictureUri =
+          action.payload.profilePictureUri + '?t=' + new Date().getTime(); // Cache busting
+      }
       return action.payload;
     },
   },
@@ -53,7 +58,7 @@ export const {
   setLastName,
   setBirthdate,
   setUserId,
-  setProfilePicture,
+  setProfilePictureUri,
   setUserInfo,
 } = authStateSlice.actions;
 

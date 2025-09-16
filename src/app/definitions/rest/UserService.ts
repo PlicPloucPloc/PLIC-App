@@ -30,7 +30,7 @@ export type RegisterRequest = {
   lastName: string;
   birthdate: string;
   password: string;
-  profilePicture?: string | null;
+  profilePictureUri?: string | null;
 };
 
 export type RegisterResponse = {

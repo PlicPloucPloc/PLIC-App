@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { setProfilePicture } from '@app/redux/slices';
+import { setProfilePictureUri } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
+import { deleteProfilePicture, putProfilePicture } from '@app/rest/S3Service';
+import { fetchAndCompressImage, selectImageFromMedia } from '@app/utils/Image';
+import Loader from '@components/Loader';
 import ProfilePicture from '@components/ProfilePicture';
 import { Ionicons } from '@expo/vector-icons';
 import { AccountStackScreenProps } from '@navigation/Types';
-import * as ImagePicker from 'expo-image-picker';
-import { setStatusBarBackgroundColor } from 'expo-status-bar';
 import Modal from 'react-native-modal';
 import { useSelector } from 'react-redux';
 
@@ -20,61 +21,59 @@ export default function MyProfileScreen({}: AccountStackScreenProps<'MyProfile'>
   const authState = useSelector((state: RootState) => state.authState);
   const [modalVisible, setModalVisible] = useState(false);
 
+  const [isLoading, setIsLoading] = useState(false);
+
   const profileItems = [
     { icon: 'person', label: 'First name', value: authState.firstName },
     { icon: 'person', label: 'Last name', value: authState.lastName },
     { icon: 'calendar', label: 'Date of birth', value: authState.birthdate },
   ];
 
-  async function handleImageSelection(source: 'camera' | 'gallery') {
-    const permission =
-      source === 'camera'
-        ? await ImagePicker.requestCameraPermissionsAsync()
-        : await ImagePicker.requestMediaLibraryPermissionsAsync();
-
-    if (!permission.granted) {
-      Alert.alert('Permission required', `Please allow access to your ${source}.`);
-      return;
-    }
-
-    const pickerMethod =
-      source === 'camera' ? ImagePicker.launchCameraAsync : ImagePicker.launchImageLibraryAsync;
-
-    const result = await pickerMethod({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.7,
+  const handleImageSelection = (source: 'camera' | 'gallery') =>
+    selectImageFromMedia(source, async (uri: string) => {
+      await uploadImage(uri);
     });
 
-    if (!result.canceled) {
-      const uri = result.assets[0].uri;
-      setModalVisible(false);
-      store.dispatch(setProfilePicture(uri));
+  async function uploadImage(uri: string) {
+    setIsLoading(true);
+    const image = await fetchAndCompressImage(uri);
+
+    if (!image) {
+      return false;
     }
+
+    store.dispatch(setProfilePictureUri(image.uri));
+
+    await putProfilePicture(`${authState.userId}.png`, image.blob);
+    setIsLoading(false);
+    setModalVisible(false);
   }
 
-  function showModal(show: boolean) {
-    setModalVisible(show);
-    // store.dispatch(setStatusBarBackgroundColor(show));
-    setStatusBarBackgroundColor(show ? 'rgba(0,0,0,0.5)' : 'transparent', false);
+  async function handleRemoveImage() {
+    store.dispatch(setProfilePictureUri(null));
+
+    setIsLoading(true);
+    await deleteProfilePicture(`${authState.userId}.png`);
+    setIsLoading(false);
+    setModalVisible(false);
   }
 
   return (
     <View style={styles.container}>
       <Modal
         isVisible={modalVisible}
-        onBackdropPress={() => showModal(false)}
-        onBackButtonPress={() => showModal(false)}
+        onBackdropPress={() => setModalVisible(false)}
+        onBackButtonPress={() => setModalVisible(false)}
         hideModalContentWhileAnimating={true}
         animationInTiming={300}
         animationOutTiming={300}
         backdropTransitionOutTiming={1}
         backdropTransitionInTiming={1}
-        backdropOpacity={0.5}
+        backdropOpacity={0}
         swipeDirection={['down']}
-        onSwipeComplete={() => showModal(false)}
+        onSwipeComplete={() => setModalVisible(false)}
         style={{ margin: 0 }}>
+        <Loader loading={isLoading} />
         <View style={styles.modalView}>
           <View style={styles.modalSwipeIndicator} />
 
@@ -83,7 +82,7 @@ export default function MyProfileScreen({}: AccountStackScreenProps<'MyProfile'>
               name="close"
               size={26}
               color={colors.textPrimary}
-              onPress={() => showModal(false)}
+              onPress={() => setModalVisible(false)}
             />
             <Text style={styles.modalTitle}>Change Profile Picture</Text>
             <Ionicons name="close" size={24} style={{ opacity: 0 }} />
@@ -92,21 +91,41 @@ export default function MyProfileScreen({}: AccountStackScreenProps<'MyProfile'>
           <TouchableOpacity
             style={styles.buttonRow}
             onPress={() => handleImageSelection('gallery')}>
-            <Ionicons name="images" size={24} color={colors.textSecondary} />
-            <Text style={styles.modaltext}>Gallery</Text>
+            <Ionicons name="images" size={24} color={colors.textPrimary} />
+            <Text style={styles.modaltext}>Choose from gallery</Text>
           </TouchableOpacity>
 
           <View style={styles.separator} />
 
           <TouchableOpacity style={styles.buttonRow} onPress={() => handleImageSelection('camera')}>
-            <Ionicons name="camera" size={24} color={colors.textSecondary} />
-            <Text style={styles.modaltext}>Camera</Text>
+            <Ionicons name="camera" size={24} color={colors.textPrimary} />
+            <Text style={styles.modaltext}>Take a picture</Text>
+          </TouchableOpacity>
+
+          <View style={styles.separator} />
+
+          <TouchableOpacity
+            style={styles.buttonRow}
+            onPress={() => handleRemoveImage()}
+            disabled={!authState.profilePictureUri}>
+            <Ionicons
+              name="trash"
+              size={24}
+              color={authState.profilePictureUri ? colors.textPrimary : colors.textSecondary}
+            />
+            <Text
+              style={[
+                styles.modaltext,
+                authState.profilePictureUri ? {} : { color: colors.textSecondary },
+              ]}>
+              Delete profile picture
+            </Text>
           </TouchableOpacity>
         </View>
       </Modal>
 
-      <TouchableOpacity onPress={() => showModal(true)} style={styles.avatarContainer}>
-        <ProfilePicture size={200} imageUri={authState.profilePicture} borderRadius={30} />
+      <TouchableOpacity onPress={() => setModalVisible(true)} style={styles.avatarContainer}>
+        <ProfilePicture size={200} imageUri={authState.profilePictureUri} borderRadius={30} />
       </TouchableOpacity>
 
       <View style={styles.infoContainer}>
@@ -167,7 +186,8 @@ const createStyles = (colors: ColorTheme) =>
       position: 'absolute',
       bottom: 0,
       width: '100%',
-      backgroundColor: colors.background,
+      height: '99%',
+      backgroundColor: colors.backgroundSecondary,
       paddingHorizontal: 20,
       paddingBottom: 30,
       paddingTop: 5,
@@ -208,7 +228,7 @@ const createStyles = (colors: ColorTheme) =>
       borderBottomColor: colors.contrast,
     },
     modaltext: {
-      color: colors.textSecondary,
+      color: colors.textPrimary,
       fontSize: 15,
       fontWeight: '500',
       marginLeft: 15,
