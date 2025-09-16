@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useColorScheme } from 'react-native';
 
 import { RootEnum } from '@app/definitions';
 import { setRoot } from '@app/redux/slices';
@@ -11,13 +12,15 @@ import { NavigationContainer } from '@react-navigation/native';
 import SplashScreen from '@screens/SplashScreen';
 import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
+import { StatusBar } from 'expo-status-bar';
 import { useSelector } from 'react-redux';
 
 import AuthNavigator from './AuthNavigator';
 import InsideNavigator from './InsideNavigator';
 
 export default function AppContainer() {
-  const root = useSelector((state: RootState) => state.appState.root);
+  const appState = useSelector((state: RootState) => state.appState);
+  const scheme = useColorScheme();
 
   const [isLoading, setIsLoading] = useState(true);
 
@@ -58,7 +61,8 @@ export default function AppContainer() {
 
   return (
     <NavigationContainer>
-      {root === RootEnum.ROOT_INSIDE ? <InsideNavigator /> : <AuthNavigator />}
+      <StatusBar style={scheme == 'dark' ? 'dark' : 'light'} />
+      {appState.root === RootEnum.ROOT_INSIDE ? <InsideNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }

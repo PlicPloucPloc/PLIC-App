@@ -50,7 +50,7 @@ export type SharedStackParamList = {
     apartmentId?: number;
     enableRelationButtons?: boolean;
   };
-  Profile: { userId: string };
+  OtherProfile: { userId: string };
   DirectMessage: { userId: string };
 };
 
@@ -123,6 +123,7 @@ export type ColocFinderStackScreenProps<T extends keyof ColocFinderStackParamLis
 // ------- Account stack -------
 export type AccountStackParamList = {
   Account: undefined;
+  MyProfile: undefined;
   Filters: undefined;
   History: undefined;
 };

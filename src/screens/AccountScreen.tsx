@@ -142,12 +142,7 @@ export default function AccountScreen({ navigation }: AccountStackScreenProps<'A
   return (
     <View style={styles.container}>
       <Pressable
-        onPress={() =>
-          navigation.navigate('SharedStack', {
-            screen: 'Profile',
-            params: { userId: authState.userId },
-          })
-        }
+        onPress={() => navigation.navigate('MyProfile')}
         android_ripple={{ color: `${colors.primary}50` }}
         unstable_pressDelay={100}
         style={styles.headerContainer}>
