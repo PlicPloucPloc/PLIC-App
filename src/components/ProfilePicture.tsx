@@ -10,7 +10,6 @@ type ProfilePictureProps = {
   size: number;
   imageUri: string | null;
   borderRadius?: number;
-  showRemove?: boolean;
   onRemove?: () => void;
 };
 
@@ -18,7 +17,6 @@ export default function ProfilePicture({
   size = 100,
   borderRadius = size / 2,
   imageUri = null,
-  showRemove = false,
   onRemove = undefined,
 }: ProfilePictureProps) {
   const colors = useThemeColors();
@@ -42,7 +40,7 @@ export default function ProfilePicture({
               },
             ]}
           />
-          {showRemove && (
+          {onRemove && imageUri && (
             <TouchableOpacity
               onPress={onRemove}
               style={[styles.removeIcon, { backgroundColor: colors.background }]}>
@@ -78,10 +76,10 @@ const createStyles = (colors: any) =>
     },
     removeIcon: {
       position: 'absolute',
-      top: -10,
-      right: -10,
+      top: 0,
+      right: 0,
       backgroundColor: colors.background,
-      borderRadius: 50,
+      borderRadius: 100,
     },
     placeholder: {
       borderWidth: 2,

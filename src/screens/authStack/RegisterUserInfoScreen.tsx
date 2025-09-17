@@ -14,10 +14,10 @@ import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import * as AuthActions from '@app/redux/slices/AuthStateSlice';
 import store, { RootState } from '@app/redux/Store';
+import { showBirthdatePicker } from '@app/utils/Auth';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
 import { AuthStackScreenProps } from '@navigation/Types';
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 import { useSelector } from 'react-redux';
 
 export default function RegisterUserInfoScreen({
@@ -30,33 +30,16 @@ export default function RegisterUserInfoScreen({
 
   const [firstName, setFirstName] = useState(authState.firstName ?? '');
   const [lastName, setLastName] = useState(authState.lastName ?? '');
-  const [birth, setBirth] = useState(authState.birthdate ? new Date(authState.birthdate) : null);
+  const [birthdate, setBirthdate] = useState(
+    authState.birthdate ? new Date(authState.birthdate) : null,
+  );
 
   const firstNameInputRef = useRef<TextInput>(null);
   const lastNameInputRef = useRef<TextInput>(null);
 
-  const maxDate = new Date();
-  maxDate.setFullYear(maxDate.getFullYear() - 13); // 13 years old minimum to register
-
-  function showDatePicker() {
-    DateTimePickerAndroid.open({
-      value: birth || new Date(),
-      onChange: (_, selectedDate) => {
-        if (!selectedDate) return;
-
-        setBirth(selectedDate);
-        store.dispatch(AuthActions.setBirthdate(selectedDate.toISOString().split('T')[0]));
-      },
-      mode: 'date',
-      maximumDate: maxDate,
-      minimumDate: new Date(1900, 0, 1, 1), // Set to 1900
-    });
-  }
-
   function handleNext() {
-    if (!firstName || !lastName || !birth) {
-      Alert.alert('Error', 'Please fill in all fields.');
-      return;
+    if (!firstName || !lastName || !birthdate) {
+      return Alert.alert('Error', 'Please fill in all fields.');
     }
 
     navigation.navigate('RegisterPicture');
@@ -91,13 +74,18 @@ export default function RegisterUserInfoScreen({
             returnKeyType="next"
             onBlur={() => store.dispatch(AuthActions.setLastName(lastName.trim()))}
           />
-          <TouchableOpacity onPress={showDatePicker} style={{ width: '100%' }}>
+          <TouchableOpacity
+            onPress={() => {
+              Keyboard.dismiss();
+              showBirthdatePicker(birthdate, setBirthdate);
+            }}
+            style={{ width: '100%' }}>
             <TextInput
               style={styles.input}
               placeholder="Date of birth"
               placeholderTextColor={colors.textSecondary}
               editable={false}
-              value={birth?.toLocaleDateString()}
+              value={birthdate?.toLocaleDateString()}
               pointerEvents="none"
             />
           </TouchableOpacity>
@@ -140,11 +128,5 @@ const createStyles = (colors: ColorTheme) =>
       borderRadius: 10,
       fontSize: 16,
       color: colors.textPrimary,
-    },
-    buildingsContainer: {
-      flex: 2,
-      width: '100%',
-      alignItems: 'center',
-      paddingTop: 20,
     },
   });

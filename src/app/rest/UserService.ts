@@ -11,8 +11,8 @@ import {
 } from '@app/definitions';
 import { IAuthState, setRoot, setUserInfo } from '@app/redux/slices';
 import store from '@app/redux/Store';
-import { alertOnResponseError } from '@app/utils/Error.tsx';
-import { fetchAndCompressImage } from '@app/utils/Image.tsx';
+import { alertOnResponseError } from '@app/utils/Error.ts';
+import { fetchAndCompressImage } from '@app/utils/Image.ts';
 import * as SecureStore from 'expo-secure-store';
 
 import { apiFetch } from './Client';

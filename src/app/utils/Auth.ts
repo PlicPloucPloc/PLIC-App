@@ -1,3 +1,7 @@
+import { setBirthdate } from '@app/redux/slices';
+import store from '@app/redux/Store';
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+
 export function checkEmail(email: string): string {
   if (!email) {
     return 'Email cannot be empty.';
@@ -36,4 +40,28 @@ export function checkPassword(password: string, isRegistering = false): string {
   }
 
   return '';
+}
+
+export function showBirthdatePicker(
+  date: Date | null,
+  setDate: (date: Date) => void,
+  publishToStore = true,
+) {
+  const maxDate = new Date();
+  maxDate.setFullYear(maxDate.getFullYear() - 13); // 13 years old minimum to register
+
+  DateTimePickerAndroid.open({
+    value: date || new Date(),
+    onChange: (_, selectedDate) => {
+      if (!selectedDate) return;
+
+      setDate(selectedDate);
+      if (publishToStore) {
+        store.dispatch(setBirthdate(selectedDate.toISOString()));
+      }
+    },
+    mode: 'date',
+    maximumDate: maxDate,
+    minimumDate: new Date(1900, 0, 1, 1), // Set to 1900
+  });
 }

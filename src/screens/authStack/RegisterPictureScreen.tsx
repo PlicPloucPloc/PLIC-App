@@ -46,12 +46,7 @@ export default function RegisterPictureScreen({
       <View style={styles.content}>
         <Text style={styles.title}>Register - Profile Picture</Text>
 
-        <ProfilePicture
-          size={150}
-          imageUri={imageUri}
-          showRemove={imageUri !== null}
-          onRemove={handleRemoveImage}
-        />
+        <ProfilePicture size={150} imageUri={imageUri} onRemove={handleRemoveImage} />
 
         <View style={styles.iconRow}>
           <TouchableOpacity

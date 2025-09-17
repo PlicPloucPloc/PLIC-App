@@ -1,6 +1,6 @@
 import { API_PAGE_SIZE } from '@app/config/Constants.ts';
 import { ApartmentInfo } from '@app/definitions';
-import { alertOnResponseError } from '@app/utils/Error.tsx';
+import { alertOnResponseError } from '@app/utils/Error.ts';
 
 import { apiFetch } from './Client';
 import Endpoints from './Endpoints';

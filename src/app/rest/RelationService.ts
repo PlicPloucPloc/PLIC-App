@@ -4,7 +4,7 @@ import { API_PAGE_SIZE } from '@app/config/Constants.ts';
 import { RELATION_TYPE, RelationInfo } from '@app/definitions';
 import { setShouldRefetchHistory, setShouldRefetchLikeList } from '@app/redux/slices/index.ts';
 import store from '@app/redux/Store.ts';
-import { alertOnResponseError } from '@app/utils/Error.tsx';
+import { alertOnResponseError } from '@app/utils/Error.ts';
 
 import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
