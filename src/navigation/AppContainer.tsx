@@ -5,7 +5,7 @@ import { RootEnum } from '@app/definitions';
 import { setRoot } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
 import { getToken } from '@app/rest/Client';
-import { loadUserInfo } from '@app/rest/UserService';
+import { loadCurrentUserInfo } from '@app/rest/UserService';
 import { Images } from '@assets/index';
 import { Ionicons } from '@expo/vector-icons';
 import { NavigationContainer } from '@react-navigation/native';
@@ -43,7 +43,7 @@ export default function AppContainer() {
 
         const token = await getToken();
         if (token) {
-          await loadUserInfo();
+          await loadCurrentUserInfo();
         }
 
         store.dispatch(setRoot(token ? RootEnum.ROOT_INSIDE : RootEnum.ROOT_AUTH));

@@ -9,7 +9,8 @@ import {
   RootEnum,
   UserInfoResponse,
 } from '@app/definitions';
-import { IAuthState, setRoot, setUserInfo } from '@app/redux/slices';
+import { AuthState } from '@app/definitions/redux';
+import { setRoot, setUserInfo } from '@app/redux/slices';
 import store from '@app/redux/Store';
 import { alertOnResponseError } from '@app/utils/Error.ts';
 import { fetchAndCompressImage } from '@app/utils/Image.ts';
@@ -19,24 +20,16 @@ import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { checkProfilePictureExists, postProfilePictureFromSignedUrl } from './S3Service.ts';
 
-export async function getUserInfo(): Promise<UserInfoResponse | null> {
-  const userInfo = await apiFetch(Endpoints.USER.INFO, { method: 'GET' });
+async function getUserInfo(request: () => Promise<Response>): Promise<AuthState | null> {
+  const response = await request();
 
-  if (await alertOnResponseError(userInfo, 'User', 'fetching user info')) {
+  if (await alertOnResponseError(response, 'User', 'fetching user info')) {
     return null;
   }
 
-  return (await userInfo.json()) as UserInfoResponse;
-}
+  const userInfo: UserInfoResponse = await response.json();
 
-export async function loadUserInfo(): Promise<void> {
-  const userInfo = await getUserInfo();
-
-  if (!userInfo) {
-    return;
-  }
-
-  const authState: IAuthState = {
+  const authState: AuthState = {
     userId: userInfo.id,
     email: '',
     firstName: userInfo.firstname,
@@ -46,11 +39,30 @@ export async function loadUserInfo(): Promise<void> {
   };
 
   const profilePictureUrl = await checkProfilePictureExists(userInfo.id);
+
   if (profilePictureUrl) {
     authState.profilePictureUri = profilePictureUrl;
   }
 
-  store.dispatch(setUserInfo(authState));
+  return authState;
+}
+
+export async function getCurrentUserInfo() {
+  return getUserInfo(() => apiFetch(Endpoints.USER.INFO, { method: 'GET' }));
+}
+
+export async function getOtherUserInfo(userId: string): Promise<AuthState | null> {
+  return getUserInfo(() => apiFetch(Endpoints.USER.OTHER_INFO(userId), { method: 'GET' }));
+}
+
+export async function loadCurrentUserInfo(): Promise<void> {
+  const userInfo = await getCurrentUserInfo();
+
+  if (!userInfo) {
+    return;
+  }
+
+  store.dispatch(setUserInfo(userInfo));
 }
 
 export async function loginUser(credentials: LoginRequest): Promise<boolean | null> {
@@ -77,7 +89,7 @@ export async function loginUser(credentials: LoginRequest): Promise<boolean | nu
   const userData: LoginResponse = await response.json();
   await SecureStore.setItemAsync('token', userData.session.access_token);
   await SecureStore.setItemAsync('refresh_token', userData.session.refresh_token);
-  await loadUserInfo();
+  await loadCurrentUserInfo();
 
   return true;
 }

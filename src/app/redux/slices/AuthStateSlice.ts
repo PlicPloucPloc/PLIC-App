@@ -1,16 +1,8 @@
+import { AuthState } from '@app/definitions/redux';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-export interface IAuthState {
-  userId: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  birthdate: string; // (YYYY-MM-DD)
-  profilePictureUri: string | null;
-}
-
-const initialState: IAuthState = {
+const initialState: AuthState = {
   userId: '',
   email: '',
   firstName: '',
@@ -42,7 +34,7 @@ export const authStateSlice = createSlice({
       const newUri = action.payload ? action.payload + '?t=' + new Date().getTime() : null; // Cache busting
       state.profilePictureUri = newUri;
     },
-    setUserInfo: (_, action: PayloadAction<IAuthState>) => {
+    setUserInfo: (_, action: PayloadAction<AuthState>) => {
       if (action.payload.profilePictureUri) {
         action.payload.profilePictureUri =
           action.payload.profilePictureUri + '?t=' + new Date().getTime(); // Cache busting

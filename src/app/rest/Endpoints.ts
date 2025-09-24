@@ -1,6 +1,7 @@
 const Endpoints = {
   USER: {
     INFO: '/user/id',
+    OTHER_INFO: (userId: string) => `/user/${userId}`,
     LOGIN: '/user/login',
     REGISTER: '/user/register',
     CHECK_EMAIL: (email: string) => `/user/checkEmail/${email.toLowerCase()}`,

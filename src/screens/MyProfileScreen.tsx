@@ -12,6 +12,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { AccountStackScreenProps } from '@navigation/Types';
 import { useSelector } from 'react-redux';
 
+type ProfileItem = {
+  icon: IoniconName;
+  label: string;
+  value: string;
+};
+
 export default function MyProfileScreen({}: AccountStackScreenProps<'MyProfile'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
@@ -20,7 +26,7 @@ export default function MyProfileScreen({}: AccountStackScreenProps<'MyProfile'>
   const [pictureModalVisible, setPictureModalVisible] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
 
-  const profileItems = [
+  const profileItems: ProfileItem[] = [
     { icon: 'person', label: 'First name', value: authState.firstName },
     { icon: 'person', label: 'Last name', value: authState.lastName },
     { icon: 'calendar', label: 'Date of birth', value: authState.birthdate },
@@ -43,7 +49,7 @@ export default function MyProfileScreen({}: AccountStackScreenProps<'MyProfile'>
       <TouchableOpacity
         onPress={() => setPictureModalVisible(true)}
         style={styles.pictureContainer}>
-        <ProfilePicture size={200} imageUri={authState.profilePictureUri} borderRadius={30} />
+        <ProfilePicture size={200} userInfo={authState} borderRadius={30} />
       </TouchableOpacity>
 
       <View style={{ marginTop: 6, borderRadius: 1000, alignSelf: 'center' }}>
@@ -59,7 +65,7 @@ export default function MyProfileScreen({}: AccountStackScreenProps<'MyProfile'>
         <View
           key={index}
           style={[styles.itemRow, index != profileItems.length - 1 ? styles.bottomBorder : {}]}>
-          <Ionicons name={item.icon as IoniconName} size={22} color={colors.textSecondary} />
+          <Ionicons name={item.icon} size={22} color={colors.textSecondary} />
           <View style={{ marginLeft: 15 }}>
             <Text style={styles.label}>{item.label}</Text>
             <Text style={styles.value}>{item.value}</Text>

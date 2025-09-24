@@ -11,29 +11,20 @@ export default function ColocFinderForHouseScreen({
     <View style={styles.container}>
       <Text style={styles.title}>Find coloc for house: {route.params.houseId}</Text>
       <Button
-        title="user 1"
+        title="Romain Doulaud"
         onPress={() =>
           navigation.navigate('SharedStack', {
             screen: 'OtherProfile',
-            params: { userId: '132-654-sfj' },
+            params: { userId: 'a3c0e18a-2f24-4eaa-82cc-9d29c8e509e1' },
           })
         }
       />
       <Button
-        title="user 2"
+        title="Romano Pepito"
         onPress={() =>
           navigation.navigate('SharedStack', {
             screen: 'OtherProfile',
-            params: { userId: '987-321-fgh' },
-          })
-        }
-      />
-      <Button
-        title="user 3"
-        onPress={() =>
-          navigation.navigate('SharedStack', {
-            screen: 'OtherProfile',
-            params: { userId: '456-789-dfg' },
+            params: { userId: '7c8ce8e3-a3af-407f-a34c-0931422a71c1' },
           })
         }
       />

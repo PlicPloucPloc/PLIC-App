@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { AuthState } from '@app/definitions/redux';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,29 +9,53 @@ import { useSelector } from 'react-redux';
 
 type ProfilePictureProps = {
   size: number;
-  imageUri: string | null;
+  imageUri?: string | null;
+  userInfo?: AuthState;
   borderRadius?: number;
   onRemove?: () => void;
 };
 
 export default function ProfilePicture({
   size = 100,
+  imageUri,
+  userInfo,
   borderRadius = size / 2,
-  imageUri = null,
   onRemove = undefined,
 }: ProfilePictureProps) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
+  const computeInitials = (firstName: string, lastName: string) =>
+    `${firstName[0]}${lastName[0]}`.toUpperCase();
+
   const authState = useSelector((state: RootState) => state.authState);
-  const initials = `${authState.firstName[0]}${authState.lastName[0]}`.toUpperCase();
+  const [initials, setInitials] = useState(
+    computeInitials(authState.firstName, authState.lastName),
+  );
+
+  const [uri, setUri] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (userInfo && imageUri) {
+      console.warn(
+        'Only one of userInfo or imageUri should be provided to ProfilePicture component.',
+      );
+    }
+
+    if (userInfo !== undefined) {
+      setUri(userInfo.profilePictureUri);
+      setInitials(computeInitials(userInfo.firstName, userInfo.lastName));
+    } else if (imageUri !== undefined) {
+      setUri(imageUri);
+    }
+  }, [userInfo, imageUri]);
 
   return (
     <View style={[styles.imageContainer, { width: size, height: size }]}>
-      {imageUri ? (
+      {uri ? (
         <>
           <Image
-            source={{ uri: imageUri }}
+            source={{ uri: uri }}
             style={[
               styles.imagePreview,
               {
