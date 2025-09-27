@@ -80,7 +80,13 @@ export default function EditProfilePictureModal({
       <Loader loading={isLoading} />
 
       <View style={{ alignItems: 'center', marginBottom: 20 }}>
-        <ProfilePicture size={250} imageUri={imageUri} borderRadius={30} />
+        <ProfilePicture
+          size={250}
+          imageUri={imageUri}
+          firstName={authState.firstName}
+          lastName={authState.lastName}
+          borderRadius={30}
+        />
       </View>
 
       <TouchableOpacity style={styles.buttonRow} onPress={() => handleImageSelection('gallery')}>

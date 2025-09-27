@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
-import { ActivityIndicator, Alert, FlatList, RefreshControl } from 'react-native';
+import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text } from 'react-native';
 
+import { ColorTheme } from '@app/Colors';
 import { RelationInfo } from '@app/definitions';
 import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
@@ -26,6 +27,8 @@ export default function ApartmentList({
   isHistory,
 }: ApartmentListProps) {
   const colors = useThemeColors();
+  const styles = createStyles(colors);
+
   const {
     data: relations,
     setData: setRelations,
@@ -98,6 +101,10 @@ export default function ApartmentList({
     [handlePress, handleDeleteRelation, isHistory],
   );
 
+  if (relations.length === 0) {
+    return <Text style={styles.text}>No apartments found.</Text>;
+  }
+
   return (
     <FlatList
       data={filteredRelations}
@@ -123,3 +130,15 @@ export default function ApartmentList({
     />
   );
 }
+
+const createStyles = (colors: ColorTheme) =>
+  StyleSheet.create({
+    text: {
+      flex: 1,
+      textAlign: 'center',
+      marginTop: 20,
+      color: colors.textSecondary,
+      fontSize: 16,
+      fontWeight: '500',
+    },
+  });

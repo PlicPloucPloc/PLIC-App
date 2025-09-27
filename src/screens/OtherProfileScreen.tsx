@@ -5,16 +5,24 @@ import { ColorTheme } from '@app/Colors';
 import { IoniconName } from '@app/definitions';
 import { AuthState } from '@app/definitions/redux';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { RootState } from '@app/redux/Store';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import ProfilePicture from '@components/ProfilePicture';
 import { Ionicons } from '@expo/vector-icons';
 import { SharedStackScreenProps } from '@navigation/Types';
+import { useSelector } from 'react-redux';
 
 type ProfileItem = {
   icon: IoniconName;
   label: string;
   value: string;
 };
+
+const defaultProfileItems: ProfileItem[] = [
+  { icon: 'person', label: 'First name', value: '...' },
+  { icon: 'person', label: 'Last name', value: '...' },
+  { icon: 'calendar', label: 'Age', value: '...' },
+];
 
 export default function OtherProfileScreen({
   navigation,
@@ -23,12 +31,19 @@ export default function OtherProfileScreen({
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const [profileItems, setProfileItems] = useState<ProfileItem[]>([]);
-  const [userInfo, setUserInfo] = useState<AuthState>();
+  const [profileItems, setProfileItems] = useState<ProfileItem[]>(defaultProfileItems);
+  const [userInfo, setUserInfo] = useState<AuthState>({
+    firstName: '...',
+    lastName: '...',
+    profilePictureUri: null,
+  } as AuthState);
+
+  const authState = useSelector((state: RootState) => state.authState);
+  const isCurrentUser = authState.userId === route.params.userId;
 
   useEffect(() => {
     (async () => {
-      const userInfo = await getOtherUserInfo(route.params.userId);
+      const userInfo = isCurrentUser ? authState : await getOtherUserInfo(route.params.userId);
 
       if (!userInfo) {
         return;
@@ -46,19 +61,27 @@ export default function OtherProfileScreen({
         { icon: 'calendar', label: 'Age', value: age.toString() },
       ]);
     })();
-  }, [route.params.userId]);
+  }, [route.params.userId, authState, isCurrentUser]);
 
   return (
     <View style={styles.container}>
       <View style={styles.pictureContainer}>
-        <ProfilePicture size={200} userInfo={userInfo} borderRadius={30} />
+        <ProfilePicture
+          size={200}
+          imageUri={userInfo.profilePictureUri}
+          firstName={userInfo.firstName}
+          lastName={userInfo.lastName}
+          borderRadius={30}
+        />
       </View>
 
-      <TouchableOpacity
-        onPress={() => navigation.navigate('DirectMessage', { userId: route.params.userId })}
-        style={{ marginTop: 12, alignSelf: 'center' }}>
-        <Text style={{ color: colors.primary, fontWeight: '600' }}>Send message</Text>
-      </TouchableOpacity>
+      {!isCurrentUser && (
+        <TouchableOpacity
+          onPress={() => navigation.navigate('DirectMessage', { userId: route.params.userId })}
+          style={{ marginTop: 12, alignSelf: 'center' }}>
+          <Text style={{ color: colors.primary, fontWeight: '600' }}>Send message</Text>
+        </TouchableOpacity>
+      )}
 
       {profileItems.map((item, index) => (
         <View

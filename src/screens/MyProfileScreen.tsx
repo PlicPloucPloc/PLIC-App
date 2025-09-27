@@ -49,7 +49,13 @@ export default function MyProfileScreen({}: AccountStackScreenProps<'MyProfile'>
       <TouchableOpacity
         onPress={() => setPictureModalVisible(true)}
         style={styles.pictureContainer}>
-        <ProfilePicture size={200} userInfo={authState} borderRadius={30} />
+        <ProfilePicture
+          size={200}
+          imageUri={authState.profilePictureUri}
+          firstName={authState.firstName}
+          lastName={authState.lastName}
+          borderRadius={30}
+        />
       </TouchableOpacity>
 
       <View style={{ marginTop: 6, borderRadius: 1000, alignSelf: 'center' }}>

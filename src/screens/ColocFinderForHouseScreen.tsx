@@ -24,7 +24,7 @@ export default function ColocFinderForHouseScreen({
         onPress={() =>
           navigation.navigate('SharedStack', {
             screen: 'OtherProfile',
-            params: { userId: '7c8ce8e3-a3af-407f-a34c-0931422a71c1' },
+            params: { userId: '273fec53-ad1d-4b23-b933-a9e149f62c3b' },
           })
         }
       />
