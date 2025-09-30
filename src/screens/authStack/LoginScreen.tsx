@@ -81,6 +81,7 @@ export default function LoginScreen({ navigation }: AuthStackScreenProps<'Login'
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            autoComplete="email"
             textContentType="emailAddress"
             returnKeyType="next"
             autoFocus={true}

@@ -16,7 +16,7 @@ const cleanGlobals = (obj) =>
 
 export const baseConfig = defineConfig([
   {
-    ignores: ['node_modules/**', 'expo/**', 'metro.config.js', '.expo/**'],
+    ignores: ['node_modules/**', 'expo/**', 'babel.config.js', '.expo/**'],
   },
   {
     files: ['**/*.{js,ts,jsx,tsx}'],

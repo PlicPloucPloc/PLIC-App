@@ -1,5 +1,13 @@
 import React, { useCallback, useRef, useState } from 'react';
-import { Alert, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import {
+  Alert,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo, RELATION_TYPE } from '@app/definitions';
@@ -15,7 +23,6 @@ import { SwipeDirection, Swiper, type SwiperCardRefType } from '@ellmos/rn-swipe
 import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
 import { useFocusEffect } from '@react-navigation/native';
-import { TouchableWithoutFeedback } from 'react-native-gesture-handler';
 import { useSelector } from 'react-redux';
 
 const ICON_SIZE = 38;
@@ -25,7 +32,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const swiperRef = useRef<SwiperCardRefType>();
+  const swiperRef = useRef<SwiperCardRefType>(null);
   const swipeDirection = useSelector((state: RootState) => state.appState.swipeDirection);
 
   useFocusEffect(

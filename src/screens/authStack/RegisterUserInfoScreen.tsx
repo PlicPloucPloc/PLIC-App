@@ -58,6 +58,8 @@ export default function RegisterUserInfoScreen({
             onChangeText={setFirstName}
             style={styles.input}
             autoCorrect={false}
+            autoComplete="name"
+            textContentType="name"
             returnKeyType="next"
             autoFocus={true}
             onSubmitEditing={() => lastNameInputRef.current?.focus()}
@@ -71,6 +73,8 @@ export default function RegisterUserInfoScreen({
             onChangeText={setLastName}
             style={styles.input}
             autoCorrect={false}
+            autoComplete="family-name"
+            textContentType="familyName"
             returnKeyType="next"
             onBlur={() => store.dispatch(AuthActions.setLastName(lastName.trim()))}
           />

@@ -1,6 +1,6 @@
 import { Alert } from 'react-native';
 
-import * as ImageManipulator from 'expo-image-manipulator';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
 import * as ImagePicker from 'expo-image-picker';
 
 import { alertOnResponseError } from './Error';
@@ -9,9 +9,11 @@ export async function fetchAndCompressImage(
   imageUri: string,
 ): Promise<{ uri: string; blob: Blob } | null> {
   // Convert image to PNG
-  const manipResult = await ImageManipulator.manipulateAsync(imageUri, [], {
+  const imageRef = await ImageManipulator.manipulate(imageUri).renderAsync();
+
+  const manipResult = await imageRef.saveAsync({
     compress: 0.4,
-    format: ImageManipulator.SaveFormat.PNG,
+    format: SaveFormat.PNG,
   });
 
   imageUri = manipResult.uri;
@@ -50,7 +52,7 @@ export async function selectImageFromMedia(
     source === 'camera' ? ImagePicker.launchCameraAsync : ImagePicker.launchImageLibraryAsync;
 
   const result = await pickerMethod({
-    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    mediaTypes: 'images',
     allowsEditing: true,
     aspect: [1, 1],
     quality: 0.7,

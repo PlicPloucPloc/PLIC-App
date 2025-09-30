@@ -79,6 +79,8 @@ export default function RegisterEmailScreen({ navigation }: AuthStackScreenProps
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
+            autoComplete="email"
+            textContentType="emailAddress"
             autoFocus={true}
             editable={!loading}
             onSubmitEditing={handleNext}

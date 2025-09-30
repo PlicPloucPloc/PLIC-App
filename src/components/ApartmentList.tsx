@@ -101,7 +101,7 @@ export default function ApartmentList({
     [handlePress, handleDeleteRelation, isHistory],
   );
 
-  if (relations.length === 0) {
+  if (!refreshing && !loadingMore && relations.length === 0) {
     return <Text style={styles.text}>No apartments found.</Text>;
   }
 

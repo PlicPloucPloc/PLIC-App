@@ -24,7 +24,16 @@ export default function ColocFinderForHouseScreen({
         onPress={() =>
           navigation.navigate('SharedStack', {
             screen: 'OtherProfile',
-            params: { userId: '273fec53-ad1d-4b23-b933-a9e149f62c3b' },
+            params: { userId: '69a5edf8-2d5a-43fc-8578-12deb5efc907' },
+          })
+        }
+      />
+      <Button
+        title="Karnyvor Aphamer"
+        onPress={() =>
+          navigation.navigate('SharedStack', {
+            screen: 'OtherProfile',
+            params: { userId: '636c3680-150b-4d47-83c9-43a11eedbd7e' },
           })
         }
       />

@@ -1,3 +1,4 @@
+import { JSX } from 'react';
 import { ActivityIndicator, Modal, View } from 'react-native';
 
 type LoaderProps = {

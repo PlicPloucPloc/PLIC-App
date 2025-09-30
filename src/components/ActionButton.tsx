@@ -1,10 +1,8 @@
 import React from 'react';
-import { TouchableOpacity } from 'react-native';
-
-type ActionButtonProps = TouchableOpacity['props'];
+import { TouchableOpacity, TouchableOpacityProps } from 'react-native';
 
 const SwipeButton = React.memo(
-  ({ onPress, disabled, style, children, ...rest }: ActionButtonProps) => {
+  ({ onPress, disabled, style, children, ...rest }: TouchableOpacityProps) => {
     return (
       <TouchableOpacity
         onPress={onPress}

@@ -20,6 +20,7 @@ const PasswordInput = React.forwardRef<TextInput, PasswordInputProps>((props, re
         style={[styles.passwordInput, props.inputStyle]}
         autoCapitalize="none"
         autoCorrect={false}
+        autoComplete="password"
         textContentType="password"
         secureTextEntry={!showPassword}
         onFocus={() => setIsFocused(true)}

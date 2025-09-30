@@ -148,6 +148,8 @@ export async function deleteRelation(apartmentId: number): Promise<boolean> {
 }
 
 const updateShouldRefetchStates = (shouldRefreshLikeList: boolean) => {
-  store.dispatch(setShouldRefetchLikeList(shouldRefreshLikeList));
+  if (shouldRefreshLikeList) {
+    store.dispatch(setShouldRefetchLikeList(true));
+  }
   store.dispatch(setShouldRefetchHistory(true));
 };
