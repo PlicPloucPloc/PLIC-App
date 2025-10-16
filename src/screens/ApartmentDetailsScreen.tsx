@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
@@ -10,6 +10,7 @@ import { getApartmentInfoById } from '@app/rest/ApartmentService';
 import { getApartmentImages } from '@app/rest/S3Service';
 import { Images } from '@assets/index';
 import SwipeButton from '@components/ActionButton';
+import ApartmentDetailsAmenities from '@components/ApartmentDetailsAmenities';
 import Loader from '@components/Loader';
 import { SwipeDirection } from '@ellmos/rn-swiper-list';
 import { Ionicons } from '@expo/vector-icons';
@@ -18,8 +19,6 @@ import { Image } from 'expo-image';
 import PagerView from 'react-native-pager-view';
 
 const ICON_SIZE = 38;
-
-const Divider = () => <View style={{ height: 1, backgroundColor: '#ddd', marginVertical: 20 }} />;
 
 export default function ApartmentDetailsScreen({
   navigation,
@@ -30,6 +29,7 @@ export default function ApartmentDetailsScreen({
 
   const [loading, setLoading] = useState(true);
   const [apartment, setApartment] = useState<ApartmentInfo>();
+
   const [showFullDescription, setShowFullDescription] = useState(false);
   const MAX_LINES = 4;
 
@@ -41,10 +41,8 @@ export default function ApartmentDetailsScreen({
 
       let apartmentTmp: ApartmentInfo;
       if (route.params?.apartment) {
-        console.log('Using apartment from route params', route.params.apartment);
         apartmentTmp = { ...route.params.apartment };
       } else if (route.params?.apartmentId) {
-        console.log('Fetching apartment by ID from route params', route.params.apartmentId);
         const apartmentResponse = await getApartmentInfoById(route.params.apartmentId);
         if (!apartmentResponse) return;
 
@@ -60,27 +58,10 @@ export default function ApartmentDetailsScreen({
     })();
   }, [route.params]);
 
-  const InfoItem = ({
-    icon,
-    label,
-    value,
-  }: {
-    icon: keyof typeof Ionicons.glyphMap;
-    label: string;
-    value: string | number | null;
-  }) => {
-    if (value === null || value === undefined) return null;
-
-    return (
-      <View style={styles.criteriaItem}>
-        <Ionicons name={icon} size={16} color="#555" />
-        <Text style={styles.criteriaText}>
-          <Text style={{ fontWeight: '600' }}>{label}: </Text>
-          {value}
-        </Text>
-      </View>
-    );
-  };
+  const Divider = useCallback(
+    () => <View style={{ height: 1, backgroundColor: '#ddd', marginVertical: 20 }} />,
+    [],
+  );
 
   if (loading || !apartment) {
     return <Loader loading={true} />;
@@ -88,6 +69,7 @@ export default function ApartmentDetailsScreen({
 
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
+      {/* ============= Pictures ============= */}
       <View style={styles.pagerWrapper}>
         <PagerView
           style={styles.pagerView}
@@ -113,44 +95,22 @@ export default function ApartmentDetailsScreen({
       </View>
 
       <View style={styles.infoContainer}>
+        {/* ============= Header ============= */}
         <Text style={styles.title}>{apartment.name}</Text>
 
         <Text style={styles.priceText}>
-          {apartment.rent} € <Text style={styles.lightText}>no charges</Text>
-        </Text>
-        <Text style={styles.priceText}>
-          {apartment.rent + 0} € <Text style={styles.lightText}>with charges</Text>{' '}
-          {/* TODO: change charges */}
+          {apartment.rent} € <Text style={styles.lightText}>without charges</Text>
         </Text>
 
-        <View style={styles.criteriaContainerGrid}>
-          <View style={styles.criteriaColumn}>
-            <InfoItem icon="resize" label="Surface" value={`${apartment.surface} m²`} />
-            <InfoItem icon="apps" label="Rooms" value={apartment.number_of_rooms} />
-            <InfoItem icon="bed-outline" label="Bedrooms" value={apartment.number_of_bedrooms} />
-            <InfoItem
-              icon="cube-outline"
-              label="Furnished"
-              value={apartment.is_furnished ? 'Yes' : 'No'}
-            />
-          </View>
-          <View style={styles.criteriaColumn}>
-            <InfoItem icon="layers-outline" label="Floor" value={apartment.floor} />
-            <InfoItem
-              icon="swap-vertical-outline"
-              label="Elevator"
-              value={apartment.has_elevator ? 'Yes' : 'No'}
-            />
-            <InfoItem
-              icon="calendar-outline"
-              label="Available"
-              value={apartment.available_from?.toString() ?? null}
-            />
-          </View>
-        </View>
+        {apartment.estimated_price && (
+          <Text style={styles.priceText}>
+            {apartment.estimated_price} € <Text style={styles.lightText}>with charges</Text>
+          </Text>
+        )}
 
         <Divider />
 
+        {/* ============= Description ============= */}
         <Text style={styles.sectionTitle}>Description</Text>
         <Text
           style={styles.description}
@@ -168,6 +128,14 @@ export default function ApartmentDetailsScreen({
 
         <Divider />
 
+        {/* ============= Amenities ============= */}
+        <Text style={styles.sectionTitle}>Amenities</Text>
+
+        <ApartmentDetailsAmenities apartment={apartment} />
+
+        <Divider />
+
+        {/* ============= Map ============= */}
         <Text style={styles.sectionTitle}>Map</Text>
         <Image
           source={Images.maps}
@@ -176,6 +144,7 @@ export default function ApartmentDetailsScreen({
         />
       </View>
 
+      {/* ============= Relation buttons ============= */}
       {route.params.enableRelationButtons && (
         <>
           <Divider />
@@ -283,27 +252,6 @@ const createStyles = (colors: ColorTheme) =>
     lightText: {
       color: colors.textSecondary,
       fontSize: 14,
-    },
-
-    criteriaContainerGrid: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      padding: 4,
-      marginTop: 12,
-    },
-    criteriaColumn: {
-      flex: 1,
-      gap: 12,
-    },
-    criteriaItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: 8,
-    },
-    criteriaText: {
-      fontSize: 14,
-      color: '#333',
-      flexShrink: 1,
     },
 
     sectionTitle: {

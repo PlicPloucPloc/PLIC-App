@@ -83,7 +83,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
   const onIndexChange = useCallback(
     (index: number) => {
-      console.log(apartments.length);
       if (index >= apartments.length) {
         return;
       }
