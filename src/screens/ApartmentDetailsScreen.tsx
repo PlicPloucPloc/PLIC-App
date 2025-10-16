@@ -8,9 +8,9 @@ import { setSwipeDirection } from '@app/redux/slices';
 import store from '@app/redux/Store';
 import { getApartmentInfoById } from '@app/rest/ApartmentService';
 import { getApartmentImages } from '@app/rest/S3Service';
-import { Images } from '@assets/index';
 import SwipeButton from '@components/ActionButton';
 import ApartmentDetailsAmenities from '@components/ApartmentDetailsAmenities';
+import NearbyInfrastructureMap from '@components/ApartmentDetailsMap';
 import Loader from '@components/Loader';
 import { SwipeDirection } from '@ellmos/rn-swiper-list';
 import { Ionicons } from '@expo/vector-icons';
@@ -137,11 +137,13 @@ export default function ApartmentDetailsScreen({
 
         {/* ============= Map ============= */}
         <Text style={styles.sectionTitle}>Map</Text>
-        <Image
-          source={Images.maps}
-          style={{ width: '100%', height: 200, borderRadius: 12 }}
-          contentFit="cover"
-        />
+
+        <View style={styles.mapContainer}>
+          <NearbyInfrastructureMap
+            address={apartment.location}
+            style={{ width: '100%', height: '100%' }}
+          />
+        </View>
       </View>
 
       {/* ============= Relation buttons ============= */}
@@ -262,6 +264,15 @@ const createStyles = (colors: ColorTheme) =>
     description: {
       fontSize: 14,
       color: colors.textPrimary,
+    },
+
+    mapContainer: {
+      width: '100%',
+      height: 400,
+      borderRadius: 12,
+      overflow: 'hidden',
+      backgroundColor: '#eee',
+      marginTop: 8,
     },
 
     buttonsContainer: {

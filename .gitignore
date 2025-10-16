@@ -167,3 +167,4 @@ fix_*.patch
 /packages/**/types_generated/
 .expo
 .env.localdev
+.env.prod
