@@ -19,29 +19,6 @@ import PagerView from 'react-native-pager-view';
 
 const ICON_SIZE = 38;
 
-function InfoItem({
-  icon,
-  label,
-  value,
-}: {
-  icon: keyof typeof Ionicons.glyphMap;
-  label: string;
-  value: string | number;
-}) {
-  const colors = useThemeColors();
-  const styles = createStyles(colors);
-
-  return (
-    <View style={styles.criteriaItem}>
-      <Ionicons name={icon} size={16} color="#555" />
-      <Text style={styles.criteriaText}>
-        <Text style={{ fontWeight: '600' }}>{label}: </Text>
-        {value}
-      </Text>
-    </View>
-  );
-}
-
 const Divider = () => <View style={{ height: 1, backgroundColor: '#ddd', marginVertical: 20 }} />;
 
 export default function ApartmentDetailsScreen({
@@ -64,8 +41,10 @@ export default function ApartmentDetailsScreen({
 
       let apartmentTmp: ApartmentInfo;
       if (route.params?.apartment) {
+        console.log('Using apartment from route params', route.params.apartment);
         apartmentTmp = { ...route.params.apartment };
       } else if (route.params?.apartmentId) {
+        console.log('Fetching apartment by ID from route params', route.params.apartmentId);
         const apartmentResponse = await getApartmentInfoById(route.params.apartmentId);
         if (!apartmentResponse) return;
 
@@ -81,9 +60,32 @@ export default function ApartmentDetailsScreen({
     })();
   }, [route.params]);
 
+  const InfoItem = ({
+    icon,
+    label,
+    value,
+  }: {
+    icon: keyof typeof Ionicons.glyphMap;
+    label: string;
+    value: string | number | null;
+  }) => {
+    if (value === null || value === undefined) return null;
+
+    return (
+      <View style={styles.criteriaItem}>
+        <Ionicons name={icon} size={16} color="#555" />
+        <Text style={styles.criteriaText}>
+          <Text style={{ fontWeight: '600' }}>{label}: </Text>
+          {value}
+        </Text>
+      </View>
+    );
+  };
+
   if (loading || !apartment) {
     return <Loader loading={true} />;
   }
+
   return (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContainer}>
       <View style={styles.pagerWrapper}>
@@ -125,7 +127,7 @@ export default function ApartmentDetailsScreen({
           <View style={styles.criteriaColumn}>
             <InfoItem icon="resize" label="Surface" value={`${apartment.surface} m²`} />
             <InfoItem icon="apps" label="Rooms" value={apartment.number_of_rooms} />
-            <InfoItem icon="bed-outline" label="Bedrooms" value={apartment.number_of_bed_rooms} />
+            <InfoItem icon="bed-outline" label="Bedrooms" value={apartment.number_of_bedrooms} />
             <InfoItem
               icon="cube-outline"
               label="Furnished"
@@ -137,9 +139,13 @@ export default function ApartmentDetailsScreen({
             <InfoItem
               icon="swap-vertical-outline"
               label="Elevator"
-              value={apartment.elevator ? 'Yes' : 'No'}
+              value={apartment.has_elevator ? 'Yes' : 'No'}
             />
-            <InfoItem icon="calendar-outline" label="Available" value={apartment.available_from} />
+            <InfoItem
+              icon="calendar-outline"
+              label="Available"
+              value={apartment.available_from?.toString() ?? null}
+            />
           </View>
         </View>
 

@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import 'react-native-get-random-values';
 
 import { API_TIMEOUT } from '@app/config/Constants';
+import { API_URL } from '@app/config/Env';
 import { RootEnum, TokenResponse } from '@app/definitions';
 import { setRoot } from '@app/redux/slices';
 import store from '@app/redux/Store';
@@ -10,9 +11,6 @@ import * as SecureStore from 'expo-secure-store';
 import { v4 as uuidv4 } from 'uuid';
 
 import Endpoints from './Endpoints';
-
-const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:4242';
-const TIMEOUT = API_TIMEOUT;
 
 /**
  * Fetches data from the API with optional authentication.
@@ -39,8 +37,8 @@ export async function apiFetch(
     response = await fetchWithTimeout(`${prefix}${endpoint}`, { ...options, headers });
   } catch (error: any) {
     if (error.name === 'AbortError') {
-      console.error(`Request ID: ${requestId} | Request timed out after ${TIMEOUT}ms`);
-      return new Response(JSON.stringify({ message: `Request timed out after ${TIMEOUT}ms` }), {
+      console.error(`Request ID: ${requestId} | Request timed out after ${API_TIMEOUT}ms`);
+      return new Response(JSON.stringify({ message: `Request timed out after ${API_TIMEOUT}ms` }), {
         status: 408,
         statusText: 'Request Timeout',
         headers: { 'Content-Type': 'application/json' },
@@ -81,7 +79,7 @@ async function prepareHeaders(
 
 export async function fetchWithTimeout(url: string, options: RequestInit): Promise<Response> {
   const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), TIMEOUT);
+  const id = setTimeout(() => controller.abort(), API_TIMEOUT);
   try {
     return await fetch(url, {
       ...options,

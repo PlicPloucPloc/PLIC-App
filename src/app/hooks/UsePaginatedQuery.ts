@@ -2,7 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 
 import { API_PAGE_SIZE } from '@app/config/Constants';
 
-export function usePaginatedQuery<T>(fetchFunction: (offset: number) => Promise<T[]>) {
+export function usePaginatedQuery<T>(
+  fetchFunction: (offset: number) => Promise<T[]>,
+  duplicateResolver?: (data: T[]) => T[],
+) {
   const [data, setData] = useState<T[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
@@ -29,7 +32,13 @@ export function usePaginatedQuery<T>(fetchFunction: (offset: number) => Promise<
       try {
         const offsetValue = typeof offset === 'number' ? offset : data.length;
         const result = await fetchFunction(offsetValue);
-        setData((prev) => [...prev, ...result]);
+
+        if (duplicateResolver) {
+          setData((prevData) => duplicateResolver([...prevData, ...result]));
+        } else {
+          setData((prevData) => [...prevData, ...result]);
+        }
+
         if (result.length < API_PAGE_SIZE) setHasMore(false);
       } catch (err) {
         console.error(err);
@@ -37,7 +46,7 @@ export function usePaginatedQuery<T>(fetchFunction: (offset: number) => Promise<
         setLoadingMore(false);
       }
     },
-    [loadingMore, refreshing, hasMore, fetchFunction, data.length],
+    [loadingMore, refreshing, hasMore, fetchFunction, duplicateResolver, data.length],
   );
 
   useEffect(() => {

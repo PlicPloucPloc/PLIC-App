@@ -38,8 +38,7 @@ export default function RegisterEmailScreen({ navigation }: AuthStackScreenProps
     }
 
     setLoading(true);
-    const response = await checkEmailExists(email);
-    setLoading(false);
+    const response = await checkEmailExists(email).finally(() => setLoading(false));
 
     if (!response.ok) {
       const errorData = await response.json();

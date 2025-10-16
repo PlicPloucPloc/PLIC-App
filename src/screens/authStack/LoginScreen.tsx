@@ -48,8 +48,7 @@ export default function LoginScreen({ navigation }: AuthStackScreenProps<'Login'
     }
 
     setLoading(true);
-    const response = await loginUser({ email, password });
-    setLoading(false);
+    const response = await loginUser({ email, password }).finally(() => setLoading(false));
 
     if (response == null) {
       return navigation.navigate('VerifyEmail', { isNewlyRegistered: false });

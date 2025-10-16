@@ -72,11 +72,10 @@ export default function EditProfileInformationModal({
     }
 
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // simulate api call
+    await new Promise((resolve) => setTimeout(resolve, 1000)).finally(() => setIsLoading(false)); // simulate api call
     //TODO:
     // api call to update profile information
     // dispatch indo to store
-    setIsLoading(false);
 
     setModalVisible(false);
 

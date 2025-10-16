@@ -1,11 +1,10 @@
 import { Alert } from 'react-native';
 
+import { S3_URL } from '@app/config/Env';
 import { ApartmentInfo } from '@app/definitions';
 import { alertOnResponseError } from '@app/utils/Error';
 
 import { apiFetch, fetchWithTimeout } from './Client';
-
-const S3_URL = process.env.EXPO_PUBLIC_S3_URL;
 
 export async function postProfilePictureFromSignedUrl(
   path: string,
@@ -60,7 +59,7 @@ export async function deleteProfilePicture(userId: string): Promise<void> {
 }
 
 export async function getApartmentThumbnail(apt: ApartmentInfo): Promise<string> {
-  const thumbnailUrl = `${S3_URL}/public/apartment-pictures/${apt.apartment_id}/0.jpg`;
+  const thumbnailUrl = `${S3_URL}/public/apartment-pictures/${apt.apartment_id}/0.png`;
 
   if (await checkImageExists(thumbnailUrl)) {
     return thumbnailUrl;
@@ -79,7 +78,7 @@ export async function getApartmentImages(apt: ApartmentInfo) {
 
   let index = 1;
   while (true) {
-    const imageUrl = `${S3_URL}/public/apartment-pictures/${apt.apartment_id}/${index}.jpg`;
+    const imageUrl = `${S3_URL}/public/apartment-pictures/${apt.apartment_id}/${index}.png`;
     const exists = await checkImageExists(imageUrl);
     if (!exists) break;
     images_url.push(imageUrl);

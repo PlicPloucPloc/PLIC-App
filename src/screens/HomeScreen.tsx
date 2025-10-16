@@ -66,14 +66,24 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     [],
   );
 
+  const duplicateResolver = useCallback((data: ApartmentInfo[]) => {
+    const seen = new Set();
+    return data.filter((item) => {
+      const duplicate = seen.has(item.apartment_id);
+      seen.add(item.apartment_id);
+      return !duplicate;
+    });
+  }, []);
+
   const {
     data: apartments,
     refreshing,
     fetchMore,
-  } = usePaginatedQuery<ApartmentInfo>(fetchApartments);
+  } = usePaginatedQuery<ApartmentInfo>(fetchApartments, duplicateResolver);
 
   const onIndexChange = useCallback(
     (index: number) => {
+      console.log(apartments.length);
       if (index >= apartments.length) {
         return;
       }
@@ -83,14 +93,14 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
       }
 
       const PREFETCH_OFFSET = 3; // Number of remaining cards before fetching more data
-      if (index >= apartments.length - PREFETCH_OFFSET) {
+      if (index > apartments.length - PREFETCH_OFFSET) {
         fetchMore(PREFETCH_OFFSET);
       }
 
       const apartment = apartments[index];
       setApartmentInfo({
         title: apartment.name,
-        surface: apartment.surface,
+        surface: apartment.surface ?? 'Unknown',
         location: apartment.location,
         rent: apartment.rent,
       });

@@ -50,8 +50,7 @@ export default function RegisterPasswordScreen({
     const userInfo = { ...authState, password };
 
     setLoading(true);
-    const isRegistered = await registerUser(userInfo);
-    setLoading(false);
+    const isRegistered = await registerUser(userInfo).finally(() => setLoading(false));
 
     if (isRegistered) {
       navigation.navigate('VerifyEmail', { isNewlyRegistered: true });

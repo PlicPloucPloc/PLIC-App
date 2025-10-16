@@ -6,10 +6,9 @@
     "lint": "eslint . --config eslint.full.config.mjs",
     "lint:fix": "eslint . --config eslint.full.config.mjs --fix",
     "typecheck": "tsc --noEmit",
-    "start": "npm run typecheck && npm run lint && expo start",
-    "start:quick": "expo start",
-    "start:no-cache": "npm run typecheck && npm run lint && expo start --clear",
-    "android": "expo start --android"
+    "test": "yarn run typecheck; yarn run lint",
+    "start:prod": "env-cmd --recursive -f .env.prod expo start",
+    "start:localdev": "env-cmd --recursive -f .env.localdev expo start"
   },
   "dependencies": {
     "@ellmos/rn-swiper-list": "^3.0.1",
@@ -20,8 +19,8 @@
     "@react-navigation/stack": "^7.1.2",
     "@reduxjs/toolkit": "^2.6.1",
     "axios": "^1.9.0",
-    "expo": "^54.0.0",
-    "expo-image": "~3.0.8",
+    "expo": "54.0.13",
+    "expo-image": "~3.0.9",
     "expo-image-manipulator": "~14.0.7",
     "expo-image-picker": "~17.0.8",
     "expo-secure-store": "~15.0.7",
@@ -50,6 +49,7 @@
     "@typescript-eslint/eslint-plugin": "^8.45.0",
     "@typescript-eslint/parser": "^8.45.0",
     "babel-plugin-module-resolver": "^5.0.2",
+    "env-cmd": "^11.0.0",
     "eslint": "^9.36.0",
     "eslint-config-expo": "^10.0.0",
     "eslint-config-prettier": "^10.1.8",

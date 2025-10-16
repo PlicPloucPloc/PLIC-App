@@ -1,10 +1,11 @@
 import React, { memo } from 'react';
-import { Alert, Animated, Pressable, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
 import { RelationInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { Swipeable } from 'react-native-gesture-handler';
+import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
 import ApartmentListItem from './ApartmentListItem';
 
@@ -19,14 +20,15 @@ const ApartmentListRow = memo(({ relation, onPress, onDelete, isHistory }: Props
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const renderLeftActions = (progress: Animated.AnimatedInterpolation<number>) => {
-    const translateX = progress.interpolate({
-      inputRange: [0, 1],
-      outputRange: [-100, 0],
+  function RightAction(prog: SharedValue<number>, drag: SharedValue<number>) {
+    const styleAnimation = useAnimatedStyle(() => {
+      return {
+        transform: [{ translateX: drag.value + 100 }],
+      };
     });
 
     return (
-      <Animated.View style={[styles.rightAction, { transform: [{ translateX }] }]}>
+      <Reanimated.View style={[styles.rightAction, styleAnimation]}>
         <TouchableOpacity
           onPress={() => {
             Alert.alert(
@@ -45,12 +47,30 @@ const ApartmentListRow = memo(({ relation, onPress, onDelete, isHistory }: Props
           style={styles.actionTouchable}>
           <Text style={styles.actionText}>Delete</Text>
         </TouchableOpacity>
-      </Animated.View>
+      </Reanimated.View>
     );
-  };
+  }
+
+  if (!isHistory) {
+    return (
+      <Pressable
+        onPress={() => onPress(relation)}
+        android_ripple={{ color: `${colors.primary}50` }}
+        unstable_pressDelay={100}>
+        <ApartmentListItem
+          title={relation.apt.name}
+          surface={relation.apt.surface}
+          rent={relation.apt.rent}
+          location={relation.apt.location}
+          imageUrl={relation.apt.image_thumbnail}
+          relationType={isHistory ? relation.type : undefined}
+        />
+      </Pressable>
+    );
+  }
 
   return (
-    <Swipeable renderLeftActions={renderLeftActions}>
+    <Swipeable renderRightActions={RightAction}>
       <Pressable
         onPress={() => onPress(relation)}
         android_ripple={{ color: `${colors.primary}50` }}

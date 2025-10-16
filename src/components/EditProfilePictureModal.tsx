@@ -53,21 +53,23 @@ export default function EditProfilePictureModal({
 
     setIsLoading(true);
 
-    if (imageUri === null) {
-      store.dispatch(setProfilePictureUri(null));
-      await deleteProfilePicture(`${authState.userId}.png`);
-    } else {
-      const image = await fetchAndCompressImage(imageUri);
-      if (!image) {
-        return false;
+    try {
+      if (imageUri === null) {
+        store.dispatch(setProfilePictureUri(null));
+        await deleteProfilePicture(`${authState.userId}.png`);
+      } else {
+        const image = await fetchAndCompressImage(imageUri);
+        if (!image) {
+          return false;
+        }
+
+        store.dispatch(setProfilePictureUri(image.uri));
+        await putProfilePicture(`${authState.userId}.png`, image.blob);
       }
-
-      store.dispatch(setProfilePictureUri(image.uri));
-      await putProfilePicture(`${authState.userId}.png`, image.blob);
+    } finally {
+      setIsLoading(false);
+      setModalVisible(false);
     }
-
-    setIsLoading(false);
-    setModalVisible(false);
   }
 
   return (
