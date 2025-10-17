@@ -101,6 +101,7 @@ export type MessageStackParamList = {
   DirectMessage: undefined;
   GroupMessageList: undefined;
   GroupMessage: undefined;
+  GroupInfo: undefined;
   SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };
 
