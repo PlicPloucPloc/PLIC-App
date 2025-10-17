@@ -27,10 +27,8 @@ export default function GroupMessageListScreen({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simuler un appel à une API distante
     const fetchMessages = async () => {
       setLoading(true);
-      // await new Promise((resolve) => setTimeout(resolve, 1000)); // attente 1 seconde
 
       const mockData: MessageItem[] = [
         {
@@ -87,11 +85,13 @@ export default function GroupMessageListScreen({
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingHorizontal: 16 }}
           renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.messageContainer}
-              onPress={() => navigation.navigate('GroupMessage')}>
-              <Image source={{ uri: item.avatar }} style={styles.avatar} />
-              <View style={styles.messageContent}>
+            <View style={styles.messageContainer}>
+              <TouchableOpacity onPress={() => navigation.navigate('GroupInfo')}>
+                <Image source={{ uri: item.avatar }} style={styles.avatar} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.messageContent}
+                onPress={() => navigation.navigate('GroupMessage')}>
                 <View style={styles.messageHeader}>
                   <Text style={styles.name}>{item.name}</Text>
                   <Text style={styles.time}>{item.time}</Text>
@@ -101,8 +101,8 @@ export default function GroupMessageListScreen({
                   style={[styles.lastMessage, item.unread && styles.unreadMessage]}>
                   {item.lastMessage}
                 </Text>
-              </View>
-            </TouchableOpacity>
+              </TouchableOpacity>
+            </View>
           )}
         />
       )}

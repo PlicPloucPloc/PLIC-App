@@ -31,3 +31,8 @@ To contribute to the project, create a new branch with the name of the feature a
 To ensure code quality, the project uses ESLint and TypeScript for linting and type checking.
 
 You can run then manually using `yarn lint` and `yarn typecheck`.
+
+add a .env with 
+SUPABASE_JWT_SECRET=
+SUPABASE_SERVICE_ROLE_KEY=
+SUPABASE_ENDPOINT=

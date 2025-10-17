@@ -1,10 +1,16 @@
 import { RootEnum } from '@app/definitions';
-import { AppState } from '@app/definitions/redux';
 import { SwipeDirection } from '@ellmos/rn-swiper-list';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState: AppState = {
+export interface IAppState {
+  root: RootEnum;
+  shouldRefetchLikeList: boolean;
+  shouldRefetchHistory: boolean;
+  swipeDirection: SwipeDirection | undefined;
+}
+
+const initialState: IAppState = {
   root: RootEnum.ROOT_AUTH,
   shouldRefetchLikeList: false,
   shouldRefetchHistory: false,

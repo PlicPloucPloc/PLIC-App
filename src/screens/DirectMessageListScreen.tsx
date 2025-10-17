@@ -27,10 +27,9 @@ export default function DirectMessageListScreen({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Simuler un appel à une API distante
     const fetchMessages = async () => {
       setLoading(true);
-      // await new Promise((resolve) => setTimeout(resolve, 1000)); // attente 1 seconde
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const mockData: MessageItem[] = [
         {
@@ -75,7 +74,6 @@ export default function DirectMessageListScreen({
         </TouchableOpacity>
       </View>
 
-      {/* Loader ou Liste */}
       {loading ? (
         <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 20 }} />
       ) : (
