@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import {
   LoginRequest,
   LoginResponse,
+  RecommendedCollocResponse,
   RegisterRequest,
   RegisterResponse,
   ResendEmailRequest,
@@ -182,5 +183,25 @@ export async function resendVerificationEmail(body: ResendEmailRequest): Promise
 
   return true;
 }
+export async function getRecommendedColloc(): Promise<RecommendedCollocResponse> {
+  try {
+    const response = await apiFetch(
+      Endpoints.USER.RECOMMENDED_COLLOC,
+      {
+        method: 'GET',
+      },
+      true,
+    );
 
+    if (await alertOnResponseError(response, 'User', 'getting recommended colloc')) {
+      return { users: [] };
+    }
+
+    const data: RecommendedCollocResponse = await response.json();
+
+    return data;
+  } catch {
+    return { users: [] };
+  }
+}
 // TODO: Forgot password

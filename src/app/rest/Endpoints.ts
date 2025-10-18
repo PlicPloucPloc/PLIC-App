@@ -7,6 +7,7 @@ const Endpoints = {
     CHECK_EMAIL: (email: string) => `/user/checkEmail/${email.toLowerCase()}`,
     RESEND_EMAIL: () => '/user/resend',
     REFRESH: '/user/refresh',
+    RECOMMENDED_COLLOC: '/user/recommendedColloc',
   },
   RELATIONS: {
     GET_ALL_PAGINATED: (offset: number, limit: number) =>
