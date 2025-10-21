@@ -8,7 +8,7 @@ export function usePaginatedQuery<T>(
 ) {
   const [data, setData] = useState<T[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] = useState(true);
   const [hasMore, setHasMore] = useState(true);
 
   const fetchInitialData = useCallback(async () => {

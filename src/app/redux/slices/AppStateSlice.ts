@@ -1,7 +1,6 @@
 import { RootEnum } from '@app/definitions';
 import { SwipeDirection } from '@ellmos/rn-swiper-list';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 
 export interface IAppState {
   root: RootEnum;

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { IoniconName } from '@app/definitions';
-import { AuthState } from '@app/definitions/redux';
+import { AuthState, IoniconName } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { getOtherUserInfo } from '@app/rest/UserService';

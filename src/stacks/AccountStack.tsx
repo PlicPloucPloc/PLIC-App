@@ -47,11 +47,15 @@ export default function AccountStack(_: BottomTabStackScreenProps<'AccountStack'
         options={({ navigation }) => headerOptions('Profile', navigation)}
       />
 
-      <Stack.Screen name="Filters" component={FiltersScreen} />
+      <Stack.Screen
+        name="Filters"
+        component={FiltersScreen}
+        options={({ navigation }) => headerOptions('Filters', navigation)}
+      />
       <Stack.Screen
         name="History"
         component={HistoryScreen}
-        options={() => headerOptions('History')}
+        options={({ navigation }) => headerOptions('History', navigation)}
       />
     </Stack.Navigator>
   );
