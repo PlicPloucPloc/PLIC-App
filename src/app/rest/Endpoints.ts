@@ -19,6 +19,8 @@ const Endpoints = {
     POST_RELATION: '/relations',
     UPDATE_RELATION: '/relations',
     DELETE_RELATION: '/relations',
+    UPDATE_ALLOW_COLLOC: (allowColloc: boolean) =>
+      `/relations/allowColloc?allowColloc=${allowColloc}`,
   },
   APARTMENT: {
     NO_RELATIONS_PAGINATED: (offset: number, limit: number) =>

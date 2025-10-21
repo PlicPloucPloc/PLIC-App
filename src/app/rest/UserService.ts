@@ -204,4 +204,5 @@ export async function getRecommendedColloc(): Promise<RecommendedCollocResponse>
     return { users: [] };
   }
 }
+
 // TODO: Forgot password

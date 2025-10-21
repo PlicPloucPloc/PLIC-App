@@ -1,138 +1,104 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
+import { UserInfoResponse } from '@app/definitions/rest/UserService';
+import { CalculateAge } from '@app/definitions/utils/Ionicons';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { putAllowColloc } from '@app/rest/RelationService';
 import { getRecommendedColloc } from '@app/rest/UserService';
-import Loader from '@components/Loader';
-import { SharedStackScreenProps } from '@navigation/Types';
+import ProfilePicture from '@components/ProfilePicture';
+import { ColocFinderStackScreenProps } from '@navigation/Types';
+import { Switch } from 'react-native-gesture-handler';
 
-type UserInfoResponse = {
-  id: string;
-  firstname: string;
-  lastname: string;
-  birthdate: string;
-};
-
-const calculateAge = (birthdate: string): number => {
-  const birth = new Date(birthdate);
-  const today = new Date();
-  let age = today.getFullYear() - birth.getFullYear();
-  const monthDiff = today.getMonth() - birth.getMonth();
-  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-    age--;
-  }
-  return age;
-};
-
-const getRandomColor = (): string => {
-  const colors = ['#4ade80', '#f87171', '#c084fc', '#a3e635', '#60a5fa', '#f472b6', '#fbbf24'];
-  return colors[Math.floor(Math.random() * colors.length)];
-};
-
-const getInitials = (firstname: string, lastname: string): string => {
-  return `${firstname.charAt(0)}${lastname.charAt(0)}`.toUpperCase();
-};
-
-export default function MatchingLikesScreen({ navigation }: SharedStackScreenProps<any>) {
+export default function ColocFinderScreen({
+  navigation,
+}: ColocFinderStackScreenProps<'ColocFinder'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
+  const [isEnabled, setIsEnabled] = useState(false);
 
   const [matchingUsers, setMatchingUsers] = useState<UserInfoResponse[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   useEffect(() => {
     const fetchMatchingLikes = async () => {
       try {
-        setLoading(true);
-        console.log('Fetching recommended colloc...');
         const data = await getRecommendedColloc();
-        console.log('Recommended colloc response:', data);
-
         const users = data.users || [];
-        console.log('Extracted users:', users);
-        console.log('Number of matching users:', users.length);
-
         const validUsers = users.filter((user): user is UserInfoResponse => user !== null);
-        console.log('Valid users after filtering:', validUsers);
-
         setMatchingUsers(validUsers);
       } catch (err) {
-        console.error('Error fetching recommended colloc:', err);
-        console.error('Error details:', JSON.stringify(err, null, 2));
-        setError(err instanceof Error ? err.message : 'An error occurred');
-      } finally {
-        setLoading(false);
+        console.error('An error occurred :', err);
       }
     };
-
     fetchMatchingLikes();
   }, []);
-
-  const renderUserItem = ({ item }: { item: UserInfoResponse }) => {
-    const bgColor = getRandomColor();
-
-    return (
-      <Pressable
-        style={styles.userItem}
-        onPress={() => {
-          console.log('Navigating to DirectMessage with userId:', item.id);
-          navigation.navigate('SharedStack', {
-            screen: 'OtherProfile',
-            params: { userId: item.id },
-          });
-        }}>
-        <View style={styles.userContent}>
-          <View style={[styles.avatarContainer, { backgroundColor: bgColor }]}>
-            <View style={styles.avatarInner}>
-              <Text style={styles.avatarText}>{getInitials(item.firstname, item.lastname)}</Text>
-            </View>
-          </View>
-          <View style={styles.userInfo}>
-            <Text style={styles.userName}>
-              {item.firstname} {item.lastname}
-            </Text>
-            <Text style={styles.userAge}>{calculateAge(item.birthdate)} years</Text>
-          </View>
-        </View>
-      </Pressable>
-    );
+  const toggleSwitch = async () => {
+    const newValue = !isEnabled;
+    setIsEnabled(newValue);
+    try {
+      await putAllowColloc(newValue);
+      const data = await getRecommendedColloc();
+      const users = data.users || [];
+      const validUsers = users.filter((user): user is UserInfoResponse => user !== null);
+      setMatchingUsers(validUsers);
+    } catch (err) {
+      console.error('An error occurred :', err);
+    }
   };
-
-  if (loading) {
-    return <Loader loading={true} />;
-  }
-
-  if (error) {
-    return (
-      <View style={styles.centerContainer}>
-        <Text style={styles.errorText}>Error: {error}</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Matching Likes</Text>
+        <Switch
+          trackColor={{ false: '#767577', true: '#4BA3C3' }}
+          thumbColor={isEnabled ? '#175676' : '#f4f3f4'}
+          ios_backgroundColor="#3e3e3e"
+          onValueChange={toggleSwitch}
+          value={isEnabled}
+        />
       </View>
       <FlatList
         data={matchingUsers}
-        renderItem={renderUserItem}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() =>
+              navigation.navigate('SharedStack', {
+                screen: 'OtherProfile',
+                params: { userId: item.id },
+              })
+            }
+            style={styles.userCard}>
+            <ProfilePicture
+              size={70}
+              imageUri={null}
+              firstName={item.firstname}
+              lastName={item.lastname}
+              borderRadius={10}
+            />
+            <View style={styles.userInfo}>
+              <Text style={styles.userName}>
+                {item.firstname} {item.lastname}
+              </Text>
+              <Text style={styles.userAge}>
+                {item.birthdate ? CalculateAge(item.birthdate) : '?'} years
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
         keyExtractor={(item) => item.id}
         contentContainerStyle={styles.listContainer}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No matching likes yet</Text>
+            <Text style={styles.emptyText}>
+              No matching likes, you can active if you click here but others could see your likes
+            </Text>
           </View>
         }
       />
     </View>
   );
 }
-
 const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
     container: {
@@ -195,19 +161,7 @@ const createStyles = (colors: ColorTheme) =>
       fontWeight: '600',
       color: colors.textPrimary,
     },
-    userInfo: {
-      flex: 1,
-    },
-    userName: {
-      fontSize: 16,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      marginBottom: 2,
-    },
-    userAge: {
-      fontSize: 14,
-      color: colors.textSecondary,
-    },
+
     separator: {
       height: 1,
       backgroundColor: '#eee',
@@ -223,5 +177,26 @@ const createStyles = (colors: ColorTheme) =>
     errorText: {
       fontSize: 16,
       color: '#ef4444',
+    },
+    userCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      backgroundColor: colors.background,
+      paddingVertical: 12,
+      paddingHorizontal: 8,
+    },
+    userInfo: {
+      marginLeft: 16,
+      flex: 1,
+    },
+    userName: {
+      fontSize: 18,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      marginBottom: 4,
+    },
+    userAge: {
+      fontSize: 16,
+      color: colors.textSecondary,
     },
   });
