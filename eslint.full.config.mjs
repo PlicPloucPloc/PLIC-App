@@ -1,3 +1,6 @@
+// Config used in the repo
+// Enable every errors and warning
+
 import { defineConfig } from 'eslint-define-config';
 import { baseConfig } from './eslint.config.mjs';
 
@@ -33,7 +36,7 @@ const overrideRules = {
       },
     },
   ],
-  'no-unused-vars': 'off',
+  'no-unused-vars': 'off', // disable the base rule to use the TS version
   'typescript/no-unused-vars': [
     'error',
     {

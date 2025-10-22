@@ -7,6 +7,7 @@ import pluginPrettier from 'eslint-plugin-prettier';
 import pluginExpo from 'eslint-plugin-expo';
 import pluginReact from 'eslint-plugin-react';
 import pluginReactHooks from 'eslint-plugin-react-hooks';
+import pluginReactNative from 'eslint-plugin-react-native';
 import tsParser from '@typescript-eslint/parser';
 import tsPlugin from '@typescript-eslint/eslint-plugin';
 import globals from 'globals';
@@ -45,6 +46,7 @@ export const baseConfig = defineConfig([
       expo: pluginExpo,
       react: pluginReact,
       'react-hooks': pluginReactHooks,
+      'react-native': pluginReactNative,
       typescript: tsPlugin,
     },
     settings: {
@@ -53,10 +55,27 @@ export const baseConfig = defineConfig([
       },
     },
     rules: {
+      // typescript rules
+      'require-await': 'off', // disable the base rule to use the TS version
+      'typescript/require-await': 'error',
+
+      "typescript/no-deprecated": "error",
+
+      'typescript/consistent-type-definitions': ['error', 'type'],
+      'typescript/consistent-type-imports': [
+        'error',
+        { prefer: 'no-type-imports', fixStyle: 'inline-type-imports' },
+      ],
+      'typescript/consistent-type-exports': [
+        'error',
+        { fixMixedExportsWithInlineTypeSpecifier: true },
+      ],
+
+      // react rules
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'error',
-      'prefer-const': 'error',
       'no-undef': 'error',
+      'prefer-const': 'error',
     },
   },
 ]);
