@@ -46,7 +46,6 @@ export default function AccountStack(_: BottomTabStackScreenProps<'AccountStack'
         component={MyProfileScreen}
         options={({ navigation }) => headerOptions('Profile', navigation)}
       />
-
       <Stack.Screen
         name="Filters"
         component={FiltersScreen}
