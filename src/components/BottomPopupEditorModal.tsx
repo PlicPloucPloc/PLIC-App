@@ -36,12 +36,12 @@ export default function BottomPopuEditorModal({
       {children}
 
       {hasChanges() ? (
-        <TouchableOpacity style={styles.buttonContainer} onPress={handleDone}>
+        <TouchableOpacity style={styles.button} onPress={handleDone}>
           <Text style={styles.buttonText}>Save</Text>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
-          style={[styles.buttonContainer, { backgroundColor: 'lightgrey' }]}
+          style={[styles.button, { backgroundColor: 'lightgrey' }]}
           onPress={handleDone}>
           <Text style={styles.buttonText}>Close</Text>
         </TouchableOpacity>
@@ -52,7 +52,7 @@ export default function BottomPopuEditorModal({
 
 const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
-    buttonContainer: {
+    button: {
       backgroundColor: colors.primary,
       alignItems: 'center',
       paddingVertical: 10,

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   Alert,
   Keyboard,
@@ -13,6 +13,7 @@ import {
 import { ColorTheme } from '@app/Colors';
 import { FILTERS_SURFACE_MAX, FILTERS_SURFACE_MIN } from '@app/config/Constants';
 import { GOOGLE_API_KEY } from '@app/config/Env';
+import { AppStorage } from '@app/config/Storage';
 import { FiltersState, PlaceSearchResponse } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setFiltersState } from '@app/redux/slices';
@@ -26,6 +27,10 @@ import { usePreventRemove } from '@react-navigation/native';
 import GooglePlacesTextInput from 'react-native-google-places-textinput';
 import { useSelector } from 'react-redux';
 
+const defultPlaceDetails: PlaceSearchResponse = {
+  structuredFormat: { mainText: { text: '' } },
+} as PlaceSearchResponse;
+
 export default function FiltersScreen({ navigation }: AccountStackScreenProps<'Filters'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
@@ -36,54 +41,44 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
   const [maxSurface, setMaxSurface] = useState(FILTERS_SURFACE_MAX);
   const [minSurfaceText, setMinSurfaceText] = useState(String(FILTERS_SURFACE_MIN));
   const [maxSurfaceText, setMaxSurfaceText] = useState(String(FILTERS_SURFACE_MAX));
-  const [placeDetails, setPlaceDetails] = useState<PlaceSearchResponse | null>(null);
+  const [placeDetails, setPlaceDetails] = useState<PlaceSearchResponse>(defultPlaceDetails);
   const [maxPrice, setMaxPrice] = useState('');
 
   const isApplyingRef = useRef(false);
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSliderChange = useCallback(([min, max]: number[]) => {
+  function handleSliderChange([min, max]: number[]) {
     setMinSurface(min);
     setMaxSurface(max);
     setMinSurfaceText(String(min));
     setMaxSurfaceText(String(max));
-  }, []);
+  }
 
-  const clamp = (value: number, min: number, max: number) => Math.min(Math.max(value, min), max);
+  const handleSurfaceTextChange = useCallback(
+    (text: string, type: 'min' | 'max', blur: boolean) => {
+      const setText = type === 'min' ? setMinSurfaceText : setMaxSurfaceText;
+      const setSurface = type === 'min' ? setMinSurface : setMaxSurface;
+      const min = type === 'min' ? FILTERS_SURFACE_MIN : minSurface;
+      const max = type === 'min' ? maxSurface : FILTERS_SURFACE_MAX;
 
-  const handleMinChange = useCallback(
-    (text: string, blur: boolean) => {
-      setMinSurfaceText(text);
+      setText(text);
       const num = parseInt(text, 10);
       if (!isNaN(num)) {
-        const clamped = clamp(num, FILTERS_SURFACE_MIN, maxSurface);
-        setMinSurface(clamped);
+        const clamped = Math.min(Math.max(num, min), max);
+        setSurface(clamped);
         if (blur) {
-          setMinSurfaceText(String(clamped));
+          setText(String(clamped));
         }
+      } else if (blur) {
+        setText(String(type === 'min' ? minSurface : maxSurface));
       }
     },
-    [maxSurface],
-  );
-
-  const handleMaxChange = useCallback(
-    (text: string, blur: boolean) => {
-      setMaxSurfaceText(text);
-      const num = parseInt(text, 10);
-      if (!isNaN(num)) {
-        const clamped = clamp(num, minSurface, FILTERS_SURFACE_MAX);
-        setMaxSurface(clamped);
-        if (blur) {
-          setMaxSurfaceText(String(clamped));
-        }
-      }
-    },
-    [minSurface],
+    [minSurface, maxSurface],
   );
 
   async function applyFilters() {
-    if (!placeDetails || !maxPrice) {
+    if (!placeDetails || !placeDetails.structuredFormat.mainText.text || !maxPrice) {
       return Alert.alert(
         'Cannot apply changes.',
         'Please fill in all the fields before continuing.',
@@ -104,63 +99,17 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
 
     setIsLoading(true);
     try {
-      await AsyncStorage.setItem('apartmentFilters', JSON.stringify(filters));
+      await AsyncStorage.setItem(AppStorage.filters, JSON.stringify(filters));
       store.dispatch(setFiltersState(filters));
       isApplyingRef.current = true;
+      Keyboard.dismiss();
       navigation.goBack();
     } finally {
       setIsLoading(false);
     }
   }
 
-  function clearFilters() {
-    setMinSurface(FILTERS_SURFACE_MIN);
-    setMaxSurface(FILTERS_SURFACE_MAX);
-    setMinSurfaceText(String(FILTERS_SURFACE_MIN));
-    setMaxSurfaceText(String(FILTERS_SURFACE_MAX));
-    setPlaceDetails(null);
-    setMaxPrice('');
-  }
-
-  useEffect(() => {
-    const setValues = (filters: FiltersState) => {
-      setMinSurface(filters.minSurface);
-      setMaxSurface(filters.maxSurface);
-      setMinSurfaceText(String(filters.minSurface));
-      setMaxSurfaceText(String(filters.maxSurface));
-      setMaxPrice(String(filters.maxPrice) ?? '');
-      setPlaceDetails({
-        structuredFormat: { mainText: { text: filters.location.name } },
-        details: {
-          location: {
-            latitude: filters.location.latitude,
-            longitude: filters.location.longitude,
-          },
-        },
-      } as PlaceSearchResponse);
-    };
-
-    (async () => {
-      setIsLoading(true);
-      try {
-        // try for redux first and then for async storage
-        if (filtersState.hasValues) {
-          setValues(filtersState);
-        } else {
-          const filters = await AsyncStorage.getItem('apartmentFilters');
-          if (filters) {
-            const parsedFilters: FiltersState = JSON.parse(filters);
-            store.dispatch(setFiltersState(parsedFilters));
-            setValues(parsedFilters);
-          }
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    })();
-  }, [filtersState]);
-
-  const hasChanges = useCallback(() => {
+  const hasChanges = useMemo(() => {
     if (isApplyingRef.current) {
       return false;
     }
@@ -171,9 +120,37 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
       parseInt(maxPrice, 10) !== filtersState.maxPrice ||
       placeDetails?.structuredFormat.mainText.text !== filtersState.location?.name
     );
-  }, [filtersState, maxPrice, placeDetails, minSurface, maxSurface]);
+  }, [filtersState, minSurface, maxSurface, maxPrice, placeDetails.structuredFormat.mainText.text]);
 
-  usePreventRemove(hasChanges(), async (options) => {
+  useEffect(() => {
+    async function loadFilters() {
+      setIsLoading(true);
+      try {
+        const stored = filtersState.hasValues
+          ? filtersState
+          : JSON.parse((await AsyncStorage.getItem(AppStorage.filters)) || '{}');
+
+        if (stored && stored.hasValues) {
+          store.dispatch(setFiltersState(stored));
+          setMinSurface(stored.minSurface);
+          setMaxSurface(stored.maxSurface);
+          setMinSurfaceText(String(stored.minSurface));
+          setMaxSurfaceText(String(stored.maxSurface));
+          setMaxPrice(String(stored.maxPrice));
+          setPlaceDetails({
+            structuredFormat: { mainText: { text: stored.location.name } },
+            details: { location: stored.location },
+          } as PlaceSearchResponse);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    loadFilters();
+  }, [filtersState]);
+
+  usePreventRemove(hasChanges, async (options) => {
     if (isApplyingRef.current || (await alertUnsaveChangesAsync())) {
       navigation.dispatch(options.data.action);
     }
@@ -205,8 +182,8 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
               style={styles.surfaceInput}
               keyboardType="numeric"
               value={minSurfaceText}
-              onChangeText={(text) => handleMinChange(text, false)}
-              onBlur={() => handleMinChange(minSurfaceText, true)}
+              onChangeText={(text) => handleSurfaceTextChange(text, 'min', false)}
+              onBlur={() => handleSurfaceTextChange(minSurfaceText, 'min', true)}
             />
           </View>
 
@@ -216,8 +193,8 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
               style={styles.surfaceInput}
               keyboardType="numeric"
               value={maxSurfaceText}
-              onChangeText={(text) => handleMaxChange(text, false)}
-              onBlur={() => handleMaxChange(maxSurfaceText, true)}
+              onChangeText={(text) => handleSurfaceTextChange(text, 'max', false)}
+              onBlur={() => handleSurfaceTextChange(maxSurfaceText, 'max', true)}
             />
           </View>
         </View>
@@ -226,13 +203,22 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
         <Text style={styles.sectionTitle}>Address</Text>
         <GooglePlacesTextInput
           apiKey={GOOGLE_API_KEY}
-          value={placeDetails?.structuredFormat.mainText.text ?? ''}
+          value={placeDetails.structuredFormat.mainText.text}
           placeHolderText="Enter an address"
           languageCode="fr"
           includedRegionCodes={['fr']}
           minCharsToFetch={2}
           fetchDetails={true}
           detailsFields={['formattedAddress', 'location']}
+          onTextChange={(text) =>
+            setPlaceDetails(
+              (old) =>
+                ({
+                  ...old,
+                  structuredFormat: { mainText: { text } },
+                }) as PlaceSearchResponse,
+            )
+          }
           onPlaceSelect={(place: any) => {
             // leave 'any' as it allows type conversion
             setPlaceDetails(place);
@@ -252,27 +238,19 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
         />
 
         {/* ======== Buttons ======== */}
-        <View style={styles.buttonsContainer}>
+        {hasChanges ? (
           <TouchableOpacity
-            style={[styles.buttons, { backgroundColor: colors.backgroundSecondary }]}
-            onPress={clearFilters}>
-            <Text style={[styles.buttonText, { color: colors.textPrimary }]}>Clear</Text>
+            style={[styles.button, { backgroundColor: colors.primary }]}
+            onPress={applyFilters}>
+            <Text style={styles.buttonText}>Apply</Text>
           </TouchableOpacity>
-
-          {hasChanges() ? (
-            <TouchableOpacity
-              style={[styles.buttons, { backgroundColor: colors.primary }]}
-              onPress={applyFilters}>
-              <Text style={[styles.buttonText, { color: colors.textPrimary }]}>Apply</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity
-              style={[styles.buttons, { backgroundColor: 'lightgrey' }]}
-              onPress={navigation.goBack}>
-              <Text style={[styles.buttonText, { color: colors.textPrimary }]}>Cancel</Text>
-            </TouchableOpacity>
-          )}
-        </View>
+        ) : (
+          <TouchableOpacity
+            style={[styles.button, { backgroundColor: 'lightgrey' }]}
+            onPress={navigation.goBack}>
+            <Text style={styles.buttonText}>Cancel</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </TouchableWithoutFeedback>
   );
@@ -326,21 +304,17 @@ const createStyles = (colors: ColorTheme) =>
       color: colors.textPrimary,
     },
 
-    buttonsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginTop: 30,
-    },
-    buttons: {
-      flex: 1,
-      marginHorizontal: 9,
+    button: {
+      backgroundColor: colors.primary,
       alignItems: 'center',
-      paddingVertical: 15,
+      paddingVertical: 10,
+      marginTop: 20,
       borderRadius: 8,
       borderWidth: 1,
       elevation: 3,
     },
     buttonText: {
+      color: colors.textPrimary,
       fontWeight: '600',
       fontSize: 16,
     },
