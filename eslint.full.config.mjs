@@ -2,62 +2,35 @@
 // Enable every errors and warning
 
 import { defineConfig } from 'eslint-define-config';
-import { baseConfig } from './eslint.config.mjs';
+import baseConfig from './eslint.config.mjs';
 
-const overrideRules = {
-  'prettier/prettier': 'warn',
-  'sort-imports': [
-    'warn',
-    {
-      ignoreCase: true,
-      ignoreDeclarationSort: true,
+import pluginPrettier from 'eslint-plugin-prettier';
+
+const config = defineConfig([
+  ...baseConfig,
+  {
+    name: 'non-IDE-config',
+    files: ['**/*.{js,ts,jsx,tsx}'],
+    plugins: {
+      prettier: pluginPrettier,
     },
-  ],
-  'import/order': [
-    'warn',
-    {
-      groups: [['external', 'builtin'], 'internal', ['sibling', 'parent'], 'index'],
-      pathGroups: [
-        {
-          pattern: '@(react|react-native)',
-          group: 'external',
-          position: 'before',
-        },
-        {
-          pattern: '@src/**',
-          group: 'internal',
-        },
-      ],
-      pathGroupsExcludedImportTypes: ['internal', 'react'],
-      'newlines-between': 'always',
-      alphabetize: {
-        order: 'asc',
-        caseInsensitive: true,
+    rules: {
+      'prettier/prettier': 'warn',
+    'import/order': [
+      'warn',
+      {
+        groups: ['builtin', 'external', 'internal'],
+        pathGroups: [
+          { pattern: '@(react|react-native)', group: 'external', position: 'before' },
+          { pattern: '@src/**', group: 'internal' },
+        ],
+        pathGroupsExcludedImportTypes: ['internal', 'react'],
+        'newlines-between': 'always',
+        alphabetize: { order: 'asc', caseInsensitive: true },
       },
+    ],
     },
-  ],
-  'no-unused-vars': 'off', // disable the base rule to use the TS version
-  'typescript/no-unused-vars': [
-    'error',
-    {
-      argsIgnorePattern: '^_',
-      varsIgnorePattern: '^_',
-      ignoreRestSiblings: true,
-    },
-  ],
-};
+  },
+]);
 
-const fullConfig = baseConfig.map((entry) => {
-  if ('rules' in entry) {
-    return {
-      ...entry,
-      rules: {
-        ...entry.rules,
-        ...overrideRules,
-      },
-    };
-  }
-  return entry;
-});
-
-export default defineConfig(fullConfig);
+export default config;
