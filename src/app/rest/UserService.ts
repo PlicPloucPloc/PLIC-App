@@ -1,6 +1,7 @@
 import { Alert } from 'react-native';
 
 import {
+  AuthState,
   LoginRequest,
   LoginResponse,
   RegisterRequest,
@@ -9,7 +10,6 @@ import {
   RootEnum,
   UserInfoResponse,
 } from '@app/definitions';
-import { AuthState } from '@app/definitions/redux';
 import { setRoot, setUserInfo } from '@app/redux/slices';
 import store from '@app/redux/Store';
 import { alertOnResponseError } from '@app/utils/Error.ts';

@@ -1,8 +1,9 @@
 import React, { ReactNode } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { alertUnsaveChangesAsync } from '@app/utils/Misc';
 
 import BottomPopupModal from './BottomPopupModal';
 
@@ -26,35 +27,21 @@ export default function BottomPopuEditorModal({
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const isCloseApproved = () => {
-    return new Promise<boolean>((resolve) => {
-      Alert.alert(
-        'Unsaved changes',
-        'You have unsaved changes. Are you sure you want to discard them?',
-        [
-          { text: 'Cancel', style: 'cancel', onPress: () => resolve(false) },
-          { text: 'Discard', style: 'destructive', onPress: () => resolve(true) },
-        ],
-        { cancelable: true, onDismiss: () => resolve(false) },
-      );
-    });
-  };
-
   return (
     <BottomPopupModal
       modalVisible={modalVisible}
       setModalVisible={setModalVisible}
       title={title}
-      handleAlertOnClose={{ willAlert: hasChanges, isCloseApproved }}>
+      handleAlertOnClose={{ willAlert: hasChanges, isCloseApproved: alertUnsaveChangesAsync }}>
       {children}
 
       {hasChanges() ? (
-        <TouchableOpacity style={styles.buttonContainer} onPress={handleDone}>
+        <TouchableOpacity style={styles.button} onPress={handleDone}>
           <Text style={styles.buttonText}>Save</Text>
         </TouchableOpacity>
       ) : (
         <TouchableOpacity
-          style={[styles.buttonContainer, { backgroundColor: 'lightgrey' }]}
+          style={[styles.button, { backgroundColor: 'lightgrey' }]}
           onPress={handleDone}>
           <Text style={styles.buttonText}>Close</Text>
         </TouchableOpacity>
@@ -65,7 +52,7 @@ export default function BottomPopuEditorModal({
 
 const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
-    buttonContainer: {
+    button: {
       backgroundColor: colors.primary,
       alignItems: 'center',
       paddingVertical: 10,
