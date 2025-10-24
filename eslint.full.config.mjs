@@ -16,19 +16,19 @@ const config = defineConfig([
     },
     rules: {
       'prettier/prettier': 'warn',
-    'import/order': [
-      'warn',
-      {
-        groups: ['builtin', 'external', 'internal'],
-        pathGroups: [
-          { pattern: '@(react|react-native)', group: 'external', position: 'before' },
-          { pattern: '@src/**', group: 'internal' },
-        ],
-        pathGroupsExcludedImportTypes: ['internal', 'react'],
-        'newlines-between': 'always',
-        alphabetize: { order: 'asc', caseInsensitive: true },
-      },
-    ],
+      'import/order': [
+        'warn',
+        {
+          groups: ['builtin', 'external', 'internal'],
+          pathGroups: [
+            { pattern: '@(react|react-native)', group: 'external', position: 'before' },
+            { pattern: '@src/**', group: 'internal' },
+          ],
+          pathGroupsExcludedImportTypes: ['internal', 'react'],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
     },
   },
 ]);

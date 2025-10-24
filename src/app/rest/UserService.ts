@@ -1,6 +1,9 @@
 import { Alert } from 'react-native';
 
+import * as SecureStore from 'expo-secure-store';
+
 import {
+  AuthState,
   LoginRequest,
   LoginResponse,
   RegisterRequest,
@@ -9,12 +12,10 @@ import {
   RootEnum,
   UserInfoResponse,
 } from '@app/definitions';
-import { AuthState } from '@app/definitions/redux';
 import { setRoot, setUserInfo } from '@app/redux/slices';
 import store from '@app/redux/Store';
 import { alertOnResponseError } from '@app/utils/Error.ts';
 import { fetchAndCompressImage } from '@app/utils/Image.ts';
-import * as SecureStore from 'expo-secure-store';
 
 import { apiFetch } from './Client';
 import Endpoints from './Endpoints';

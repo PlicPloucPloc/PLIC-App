@@ -1,6 +1,6 @@
-import { AuthState } from '@app/definitions/redux';
-import type { PayloadAction } from '@reduxjs/toolkit';
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+
+import { AuthState } from '@app/definitions';
 
 const initialState: AuthState = {
   userId: '',

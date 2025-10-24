@@ -1,19 +1,20 @@
 import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+import { NavigationContainer } from '@react-navigation/native';
+import { Asset } from 'expo-asset';
+import * as Font from 'expo-font';
+import { StatusBar } from 'expo-status-bar';
+import { useSelector } from 'react-redux';
+
 import { RootEnum } from '@app/definitions';
 import { setRoot } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
 import { getToken } from '@app/rest/Client';
 import { loadCurrentUserInfo } from '@app/rest/UserService';
 import { Images } from '@assets/index';
-import { Ionicons } from '@expo/vector-icons';
-import { NavigationContainer } from '@react-navigation/native';
 import SplashScreen from '@screens/SplashScreen';
-import { Asset } from 'expo-asset';
-import * as Font from 'expo-font';
-import { StatusBar } from 'expo-status-bar';
-import { useSelector } from 'react-redux';
 
 import AuthNavigator from './AuthNavigator';
 import InsideNavigator from './InsideNavigator';

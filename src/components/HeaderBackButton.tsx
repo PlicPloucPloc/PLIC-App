@@ -13,8 +13,8 @@ export default function HeaderBackButton({ navigation }: HeaderBackButtonProps) 
   return (
     <TouchableOpacity
       onPress={() => {
-        navigation.goBack();
         Keyboard.dismiss();
+        navigation.goBack();
       }}
       style={{ paddingHorizontal: 15 }}>
       <Ionicons name="arrow-back-outline" size={28} color="black" />

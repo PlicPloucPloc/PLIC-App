@@ -1,10 +1,11 @@
-import HeaderBackButton from '@components/HeaderBackButton';
-import { SharedStackParamList } from '@navigation/Types';
 import {
   createStackNavigator,
   StackNavigationOptions,
   StackNavigationProp,
 } from '@react-navigation/stack';
+
+import HeaderBackButton from '@components/HeaderBackButton';
+import { SharedStackParamList } from '@navigation/Types';
 import ApartmentDetailsScreen from '@screens/ApartmentDetailsScreen';
 import DirectMessageScreen from '@screens/DirectMessageScreen';
 import OtherProfileScreen from '@screens/OtherProfileScreen';

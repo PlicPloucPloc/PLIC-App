@@ -1,6 +1,7 @@
+import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
+
 import HeaderLogo from '@components/HeaderLogo';
 import { BottomTabStackScreenProps, HomeStackParamList } from '@navigation/Types';
-import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 import HomeScreen from '@screens/HomeScreen';
 
 const Stack = createStackNavigator<HomeStackParamList>();

@@ -1,5 +1,6 @@
-import { BottomTabStackScreenProps, MessageStackParamList } from '@navigation/Types';
 import { createStackNavigator } from '@react-navigation/stack';
+
+import { BottomTabStackScreenProps, MessageStackParamList } from '@navigation/Types';
 import DirectMessageListScreen from '@screens/DirectMessageListScreen';
 import DirectMessageScreen from '@screens/DirectMessageScreen';
 import GroupInfoScreen from '@screens/GroupInfo';

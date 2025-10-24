@@ -1,13 +1,14 @@
+import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
+
 import { setBirthdate } from '@app/redux/slices';
 import store from '@app/redux/Store';
-import { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
 
 export function checkEmail(email: string): string {
   if (!email) {
     return 'Email cannot be empty.';
   }
 
-  var regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+  const regex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
   if (!regex.test(email)) {
     return 'Invalid email format.';
   }
@@ -29,12 +30,12 @@ export function checkPassword(password: string, isRegistering = false): string {
     return 'Password must be at least 8 characters long.';
   }
 
-  var regex = /^(.*[0-9].*)$/;
+  let regex = /^(.*[0-9].*)$/;
   if (!regex.test(password)) {
     return 'Password must contain at least one number.';
   }
 
-  var regex = /^(.*[-!@#$%_^&*].*)$/;
+  regex = /^(.*[-!@#$%_^&*].*)$/;
   if (!regex.test(password)) {
     return 'Password must contain at least one special character.';
   }

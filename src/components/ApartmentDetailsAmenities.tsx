@@ -1,10 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo, IoniconName } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { Ionicons } from '@expo/vector-icons';
 
 type InfoItemProps = {
   icon: IoniconName;

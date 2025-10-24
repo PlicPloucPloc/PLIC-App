@@ -1,10 +1,11 @@
 import React, { memo } from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+
 import { ColorTheme } from '@app/Colors';
 import { RELATION_TYPE } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { Ionicons } from '@expo/vector-icons';
 
 type ApartmentListItemProps = {
   title: string;
@@ -49,6 +50,8 @@ const ApartmentListItem = memo(
     );
   },
 );
+
+ApartmentListItem.displayName = 'ApartmentListItem';
 
 export default ApartmentListItem;
 

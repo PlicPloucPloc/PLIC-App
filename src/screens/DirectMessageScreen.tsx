@@ -11,10 +11,11 @@ import {
   View,
 } from 'react-native';
 
-import { getToken } from '@app/rest/Client';
-import MessageHeader, { User } from '@components/MessageHeader';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import { getToken } from '@app/rest/Client';
+import MessageHeader, { User } from '@components/MessageHeader';
 
 interface Message {
   id: number;

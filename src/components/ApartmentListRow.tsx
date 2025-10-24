@@ -1,11 +1,12 @@
 import React, { memo } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TouchableOpacity } from 'react-native';
 
+import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
+
 import { ColorTheme } from '@app/Colors';
 import { RelationInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
-import Reanimated, { SharedValue, useAnimatedStyle } from 'react-native-reanimated';
 
 import ApartmentListItem from './ApartmentListItem';
 
@@ -87,6 +88,8 @@ const ApartmentListRow = memo(({ relation, onPress, onDelete, isHistory }: Props
     </Swipeable>
   );
 });
+
+ApartmentListRow.displayName = 'ApartmentListRow';
 
 export default ApartmentListRow;
 

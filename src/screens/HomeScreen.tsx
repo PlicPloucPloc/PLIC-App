@@ -9,6 +9,11 @@ import {
   View,
 } from 'react-native';
 
+import { SwipeDirection, Swiper, type SwiperCardRefType } from '@ellmos/rn-swiper-list';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo, RELATION_TYPE } from '@app/definitions';
 import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
@@ -19,11 +24,7 @@ import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
 import Loader from '@components/Loader';
-import { SwipeDirection, Swiper, type SwiperCardRefType } from '@ellmos/rn-swiper-list';
-import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
-import { useFocusEffect } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
 
 const ICON_SIZE = 38;
 const SWIPE_DELAY = 300;

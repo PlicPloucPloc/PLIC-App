@@ -1,16 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
+
 import { ColorTheme } from '@app/Colors';
-import { IoniconName } from '@app/definitions';
-import { AuthState } from '@app/definitions/redux';
+import { AuthState, IoniconName } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import ProfilePicture from '@components/ProfilePicture';
-import { Ionicons } from '@expo/vector-icons';
 import { SharedStackScreenProps } from '@navigation/Types';
-import { useSelector } from 'react-redux';
 
 type ProfileItem = {
   icon: IoniconName;

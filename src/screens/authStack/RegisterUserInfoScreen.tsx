@@ -10,6 +10,8 @@ import {
   View,
 } from 'react-native';
 
+import { useSelector } from 'react-redux';
+
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import * as AuthActions from '@app/redux/slices/AuthStateSlice';
@@ -18,7 +20,6 @@ import { showBirthdatePicker } from '@app/utils/Auth';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
 import { AuthStackScreenProps } from '@navigation/Types';
-import { useSelector } from 'react-redux';
 
 export default function RegisterUserInfoScreen({
   navigation,

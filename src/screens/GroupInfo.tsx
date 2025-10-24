@@ -1,11 +1,12 @@
-import React from 'react';
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import MessageHeader, { User } from '@components/MessageHeader';
 import { Ionicons } from '@expo/vector-icons';
+import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+
+import MessageHeader, { User } from '@components/MessageHeader';
 import { MessageStackScreenProps } from '@navigation/Types';
-import { Swipeable } from 'react-native-gesture-handler';
+
 type Member = {
   id: string;
   name: string;

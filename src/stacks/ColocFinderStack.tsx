@@ -1,5 +1,6 @@
-import { BottomTabStackScreenProps, ColocFinderStackParamList } from '@navigation/Types';
 import { createStackNavigator } from '@react-navigation/stack';
+
+import { BottomTabStackScreenProps, ColocFinderStackParamList } from '@navigation/Types';
 import ColocFinderForHouseScreen from '@screens/ColocFinderForHouseScreen';
 import ColocFinderScreen from '@screens/ColocFinderScreen';
 

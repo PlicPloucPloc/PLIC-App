@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
+
 import { ColorTheme } from '@app/Colors';
 import { IoniconName } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
+import EditProfileInformationModal from '@components/EditProfileInformationModal';
 import EditProfilePictureModal from '@components/EditProfilePictureModal';
-import EditProfileInformationModal from '@components/EditProfilInformationModal';
 import ProfilePicture from '@components/ProfilePicture';
-import { Ionicons } from '@expo/vector-icons';
 import { AccountStackScreenProps } from '@navigation/Types';
-import { useSelector } from 'react-redux';
 
 type ProfileItem = {
   icon: IoniconName;
@@ -18,7 +19,7 @@ type ProfileItem = {
   value: string;
 };
 
-export default function MyProfileScreen({}: AccountStackScreenProps<'MyProfile'>) {
+export default function MyProfileScreen(_: AccountStackScreenProps<'MyProfile'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 

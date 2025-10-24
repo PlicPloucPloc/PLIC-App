@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { ActivityIndicator, Alert, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
 import { IoniconName } from '@app/definitions';
@@ -8,10 +11,7 @@ import { RootState } from '@app/redux/Store';
 import { resendVerificationEmail } from '@app/rest/UserService';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
-import { Ionicons } from '@expo/vector-icons';
 import { AuthStackScreenProps } from '@navigation/Types';
-import { TouchableOpacity } from 'react-native-gesture-handler';
-import { useSelector } from 'react-redux';
 
 type screenConfigType = {
   icon: { name: IoniconName; color: string };
@@ -102,7 +102,7 @@ export default function VerifyEmailScreen({
         </Text>
 
         <View style={styles.resendEmail}>
-          <Text style={styles.message}>Didn't receive the email? </Text>
+          <Text style={styles.message}>Didn`&apos;`t receive the email? </Text>
           {loading && <ActivityIndicator size="small" color={styles.resendEmailLink.color} />}
           {!loading && cooldown > 0 && (
             <Text style={styles.cooldownText}>Resend in {cooldown}s</Text>

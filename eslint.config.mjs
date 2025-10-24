@@ -12,13 +12,20 @@ const baseConfig = defineConfig([
   },
   {
     // disable some expo rules that are not wanted in the project
-    name: 'override-expo-config',
+    // and enable some custom rules only valid for IDEs
+    name: 'IDE-config',
     files: ['**/*.{js,ts,jsx,tsx}'],
+    languageOptions: {
+      parserOptions: {
+        project: './tsconfig.json',
+      },
+    },
     rules: {
-      'eqeqeq': 'off',
+      eqeqeq: 'off',
       'react-hooks/exhaustive-deps': 'error',
       'prefer-const': 'error',
       'no-undef': 'error',
+      "@typescript-eslint/no-deprecated": "error"
     },
   },
 ]);

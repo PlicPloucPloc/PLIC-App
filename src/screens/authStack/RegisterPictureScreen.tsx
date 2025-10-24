@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
+
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import * as AuthActions from '@app/redux/slices/AuthStateSlice';
 import store, { RootState } from '@app/redux/Store';
@@ -8,9 +11,7 @@ import { selectImageFromMedia } from '@app/utils/Image';
 import AuthStackButton from '@components/AuthStackButton';
 import BackgroundBuildings from '@components/BackgroundBuildings';
 import ProfilePicture from '@components/ProfilePicture';
-import { Ionicons } from '@expo/vector-icons';
 import { AuthStackScreenProps } from '@navigation/Types';
-import { useSelector } from 'react-redux';
 
 export default function RegisterPictureScreen({
   navigation,
