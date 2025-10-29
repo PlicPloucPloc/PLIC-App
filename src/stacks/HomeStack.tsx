@@ -1,6 +1,7 @@
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
 
 import HeaderLogo from '@components/HeaderLogo';
+import HeaderRightButton from '@components/HeaderRightButton';
 import { BottomTabStackScreenProps, HomeStackParamList } from '@navigation/Types';
 import HomeScreen from '@screens/HomeScreen';
 
@@ -17,6 +18,7 @@ function headerOptions(): StackNavigationOptions {
       fontSize: 26,
     },
     headerLeft: () => <HeaderLogo />,
+    headerRight: () => <HeaderRightButton icon="refresh" />,
   };
 }
 

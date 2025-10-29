@@ -14,14 +14,14 @@ export async function postProfilePictureFromSignedUrl(
   return fetch(`${S3_URL}/upload/sign/user-pictures/${path}?token=${token}`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'image/png',
+      'Content-Type': 'image/jpeg',
     },
     body: image,
   });
 }
 
 export async function checkProfilePictureExists(userId: string): Promise<string | null> {
-  const imageUrl = `${S3_URL}/user-pictures/${userId}.png`;
+  const imageUrl = `${S3_URL}/user-pictures/${userId}.jpeg`;
   return (await checkImageExists(imageUrl)) ? imageUrl : null;
 }
 
@@ -31,7 +31,7 @@ export async function putProfilePicture(userId: string, image: Blob): Promise<vo
     {
       method: 'PUT',
       headers: {
-        'Content-Type': 'image/png',
+        'Content-Type': 'image/jpeg',
       },
       body: image,
     },
@@ -48,7 +48,7 @@ export async function deleteProfilePicture(userId: string): Promise<void> {
     {
       method: 'DELETE',
       headers: {
-        'Content-Type': 'image/png',
+        'Content-Type': 'image/jpeg',
       },
     },
     true,
@@ -59,7 +59,7 @@ export async function deleteProfilePicture(userId: string): Promise<void> {
 }
 
 export async function getApartmentThumbnail(apt: ApartmentInfo): Promise<string> {
-  const thumbnailUrl = `${S3_URL}/public/apartment-pictures/${apt.apartment_id}/0.png`;
+  const thumbnailUrl = `${S3_URL}/public/apartment-pictures/${apt.apartment_id}/0.jpeg`;
 
   if (await checkImageExists(thumbnailUrl)) {
     return thumbnailUrl;
@@ -78,7 +78,7 @@ export async function getApartmentImages(apt: ApartmentInfo) {
 
   let index = 1;
   while (true) {
-    const imageUrl = `${S3_URL}/public/apartment-pictures/${apt.apartment_id}/${index}.png`;
+    const imageUrl = `${S3_URL}/public/apartment-pictures/${apt.apartment_id}/${index}.jpeg`;
     const exists = await checkImageExists(imageUrl);
     if (!exists) break;
     images_url.push(imageUrl);

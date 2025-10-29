@@ -102,7 +102,7 @@ export default function VerifyEmailScreen({
         </Text>
 
         <View style={styles.resendEmail}>
-          <Text style={styles.message}>Didn`&apos;`t receive the email? </Text>
+          <Text style={styles.message}>Didn&apos;t receive the email? </Text>
           {loading && <ActivityIndicator size="small" color={styles.resendEmailLink.color} />}
           {!loading && cooldown > 0 && (
             <Text style={styles.cooldownText}>Resend in {cooldown}s</Text>

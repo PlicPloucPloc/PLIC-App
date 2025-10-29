@@ -8,12 +8,12 @@ import { alertOnResponseError } from './Error';
 export async function fetchAndCompressImage(
   imageUri: string,
 ): Promise<{ uri: string; blob: Blob } | null> {
-  // Convert image to PNG
+  // Convert image to JPEG
   const imageRef = await ImageManipulator.manipulate(imageUri).renderAsync();
 
   const manipResult = await imageRef.saveAsync({
     compress: 0.4,
-    format: SaveFormat.PNG,
+    format: SaveFormat.JPEG,
   });
 
   imageUri = manipResult.uri;

@@ -3,4 +3,5 @@ export const Images = {
   backgroundBuildings: require('@assets/images/BackgroundBuildingsCropped.png'),
   storePin: require('@assets/images/store-pin.png'),
   subwayPin: require('@assets/images/subway-pin.png'),
+  noResults: require('@assets/images/no-results.png'),
 };
