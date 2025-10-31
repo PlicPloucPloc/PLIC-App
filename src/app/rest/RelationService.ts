@@ -154,7 +154,7 @@ const updateShouldRefetchStates = (shouldRefreshLikeList: boolean) => {
   store.dispatch(setShouldRefetchHistory(true));
 };
 
-export async function putAllowColloc(allowColloc: boolean): Promise<boolean> {
+export async function updateAllowColloc(allowColloc: boolean): Promise<boolean> {
   const response = await apiFetch(
     Endpoints.RELATIONS.UPDATE_ALLOW_COLLOC(allowColloc),
     {

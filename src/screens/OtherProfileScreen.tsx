@@ -7,6 +7,7 @@ import { AuthState } from '@app/definitions/redux';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { getOtherUserInfo } from '@app/rest/UserService';
+import { CalculateAge } from '@app/utils/Profile';
 import ProfilePicture from '@components/ProfilePicture';
 import { Ionicons } from '@expo/vector-icons';
 import { SharedStackScreenProps } from '@navigation/Types';
@@ -51,9 +52,7 @@ export default function OtherProfileScreen({
 
       setUserInfo(userInfo);
 
-      const age = Math.floor(
-        (new Date().getTime() - new Date(userInfo.birthdate).getTime()) / 31557600000,
-      ); // tkt c'est magique
+      const age = CalculateAge(userInfo.birthdate);
 
       setProfileItems([
         { icon: 'person', label: 'First name', value: userInfo.firstName },
@@ -77,7 +76,7 @@ export default function OtherProfileScreen({
 
       {!isCurrentUser && (
         <TouchableOpacity
-          onPress={() => navigation.navigate('DirectMessage', { userId: route.params.userId })}
+          onPress={() => navigation.navigate('DirectMessage', { apartmentId: 1 })}
           style={{ marginTop: 12, alignSelf: 'center' }}>
           <Text style={{ color: colors.primary, fontWeight: '600' }}>Send message</Text>
         </TouchableOpacity>

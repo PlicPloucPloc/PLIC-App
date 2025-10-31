@@ -3,10 +3,10 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 
 import { ColorTheme } from '@app/Colors';
 import { UserInfoResponse } from '@app/definitions/rest/UserService';
-import { CalculateAge } from '@app/definitions/utils/Ionicons';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { putAllowColloc } from '@app/rest/RelationService';
+import { updateAllowColloc } from '@app/rest/RelationService';
 import { getRecommendedColloc } from '@app/rest/UserService';
+import { CalculateAge } from '@app/utils/Profile';
 import ProfilePicture from '@components/ProfilePicture';
 import { ColocFinderStackScreenProps } from '@navigation/Types';
 import { Switch } from 'react-native-gesture-handler';
@@ -36,7 +36,7 @@ export default function ColocFinderScreen({
     const newValue = !isEnabled;
     setIsEnabled(newValue);
     try {
-      await putAllowColloc(newValue);
+      await updateAllowColloc(newValue);
       const data = await getRecommendedColloc();
       const users = data.users || [];
       const validUsers = users.filter((user): user is UserInfoResponse => user !== null);
@@ -121,47 +121,6 @@ const createStyles = (colors: ColorTheme) =>
     listContainer: {
       paddingHorizontal: 16,
     },
-    centerContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: colors.background,
-    },
-    userItem: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      paddingVertical: 12,
-      borderBottomWidth: 1,
-      borderColor: '#eee',
-    },
-    userContent: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      flex: 1,
-    },
-    avatarContainer: {
-      width: 56,
-      height: 56,
-      borderRadius: 12,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginRight: 12,
-    },
-    avatarInner: {
-      width: 48,
-      height: 48,
-      borderRadius: 8,
-      backgroundColor: colors.background,
-      justifyContent: 'center',
-      alignItems: 'center',
-    },
-    avatarText: {
-      fontSize: 18,
-      fontWeight: '600',
-      color: colors.textPrimary,
-    },
-
     separator: {
       height: 1,
       backgroundColor: '#eee',
@@ -173,10 +132,6 @@ const createStyles = (colors: ColorTheme) =>
     emptyText: {
       fontSize: 16,
       color: colors.textSecondary,
-    },
-    errorText: {
-      fontSize: 16,
-      color: '#ef4444',
     },
     userCard: {
       flexDirection: 'row',
