@@ -41,3 +41,7 @@ export type RegisterResponse = {
 export type ResendEmailRequest = {
   email: string;
 };
+
+export type RecommendedCollocResponse = {
+  users: UserInfoResponse[];
+};
