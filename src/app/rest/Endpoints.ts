@@ -7,6 +7,7 @@ const Endpoints = {
     CHECK_EMAIL: (email: string) => `/user/checkEmail/${email.toLowerCase()}`,
     RESEND_EMAIL: () => '/user/resend',
     REFRESH: '/user/refresh',
+    RECOMMENDED_COLLOC: '/user/recommendedColloc',
   },
   RELATIONS: {
     GET_ALL_PAGINATED: (offset: number, limit: number) =>
@@ -18,6 +19,8 @@ const Endpoints = {
     POST_RELATION: '/relations',
     UPDATE_RELATION: '/relations',
     DELETE_RELATION: '/relations',
+    UPDATE_ALLOW_COLLOC: (allowColloc: boolean) =>
+      `/relations/allowColloc?allowColloc=${allowColloc}`,
   },
   APARTMENT: {
     NO_RELATIONS_PAGINATED: (offset: number, limit: number) =>
