@@ -6,7 +6,7 @@ import { UserInfoResponse } from '@app/definitions/rest/UserService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { updateAllowColloc } from '@app/rest/RelationService';
 import { getRecommendedColloc } from '@app/rest/UserService';
-import { CalculateAge } from '@app/utils/Profile';
+import { CalculateAge } from '@app/utils/Misc';
 import ProfilePicture from '@components/ProfilePicture';
 import { ColocFinderStackScreenProps } from '@navigation/Types';
 import { Switch } from 'react-native-gesture-handler';
