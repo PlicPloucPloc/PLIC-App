@@ -9,7 +9,7 @@ import { AuthState, IoniconName } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { getOtherUserInfo } from '@app/rest/UserService';
-import { CalculateAge } from '@app/utils/Misc';
+import { calculateAge } from '@app/utils/Misc';
 import ProfilePicture from '@components/ProfilePicture';
 import { SharedStackScreenProps } from '@navigation/Types';
 
@@ -52,7 +52,7 @@ export default function OtherProfileScreen({
 
       setUserInfo(userInfo);
 
-      const age = CalculateAge(userInfo.birthdate);
+      const age = calculateAge(userInfo.birthdate);
 
       setProfileItems([
         { icon: 'person', label: 'First name', value: userInfo.firstName },
