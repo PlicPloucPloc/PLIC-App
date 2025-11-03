@@ -23,11 +23,15 @@ export default function EverythingSwiped(_: EverythingSwipedProps) {
       <Text style={styles.text}>
         Try expanding your filters or check your favorites while we look for new listings.
       </Text>
+
+      {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AccountStack')}> */}
+      {/*   <Text style={styles.buttonText}>Edit preferences</Text> */}
+      {/* </TouchableOpacity> */}
     </View>
   );
 }
 
-const createStyles = (_: ColorTheme) =>
+const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
@@ -49,6 +53,21 @@ const createStyles = (_: ColorTheme) =>
     text: {
       fontSize: 16,
       marginTop: 30,
+      textAlign: 'center',
+      marginBottom: 20,
+    },
+
+    button: {
+      backgroundColor: colors.primary,
+      paddingVertical: 10,
+      borderRadius: 10,
+      borderWidth: 1,
+      elevation: 3,
+    },
+    buttonText: {
+      color: colors.textPrimary,
+      fontSize: 16,
+      fontWeight: '600',
       textAlign: 'center',
     },
   });

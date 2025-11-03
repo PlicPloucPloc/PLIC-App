@@ -2,6 +2,7 @@ import { Alert } from 'react-native';
 
 import * as SecureStore from 'expo-secure-store';
 
+import { API_PAGE_SIZE } from '@app/config/Constants.ts';
 import {
   AuthState,
   LoginRequest,
@@ -188,9 +189,12 @@ export async function resendVerificationEmail(body: ResendEmailRequest): Promise
   return true;
 }
 
-export async function getRecommendedColloc(): Promise<AuthState[]> {
+export async function getRecommendedColloc(
+  offset: number,
+  pageSize: number = API_PAGE_SIZE,
+): Promise<AuthState[]> {
   const response = await apiFetch(
-    Endpoints.USER.RECOMMENDED_COLLOC,
+    Endpoints.USER.RECOMMENDED_COLLOC(offset, pageSize),
     {
       method: 'GET',
     },

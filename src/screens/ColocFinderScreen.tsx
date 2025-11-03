@@ -11,11 +11,13 @@ import {
 
 import { ColorTheme } from '@app/Colors';
 import { AuthState } from '@app/definitions';
+import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { updateAllowColloc } from '@app/rest/RelationService';
 import { getRecommendedColloc } from '@app/rest/UserService';
 import { calculateAge } from '@app/utils/Misc';
 import { Images } from '@assets/index';
+import ColocFinderNotEnabled from '@components/ColocFinderNotEnabled';
 import HeaderSwitch from '@components/HeaderSwitch';
 import ProfilePicture from '@components/ProfilePicture';
 import { ColocFinderStackScreenProps } from '@navigation/Types';
@@ -27,34 +29,34 @@ export default function ColocFinderScreen({
   const styles = createStyles(colors);
 
   const [isEnabled, setIsEnabled] = useState(false);
-  const [refreshing, setRefreshing] = useState(false);
-  const [matchingUsers, setMatchingUsers] = useState<AuthState[]>([]);
 
-  const refresh = useCallback(() => {
-    (async () => {
-      setRefreshing(true);
-      const users = await getRecommendedColloc().finally(() => setRefreshing(false));
-      setMatchingUsers(users);
-    })();
+  const fetchData = useCallback((offset: number) => {
+    return getRecommendedColloc(offset);
   }, []);
 
-  useEffect(() => {
-    if (!isEnabled) {
-      return;
-    }
-
-    refresh();
-  }, [isEnabled, refresh]);
+  const {
+    data: users,
+    setData: setUsers,
+    // FIXME: loadingMore,
+    refresh,
+    refreshing,
+    setRefreshing,
+    // FIXME: fetchMore,
+  } = usePaginatedQuery<AuthState>(fetchData);
 
   const toggleSwitch = useCallback(
-    (enabled: boolean) => {
+    async (enabled: boolean) => {
+      setRefreshing(true);
       setIsEnabled(enabled);
+      await updateAllowColloc(enabled);
+
       if (enabled) {
         refresh();
+      } else {
+        setUsers([]);
       }
-      updateAllowColloc(enabled);
     },
-    [refresh],
+    [refresh, setUsers, setRefreshing],
   );
 
   useEffect(() => {
@@ -65,27 +67,11 @@ export default function ColocFinderScreen({
 
   return (
     <View style={styles.container}>
-      {!isEnabled && (
-        <View style={styles.disabledContainer}>
-          <Text style={styles.disabledTitle}>Find Your Perfect Roommate</Text>
-
-          <Text style={styles.disabledText}>
-            Enable the coloc finder to connect with people who share your vibe and lifestyle.
-          </Text>
-
-          <Text style={styles.disabledNote}>
-            Once enabled, your profile becomes visible to others looking for roommates.
-          </Text>
-
-          <TouchableOpacity style={styles.enableButton} onPress={() => toggleSwitch(true)}>
-            <Text style={styles.enableButtonText}>Enable Now</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+      {!isEnabled && <ColocFinderNotEnabled toggleSwitch={toggleSwitch} />}
 
       {isEnabled && (
         <FlatList
-          data={matchingUsers}
+          data={users}
           renderItem={({ item }) => (
             <TouchableOpacity
               onPress={() =>
@@ -110,6 +96,21 @@ export default function ColocFinderScreen({
               </View>
             </TouchableOpacity>
           )}
+          keyExtractor={(item) => item.userId}
+          contentContainerStyle={{ flexGrow: 1 }}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          // FIXME: enable pagination when backend supports it
+          // onEndReached={() => fetchMore()}
+          // onEndReachedThreshold={0.2}
+          // ListFooterComponent={
+          //   loadingMore ? (
+          //     <ActivityIndicator
+          //       size="small"
+          //       color={colors.primary}
+          //       style={{ marginVertical: 20 }}
+          //     />
+          //   ) : null
+          // }
           refreshControl={
             <RefreshControl
               refreshing={refreshing}
@@ -118,21 +119,20 @@ export default function ColocFinderScreen({
               tintColor={colors.primary}
             />
           }
-          keyExtractor={(item) => item.userId}
-          contentContainerStyle={{ flexGrow: 1 }}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
           ListEmptyComponent={
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyTitle}>
-                We haven&apos;t found any potential roommates for you at the moment.
-              </Text>
+            refreshing ? null : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyTitle}>
+                  We haven&apos;t found any potential roommates for you at the moment.
+                </Text>
 
-              <Image source={Images.alone} style={styles.gif} />
+                <Image source={Images.alone} style={styles.gif} />
 
-              <Text style={styles.emptyText}>
-                Try to like more apartments to increase your chances!
-              </Text>
-            </View>
+                <Text style={styles.emptyText}>
+                  Try to like more apartments to increase your chances!
+                </Text>
+              </View>
+            )
           }
         />
       )}
@@ -169,10 +169,11 @@ const createStyles = (colors: ColorTheme) =>
     },
     separator: {
       height: 1,
-      backgroundColor: '#eee',
+      backgroundColor: colors.textSecondary,
     },
 
     emptyContainer: {
+      height: '85%',
       justifyContent: 'center',
       paddingHorizontal: 20,
       paddingTop: 40,
@@ -180,64 +181,19 @@ const createStyles = (colors: ColorTheme) =>
     emptyTitle: {
       fontSize: 18,
       fontWeight: 'bold',
-      marginBottom: 20,
+      marginBottom: 30,
       textAlign: 'center',
-    },
-    emptyText: {
-      fontSize: 16,
-      marginTop: 30,
-      textAlign: 'center',
-      color: colors.textSecondary,
     },
     gif: {
       width: '100%',
       height: 300,
       alignSelf: 'center',
       borderRadius: 20,
+      marginBottom: 40,
     },
-
-    // sqdlkfhsdqlkfhlksdqjfkjqskfhqskhfksqdhfkqhd
-    disabledContainer: {
-      height: '75%',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 24,
-    },
-    disabledImage: {
-      width: 200,
-      height: 200,
-      marginBottom: 30,
-      borderRadius: 20,
-    },
-    disabledTitle: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      color: colors.textPrimary,
-      marginBottom: 20,
-      textAlign: 'center',
-    },
-    disabledText: {
+    emptyText: {
       fontSize: 16,
-      color: colors.textSecondary,
       textAlign: 'center',
-      marginBottom: 10,
-    },
-    disabledNote: {
-      fontSize: 14,
       color: colors.textSecondary,
-      textAlign: 'center',
-      marginBottom: 20,
-      opacity: 0.8,
-    },
-    enableButton: {
-      backgroundColor: colors.primary,
-      paddingVertical: 12,
-      paddingHorizontal: 32,
-      borderRadius: 30,
-    },
-    enableButtonText: {
-      color: '#fff',
-      fontWeight: '600',
-      fontSize: 16,
     },
   });

@@ -19,6 +19,7 @@ export function usePaginatedQuery<T>(
     try {
       const result = await fetchFunction(0);
       setData(result);
+      // FIXME: remove comment when backend fixed
       // setHasMore(result.length === API_PAGE_SIZE);
       return result;
     } catch (err) {
@@ -64,9 +65,10 @@ export function usePaginatedQuery<T>(
   return {
     data,
     setData,
-    loadingMore,
-    refreshing,
-    fetchMore,
     refresh: fetchInitialData,
+    refreshing,
+    setRefreshing,
+    fetchMore,
+    loadingMore,
   };
 }
