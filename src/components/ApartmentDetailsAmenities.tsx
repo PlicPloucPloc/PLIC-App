@@ -95,7 +95,7 @@ export default function ApartmentDetailsAmenities({ apartment }: AmenitiesProps)
       {apartment && (
         <Pressable onPress={() => setShowAllAmenities(!showAllAmenities)}>
           <Text style={{ color: '#007bff', marginTop: 4 }}>
-            {showAllAmenities ? 'Show more' : 'Show less'}
+            {showAllAmenities ? 'Show less' : 'Show more'}
           </Text>
         </Pressable>
       )}

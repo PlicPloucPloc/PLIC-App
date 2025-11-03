@@ -5,14 +5,14 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { IoniconName } from '@app/definitions';
 
-type HeaderRightButtonProps = {
+type HeaderRefresButtonProps = {
   icon: IoniconName;
   onPress?: () => void;
 };
 
-export default function HeaderRightButton({ icon, onPress }: HeaderRightButtonProps) {
+export default function HeaderRefreshButton({ icon, onPress }: HeaderRefresButtonProps) {
   return (
-    <TouchableOpacity onPress={onPress} style={{ paddingHorizontal: 15 }}>
+    <TouchableOpacity onPress={onPress} style={{ marginRight: 15 }}>
       <Ionicons name={icon} size={28} color="black" />
     </TouchableOpacity>
   );

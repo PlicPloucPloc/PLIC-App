@@ -121,7 +121,9 @@ export async function updateRelation(apartmentId: number, type: RELATION_TYPE): 
     true,
   );
 
-  if (await alertOnResponseError(response, 'Relation', 'updating relation')) return false;
+  if (await alertOnResponseError(response, 'Relation', 'updating relation')) {
+    return false;
+  }
 
   updateShouldRefetchStates(true);
 
@@ -140,7 +142,9 @@ export async function deleteRelation(apartmentId: number): Promise<boolean> {
 
   if (response.status === 404) return true;
 
-  if (await alertOnResponseError(response, 'Relation', 'deleting relation')) return false;
+  if (await alertOnResponseError(response, 'Relation', 'deleting relation')) {
+    return false;
+  }
 
   updateShouldRefetchStates(true);
 
@@ -164,8 +168,6 @@ export async function updateAllowColloc(allowColloc: boolean): Promise<boolean> 
   );
 
   if (await alertOnResponseError(response, 'Relation', 'updating allow colloc')) return false;
-
-  updateShouldRefetchStates(true);
 
   return true;
 }

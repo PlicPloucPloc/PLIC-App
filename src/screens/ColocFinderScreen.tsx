@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { Switch } from 'react-native-gesture-handler';
-
 import { ColorTheme } from '@app/Colors';
-import { UserInfoResponse } from '@app/definitions/rest/UserService';
+import { AuthState } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { updateAllowColloc } from '@app/rest/RelationService';
 import { getRecommendedColloc } from '@app/rest/UserService';
-import { CalculateAge } from '@app/utils/Misc';
+import { CalculateAge as calculateAge } from '@app/utils/Misc';
+import HeaderSwitch from '@components/HeaderSwitch';
 import ProfilePicture from '@components/ProfilePicture';
 import { ColocFinderStackScreenProps } from '@navigation/Types';
 
@@ -17,47 +16,42 @@ export default function ColocFinderScreen({
 }: ColocFinderStackScreenProps<'ColocFinder'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
-  const [isEnabled, setIsEnabled] = useState(false);
 
-  const [matchingUsers, setMatchingUsers] = useState<UserInfoResponse[]>([]);
+  const [isEnabled, setIsEnabled] = useState(false);
+  const [matchingUsers, setMatchingUsers] = useState<AuthState[]>([]);
+
   useEffect(() => {
     const fetchMatchingLikes = async () => {
       try {
-        const data = await getRecommendedColloc();
-        const users = data.users || [];
-        const validUsers = users.filter((user): user is UserInfoResponse => user !== null);
-        setMatchingUsers(validUsers);
+        const users = await getRecommendedColloc();
+        setMatchingUsers(users);
       } catch (err) {
         console.error('An error occurred :', err);
       }
     };
+
     fetchMatchingLikes();
   }, []);
-  const toggleSwitch = async () => {
-    const newValue = !isEnabled;
-    setIsEnabled(newValue);
+
+  const onValueChange = async (value: boolean) => {
+    setIsEnabled(value);
     try {
-      await updateAllowColloc(newValue);
-      const data = await getRecommendedColloc();
-      const users = data.users || [];
-      const validUsers = users.filter((user): user is UserInfoResponse => user !== null);
-      setMatchingUsers(validUsers);
+      await updateAllowColloc(value);
+      const users = await getRecommendedColloc();
+      setMatchingUsers(users);
     } catch (err) {
       console.error('An error occurred :', err);
     }
   };
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <HeaderSwitch onValueChange={onValueChange} value={isEnabled} />,
+    });
+  }, [navigation, isEnabled]);
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Matching Likes</Text>
-        <Switch
-          trackColor={{ false: '#767577', true: '#4BA3C3' }}
-          thumbColor={isEnabled ? '#175676' : '#f4f3f4'}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={toggleSwitch}
-          value={isEnabled}
-        />
-      </View>
       <FlatList
         data={matchingUsers}
         renderItem={({ item }) => (
@@ -65,28 +59,26 @@ export default function ColocFinderScreen({
             onPress={() =>
               navigation.navigate('SharedStack', {
                 screen: 'OtherProfile',
-                params: { userId: item.id },
+                params: { userId: item.userId },
               })
             }
             style={styles.userCard}>
             <ProfilePicture
               size={70}
-              imageUri={null}
-              firstName={item.firstname}
-              lastName={item.lastname}
+              imageUri={item.profilePictureUri}
+              firstName={item.firstName}
+              lastName={item.lastName}
               borderRadius={10}
             />
             <View style={styles.userInfo}>
               <Text style={styles.userName}>
-                {item.firstname} {item.lastname}
+                {item.firstName} {item.lastName}
               </Text>
-              <Text style={styles.userAge}>
-                {item.birthdate ? CalculateAge(item.birthdate) : '?'} years
-              </Text>
+              <Text style={styles.userAge}>{calculateAge(item.birthdate)} years</Text>
             </View>
           </TouchableOpacity>
         )}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.userId}
         contentContainerStyle={styles.listContainer}
         ItemSeparatorComponent={() => <View style={styles.separator} />}
         ListEmptyComponent={
@@ -105,30 +97,15 @@ const createStyles = (colors: ColorTheme) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
-      paddingTop: 50,
     },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      marginBottom: 12,
-    },
-    headerTitle: {
-      fontSize: 28,
-      fontWeight: 'bold',
-      color: colors.textPrimary,
-    },
-    listContainer: {
-      paddingHorizontal: 16,
-    },
+    listContainer: {},
     separator: {
       height: 1,
       backgroundColor: '#eee',
     },
     emptyContainer: {
-      paddingVertical: 48,
-      alignItems: 'center',
+      paddingTop: 30,
+      paddingHorizontal: 20,
     },
     emptyText: {
       fontSize: 16,

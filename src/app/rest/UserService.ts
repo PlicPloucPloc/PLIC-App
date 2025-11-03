@@ -6,7 +6,6 @@ import {
   AuthState,
   LoginRequest,
   LoginResponse,
-  RecommendedCollocResponse,
   RegisterRequest,
   RegisterResponse,
   ResendEmailRequest,
@@ -22,15 +21,7 @@ import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { checkProfilePictureExists, postProfilePictureFromSignedUrl } from './S3Service.ts';
 
-async function getUserInfo(request: () => Promise<Response>): Promise<AuthState | null> {
-  const response = await request();
-
-  if (await alertOnResponseError(response, 'User', 'fetching user info')) {
-    return null;
-  }
-
-  const userInfo: UserInfoResponse = await response.json();
-
+async function userInfoToAuthState(userInfo: UserInfoResponse): Promise<AuthState> {
   const authState: AuthState = {
     userId: userInfo.id,
     email: '',
@@ -40,13 +31,25 @@ async function getUserInfo(request: () => Promise<Response>): Promise<AuthState 
     profilePictureUri: null,
   };
 
-  const profilePictureUrl = await checkProfilePictureExists(userInfo.id);
+  const profilePictureUrl = await checkProfilePictureExists(authState.userId);
 
   if (profilePictureUrl) {
     authState.profilePictureUri = profilePictureUrl;
   }
 
   return authState;
+}
+
+async function getUserInfo(request: () => Promise<Response>): Promise<AuthState | null> {
+  const response = await request();
+
+  if (await alertOnResponseError(response, 'User', 'fetching user info')) {
+    return null;
+  }
+
+  const userInfo: UserInfoResponse = await response.json();
+
+  return userInfoToAuthState(userInfo);
 }
 
 export async function getCurrentUserInfo() {
@@ -184,26 +187,27 @@ export async function resendVerificationEmail(body: ResendEmailRequest): Promise
 
   return true;
 }
-export async function getRecommendedColloc(): Promise<RecommendedCollocResponse> {
-  try {
-    const response = await apiFetch(
-      Endpoints.USER.RECOMMENDED_COLLOC,
-      {
-        method: 'GET',
-      },
-      true,
-    );
 
-    if (await alertOnResponseError(response, 'User', 'getting recommended colloc')) {
-      return { users: [] };
-    }
+export async function getRecommendedColloc(): Promise<AuthState[]> {
+  const response = await apiFetch(
+    Endpoints.USER.RECOMMENDED_COLLOC,
+    {
+      method: 'GET',
+    },
+    true,
+  );
 
-    const data: RecommendedCollocResponse = await response.json();
-
-    return data;
-  } catch {
-    return { users: [] };
+  if (await alertOnResponseError(response, 'User', 'getting recommended colloc')) {
+    return [];
   }
+
+  const users: UserInfoResponse[] = await response.json();
+
+  const usersWithProfilePictures: AuthState[] = await Promise.all(
+    users.map(async (user) => userInfoToAuthState(user)),
+  );
+
+  return usersWithProfilePictures;
 }
 
 // TODO: Forgot password

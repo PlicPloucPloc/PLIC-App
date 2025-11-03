@@ -43,6 +43,7 @@ export default function AppContainer() {
         await loadResources();
 
         const token = await getToken();
+        console.log('Token on app load:', token);
         if (token) {
           await loadCurrentUserInfo();
         }

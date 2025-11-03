@@ -27,7 +27,7 @@ export async function checkProfilePictureExists(userId: string): Promise<string 
 
 export async function putProfilePicture(userId: string, image: Blob): Promise<void> {
   const response = await apiFetch(
-    `${S3_URL}/user-pictures/${userId}`,
+    `${S3_URL}/user-pictures/${userId}.jpeg`,
     {
       method: 'PUT',
       headers: {
@@ -44,7 +44,7 @@ export async function putProfilePicture(userId: string, image: Blob): Promise<vo
 
 export async function deleteProfilePicture(userId: string): Promise<void> {
   const response = await apiFetch(
-    `${S3_URL}/user-pictures/${userId}`,
+    `${S3_URL}/user-pictures/${userId}.jpeg`,
     {
       method: 'DELETE',
       headers: {

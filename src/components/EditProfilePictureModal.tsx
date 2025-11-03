@@ -57,7 +57,7 @@ export default function EditProfilePictureModal({
     try {
       if (imageUri === null) {
         store.dispatch(setProfilePictureUri(null));
-        await deleteProfilePicture(`${authState.userId}.png`);
+        await deleteProfilePicture(authState.userId);
       } else {
         const image = await fetchAndCompressImage(imageUri);
         if (!image) {
@@ -65,7 +65,7 @@ export default function EditProfilePictureModal({
         }
 
         store.dispatch(setProfilePictureUri(image.uri));
-        await putProfilePicture(`${authState.userId}.png`, image.blob);
+        await putProfilePicture(authState.userId, image.blob);
       }
     } finally {
       setIsLoading(false);

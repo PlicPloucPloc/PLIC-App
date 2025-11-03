@@ -39,7 +39,7 @@ export default function VerifyEmailScreen({
     const emailResent = await resendVerificationEmail({ email: authState.email });
 
     if (emailResent) {
-      Alert.alert('Success', 'Verification email resent. Please check your inbox.');
+      Alert.alert('Check your inbox !', 'A verification email has been resent to your address.');
       setCooldown(60);
     }
     setLoading(false);

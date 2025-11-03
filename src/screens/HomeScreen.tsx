@@ -16,7 +16,7 @@ import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
 import EverythingSwiped from '@components/EverythingSwiped';
-import HeaderRightButton from '@components/HeaderRightButton';
+import HeaderRefreshButton from '@components/HeaderRefreshButton';
 import Loader from '@components/Loader';
 import { HomeStackScreenProps } from '@navigation/Types';
 
@@ -81,7 +81,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   useEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <HeaderRightButton
+        <HeaderRefreshButton
           icon="refresh"
           onPress={async () => {
             const result = await refresh();
