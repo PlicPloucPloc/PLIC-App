@@ -28,6 +28,12 @@ const Endpoints = {
     GET_INFO_PAGINATED: (offset: number, limit: number) => `/apt?offset=${offset}&limit=${limit}`,
     GET_INFO_BY_ID: (id: number) => `/apartment/${id}`,
   },
+  CHAT: {
+    GET_ROOMS: '/rooms',
+    UPDATE_ROOMS: '/rooms',
+    CREATE_ROOM: '/rooms',
+    DELETE_ROOM: (id: number) => `/rooms/${id}`,
+  },
 };
 
 export default Endpoints;

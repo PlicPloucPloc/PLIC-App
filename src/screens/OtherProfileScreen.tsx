@@ -4,8 +4,10 @@ import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { ColorTheme } from '@app/Colors';
 import { IoniconName } from '@app/definitions';
 import { AuthState } from '@app/definitions/redux';
+import { RoomRequest } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
+import { postRoom } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import { CalculateAge } from '@app/utils/Profile';
 import ProfilePicture from '@components/ProfilePicture';
@@ -31,7 +33,6 @@ export default function OtherProfileScreen({
 }: SharedStackScreenProps<'OtherProfile'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
-
   const [profileItems, setProfileItems] = useState<ProfileItem[]>(defaultProfileItems);
   const [userInfo, setUserInfo] = useState<AuthState>({
     firstName: '...',
@@ -41,7 +42,11 @@ export default function OtherProfileScreen({
 
   const authState = useSelector((state: RootState) => state.authState);
   const isCurrentUser = authState.userId === route.params.userId;
-
+  const roomRequest: RoomRequest = {
+    users: [route.params.userId],
+    apartment_id: null,
+    owner_id: authState.userId,
+  };
   useEffect(() => {
     (async () => {
       const userInfo = isCurrentUser ? authState : await getOtherUserInfo(route.params.userId);
@@ -76,7 +81,10 @@ export default function OtherProfileScreen({
 
       {!isCurrentUser && (
         <TouchableOpacity
-          onPress={() => navigation.navigate('DirectMessage', { apartmentId: 1 })}
+          onPress={async () => {
+            const roomId = await postRoom(roomRequest);
+            navigation.navigate('DirectMessage', { roomId });
+          }}
           style={{ marginTop: 12, alignSelf: 'center' }}>
           <Text style={{ color: colors.primary, fontWeight: '600' }}>Send message</Text>
         </TouchableOpacity>

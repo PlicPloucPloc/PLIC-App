@@ -87,7 +87,7 @@ export default function DirectMessageListScreen({
               onPress={() =>
                 navigation.navigate('SharedStack', {
                   screen: 'DirectMessage',
-                  params: { userId: item.id },
+                  params: { roomId: '0' },
                 })
               }>
               <Image source={{ uri: item.avatar }} style={styles.avatar} />
