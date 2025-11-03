@@ -1,11 +1,12 @@
 import React from 'react';
 
 import { Ionicons } from '@expo/vector-icons';
-import { BottomTabStackParamList } from '@navigation/Types';
 import {
   BottomTabNavigationOptions,
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
+
+import { BottomTabStackParamList } from '@navigation/Types';
 
 import AccountStack from './AccountStack';
 import ColocFinderStack from './ColocFinderStack';

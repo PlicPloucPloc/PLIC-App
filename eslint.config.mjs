@@ -2,63 +2,35 @@
 // Disable some warnings and errors
 
 import { defineConfig } from 'eslint-define-config';
-import pluginImport from 'eslint-plugin-import';
-import pluginPrettier from 'eslint-plugin-prettier';
-import pluginExpo from 'eslint-plugin-expo';
-import pluginReact from 'eslint-plugin-react';
-import pluginReactHooks from 'eslint-plugin-react-hooks';
-import tsParser from '@typescript-eslint/parser';
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import globals from 'globals';
+import expoConfig from 'eslint-config-expo/flat.js';
 
-const cleanGlobals = (obj) =>
-  Object.fromEntries(Object.entries(obj).map(([key, val]) => [key.trim(), val]));
-
-export const baseConfig = defineConfig([
+const baseConfig = defineConfig([
+  ...expoConfig,
   {
-    ignores: ['node_modules/**', 'expo/**', 'babel.config.js', '.expo/**'],
+    name: 'global-ignores',
+    ignores: ['node_modules/**', 'babel.config.js', '.expo/**'],
   },
   {
+    // disable some expo rules that are not wanted in the project
+    // and enable some custom rules only valid for IDEs
+    name: 'IDE-config',
     files: ['**/*.{js,ts,jsx,tsx}'],
     languageOptions: {
-      ecmaVersion: 'latest',
-      sourceType: 'module',
-      parser: tsParser,
       parserOptions: {
-        ecmaFeatures: {
-          jsx: true,
-        },
-        ecmaVersion: 'latest',
-        sourceType: 'module',
         project: './tsconfig.json',
       },
       globals: {
-        ...cleanGlobals(globals.node),
-        ...cleanGlobals(globals.browser),
-        NodeJS: true,
-        JSX: true,
-      },
-    },
-    plugins: {
-      import: pluginImport,
-      prettier: pluginPrettier,
-      expo: pluginExpo,
-      react: pluginReact,
-      'react-hooks': pluginReactHooks,
-      typescript: tsPlugin,
-    },
-    settings: {
-      react: {
-        version: 'detect',
+        NodeJS: true
       },
     },
     rules: {
-      'react-hooks/rules-of-hooks': 'error',
+      eqeqeq: 'off',
       'react-hooks/exhaustive-deps': 'error',
       'prefer-const': 'error',
       'no-undef': 'error',
+      "@typescript-eslint/no-deprecated": "error"
     },
   },
 ]);
 
-export default baseConfig;
+export default defineConfig(baseConfig);

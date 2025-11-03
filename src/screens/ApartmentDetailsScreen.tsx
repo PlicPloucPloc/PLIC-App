@@ -1,6 +1,11 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { SwipeDirection } from '@ellmos/rn-swiper-list';
+import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import PagerView from 'react-native-pager-view';
+
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
@@ -12,11 +17,7 @@ import SwipeButton from '@components/ActionButton';
 import ApartmentDetailsAmenities from '@components/ApartmentDetailsAmenities';
 import NearbyInfrastructureMap from '@components/ApartmentDetailsMap';
 import Loader from '@components/Loader';
-import { SwipeDirection } from '@ellmos/rn-swiper-list';
-import { Ionicons } from '@expo/vector-icons';
 import { SharedStackScreenProps } from '@navigation/Types';
-import { Image } from 'expo-image';
-import PagerView from 'react-native-pager-view';
 
 const ICON_SIZE = 38;
 

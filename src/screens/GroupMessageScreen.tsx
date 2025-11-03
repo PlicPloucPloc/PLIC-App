@@ -12,8 +12,9 @@ import {
   View,
 } from 'react-native';
 
-import MessageHeader, { User } from '@components/MessageHeader';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
+
+import MessageHeader, { User } from '@components/MessageHeader';
 
 interface Message {
   id: number;

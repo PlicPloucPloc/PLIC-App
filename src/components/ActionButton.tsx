@@ -15,4 +15,6 @@ const SwipeButton = React.memo(
   },
 );
 
+SwipeButton.displayName = 'SwipeButton';
+
 export default SwipeButton;

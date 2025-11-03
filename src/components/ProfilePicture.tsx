@@ -1,8 +1,9 @@
 import React from 'react';
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { Ionicons } from '@expo/vector-icons';
+
+import { useThemeColors } from '@app/hooks/UseThemeColor';
 
 type ProfilePictureProps = {
   size: number;

@@ -1,6 +1,9 @@
 import React, { useCallback, useMemo } from 'react';
 import { ActivityIndicator, Alert, FlatList, RefreshControl, StyleSheet, Text } from 'react-native';
 
+import { useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+
 import { ColorTheme } from '@app/Colors';
 import { RelationInfo } from '@app/definitions';
 import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
@@ -8,8 +11,6 @@ import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setShouldRefetchHistory, setShouldRefetchLikeList } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
 import { deleteRelation } from '@app/rest/RelationService';
-import { useFocusEffect } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
 
 import ApartmentListRow from './ApartmentListRow';
 

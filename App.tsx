@@ -1,9 +1,10 @@
 import React from 'react';
 
-import store from '@app/redux/Store';
-import AppContainer from '@navigation/AppContainer';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { Provider } from 'react-redux';
+
+import store from '@app/redux/Store';
+import AppContainer from '@navigation/AppContainer';
 
 export default function App() {
   return (

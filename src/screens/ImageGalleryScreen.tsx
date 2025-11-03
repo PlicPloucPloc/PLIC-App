@@ -2,12 +2,13 @@ import { useCallback, useRef, useState } from 'react';
 import * as React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { ColorTheme } from '@app/Colors';
-import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { InsideStackScreenProps } from '@navigation/Types';
 import { Image } from 'expo-image';
 import AwesomeGallery, { GalleryRef, RenderItemInfo } from 'react-native-awesome-gallery';
 import Animated, { FadeInDown, FadeOutDown } from 'react-native-reanimated';
+
+import { ColorTheme } from '@app/Colors';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { InsideStackScreenProps } from '@navigation/Types';
 
 export default function ImageGalleryScreen({
   navigation,

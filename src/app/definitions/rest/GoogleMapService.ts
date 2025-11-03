@@ -48,3 +48,24 @@ export type PlaceItem = {
   formattedAddress: string;
   location: { latitude: number; longitude: number };
 };
+
+// Types for place search
+export type PlaceSearchResponse = {
+  details: {
+    formattedAddress: string; // Full address of the place
+    location: LatLng;
+  };
+  place: string;
+  placeId: string;
+  structuredFormat: {
+    mainText: {
+      text: string; // Name of the place
+    };
+    secondaryText: {
+      text: string; // Address of the place
+    };
+  };
+  text: {
+    text: string; // Full text of the place
+  };
+};

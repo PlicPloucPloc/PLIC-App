@@ -1,10 +1,11 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo, IoniconName } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { Ionicons } from '@expo/vector-icons';
 
 type InfoItemProps = {
   icon: IoniconName;
@@ -94,7 +95,7 @@ export default function ApartmentDetailsAmenities({ apartment }: AmenitiesProps)
       {apartment && (
         <Pressable onPress={() => setShowAllAmenities(!showAllAmenities)}>
           <Text style={{ color: '#007bff', marginTop: 4 }}>
-            {showAllAmenities ? 'Show more' : 'Show less'}
+            {showAllAmenities ? 'Show less' : 'Show more'}
           </Text>
         </Pressable>
       )}

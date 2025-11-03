@@ -1,12 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Alert, Keyboard, StyleSheet, TextInput, TouchableOpacity, View } from 'react-native';
 
+import { useSelector } from 'react-redux';
+
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { showBirthdatePicker } from '@app/utils/Auth';
 import Loader from '@components/Loader';
-import { useSelector } from 'react-redux';
 
 import BottomPopuEditorModal from './BottomPopupEditorModal';
 

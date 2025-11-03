@@ -1,12 +1,14 @@
 import React from 'react';
 import { View } from 'react-native';
 
-import { AuthStackParamList } from '@navigation/Types';
 import {
   createStackNavigator,
   StackNavigationOptions,
   StackNavigationProp,
 } from '@react-navigation/stack';
+import { Bar } from 'react-native-progress';
+
+import { AuthStackParamList } from '@navigation/Types';
 import LoginScreen from '@screens/authStack/LoginScreen';
 import RegisterEmailScreen from '@screens/authStack/RegisterEmailScreen';
 import RegisterPasswordScreen from '@screens/authStack/RegisterPasswordScreen';
@@ -16,7 +18,6 @@ import VerifyEmailScreen from '@screens/authStack/VerifyEmailScreen';
 import WelcomeScreen from '@screens/authStack/WelcomeScreen';
 import HeaderBackButton from 'components/HeaderBackButton';
 import HeaderLogo from 'components/HeaderLogo';
-import { Bar } from 'react-native-progress';
 
 function LoginScreenHeaderOptions(
   navigation: StackNavigationProp<AuthStackParamList>,

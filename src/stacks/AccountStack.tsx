@@ -1,10 +1,11 @@
-import HeaderBackButton from '@components/HeaderBackButton';
-import { AccountStackParamList, BottomTabStackScreenProps } from '@navigation/Types';
 import {
   createStackNavigator,
   StackNavigationOptions,
   StackNavigationProp,
 } from '@react-navigation/stack';
+
+import HeaderBackButton from '@components/HeaderBackButton';
+import { AccountStackParamList, BottomTabStackScreenProps } from '@navigation/Types';
 import AccountScreen from '@screens/AccountScreen';
 import FiltersScreen from '@screens/FiltersScreen';
 import HistoryScreen from '@screens/HistoryScreen';
@@ -46,12 +47,15 @@ export default function AccountStack(_: BottomTabStackScreenProps<'AccountStack'
         component={MyProfileScreen}
         options={({ navigation }) => headerOptions('Profile', navigation)}
       />
-
-      <Stack.Screen name="Filters" component={FiltersScreen} />
+      <Stack.Screen
+        name="Filters"
+        component={FiltersScreen}
+        options={({ navigation }) => headerOptions('Filters', navigation)}
+      />
       <Stack.Screen
         name="History"
         component={HistoryScreen}
-        options={() => headerOptions('History')}
+        options={({ navigation }) => headerOptions('History', navigation)}
       />
     </Stack.Navigator>
   );

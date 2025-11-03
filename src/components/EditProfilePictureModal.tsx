@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
+
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setProfilePictureUri } from '@app/redux/slices';
@@ -8,8 +11,6 @@ import store, { RootState } from '@app/redux/Store';
 import { deleteProfilePicture, putProfilePicture } from '@app/rest/S3Service';
 import { fetchAndCompressImage, selectImageFromMedia } from '@app/utils/Image';
 import Loader from '@components/Loader';
-import { Ionicons } from '@expo/vector-icons';
-import { useSelector } from 'react-redux';
 
 import BottomPopupEditorModal from './BottomPopupEditorModal';
 import ProfilePicture from './ProfilePicture';
@@ -56,7 +57,7 @@ export default function EditProfilePictureModal({
     try {
       if (imageUri === null) {
         store.dispatch(setProfilePictureUri(null));
-        await deleteProfilePicture(`${authState.userId}.png`);
+        await deleteProfilePicture(authState.userId);
       } else {
         const image = await fetchAndCompressImage(imageUri);
         if (!image) {
@@ -64,7 +65,7 @@ export default function EditProfilePictureModal({
         }
 
         store.dispatch(setProfilePictureUri(image.uri));
-        await putProfilePicture(`${authState.userId}.png`, image.blob);
+        await putProfilePicture(authState.userId, image.blob);
       }
     } finally {
       setIsLoading(false);

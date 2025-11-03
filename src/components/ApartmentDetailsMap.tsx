@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, ViewStyle } from 'react-native';
 
+import MapView, { Circle, Marker, Region } from 'react-native-maps';
+
 import { MAP_CIRCLE_RADIUS } from '@app/config/Constants';
 import { Place } from '@app/definitions';
 import { geocodeAddress, getNearbyStores, getNearbySubways } from '@app/rest/GoogleMapService';
 import { Images } from '@assets/index';
-import MapView, { Circle, Marker, Region } from 'react-native-maps';
 
 const LATITUDE_DELTA = 0.025;
 const LONGITUDE_DELTA = 0.025;

@@ -1,5 +1,6 @@
-import { InsideStackParamList } from '@navigation/Types';
 import { createStackNavigator } from '@react-navigation/stack';
+
+import { InsideStackParamList } from '@navigation/Types';
 import ImageGalleryScreen from '@screens/ImageGalleryScreen';
 import ImageListScreen from '@screens/ImageList';
 

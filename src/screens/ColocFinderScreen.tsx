@@ -1,137 +1,150 @@
-import React, { useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import {
+  FlatList,
+  Image,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { UserInfoResponse } from '@app/definitions/rest/UserService';
+import { AuthState } from '@app/definitions';
+import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { updateAllowColloc } from '@app/rest/RelationService';
 import { getRecommendedColloc } from '@app/rest/UserService';
-import { CalculateAge } from '@app/utils/Profile';
+import { calculateAge } from '@app/utils/Misc';
+import { Images } from '@assets/index';
+import ColocFinderNotEnabled from '@components/ColocFinderNotEnabled';
+import HeaderSwitch from '@components/HeaderSwitch';
 import ProfilePicture from '@components/ProfilePicture';
 import { ColocFinderStackScreenProps } from '@navigation/Types';
-import { Switch } from 'react-native-gesture-handler';
 
 export default function ColocFinderScreen({
   navigation,
 }: ColocFinderStackScreenProps<'ColocFinder'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
+
   const [isEnabled, setIsEnabled] = useState(false);
 
-  const [matchingUsers, setMatchingUsers] = useState<UserInfoResponse[]>([]);
-  useEffect(() => {
-    const fetchMatchingLikes = async () => {
-      try {
-        const data = await getRecommendedColloc();
-        const users = data.users || [];
-        const validUsers = users.filter((user): user is UserInfoResponse => user !== null);
-        setMatchingUsers(validUsers);
-      } catch (err) {
-        console.error('An error occurred :', err);
-      }
-    };
-    fetchMatchingLikes();
+  const fetchData = useCallback((offset: number) => {
+    return getRecommendedColloc(offset);
   }, []);
-  const toggleSwitch = async () => {
-    const newValue = !isEnabled;
-    setIsEnabled(newValue);
-    try {
-      await updateAllowColloc(newValue);
-      const data = await getRecommendedColloc();
-      const users = data.users || [];
-      const validUsers = users.filter((user): user is UserInfoResponse => user !== null);
-      setMatchingUsers(validUsers);
-    } catch (err) {
-      console.error('An error occurred :', err);
-    }
-  };
+
+  const {
+    data: users,
+    setData: setUsers,
+    // FIXME: loadingMore,
+    refresh,
+    refreshing,
+    setRefreshing,
+    // FIXME: fetchMore,
+  } = usePaginatedQuery<AuthState>(fetchData);
+
+  const toggleSwitch = useCallback(
+    async (enabled: boolean) => {
+      setRefreshing(true);
+      setIsEnabled(enabled);
+      await updateAllowColloc(enabled);
+
+      if (enabled) {
+        refresh();
+      } else {
+        setUsers([]);
+      }
+    },
+    [refresh, setUsers, setRefreshing],
+  );
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => <HeaderSwitch value={isEnabled} onValueChange={toggleSwitch} />,
+    });
+  }, [navigation, isEnabled, toggleSwitch]);
+
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Matching Likes</Text>
-        <Switch
-          trackColor={{ false: '#767577', true: '#4BA3C3' }}
-          thumbColor={isEnabled ? '#175676' : '#f4f3f4'}
-          ios_backgroundColor="#3e3e3e"
-          onValueChange={toggleSwitch}
-          value={isEnabled}
-        />
-      </View>
-      <FlatList
-        data={matchingUsers}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            onPress={() =>
-              navigation.navigate('SharedStack', {
-                screen: 'OtherProfile',
-                params: { userId: item.id },
-              })
-            }
-            style={styles.userCard}>
-            <ProfilePicture
-              size={70}
-              imageUri={null}
-              firstName={item.firstname}
-              lastName={item.lastname}
-              borderRadius={10}
+      {!isEnabled && <ColocFinderNotEnabled toggleSwitch={toggleSwitch} />}
+
+      {isEnabled && (
+        <FlatList
+          data={users}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('SharedStack', {
+                  screen: 'OtherProfile',
+                  params: { userId: item.userId },
+                })
+              }
+              style={styles.userCard}>
+              <ProfilePicture
+                size={70}
+                imageUri={item.profilePictureUri}
+                firstName={item.firstName}
+                lastName={item.lastName}
+                borderRadius={10}
+              />
+              <View style={styles.userInfo}>
+                <Text style={styles.userName}>
+                  {item.firstName} {item.lastName}
+                </Text>
+                <Text style={styles.userAge}>{calculateAge(item.birthdate)} years</Text>
+              </View>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.userId}
+          contentContainerStyle={{ flexGrow: 1 }}
+          ItemSeparatorComponent={() => <View style={styles.separator} />}
+          // FIXME: enable pagination when backend supports it
+          // onEndReached={() => fetchMore()}
+          // onEndReachedThreshold={0.2}
+          // ListFooterComponent={
+          //   loadingMore ? (
+          //     <ActivityIndicator
+          //       size="small"
+          //       color={colors.primary}
+          //       style={{ marginVertical: 20 }}
+          //     />
+          //   ) : null
+          // }
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={refresh}
+              colors={[colors.primary]}
+              tintColor={colors.primary}
             />
-            <View style={styles.userInfo}>
-              <Text style={styles.userName}>
-                {item.firstname} {item.lastname}
-              </Text>
-              <Text style={styles.userAge}>
-                {item.birthdate ? CalculateAge(item.birthdate) : '?'} years
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.listContainer}
-        ItemSeparatorComponent={() => <View style={styles.separator} />}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>
-              No matching likes, you can active if you click here but others could see your likes
-            </Text>
-          </View>
-        }
-      />
+          }
+          ListEmptyComponent={
+            refreshing ? null : (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyTitle}>
+                  We haven&apos;t found any potential roommates for you at the moment.
+                </Text>
+
+                <Image source={Images.alone} style={styles.gif} />
+
+                <Text style={styles.emptyText}>
+                  Try to like more apartments to increase your chances!
+                </Text>
+              </View>
+            )
+          }
+        />
+      )}
     </View>
   );
 }
+
 const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.background,
-      paddingTop: 50,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      marginBottom: 12,
-    },
-    headerTitle: {
-      fontSize: 28,
-      fontWeight: 'bold',
-      color: colors.textPrimary,
-    },
-    listContainer: {
-      paddingHorizontal: 16,
-    },
-    separator: {
-      height: 1,
-      backgroundColor: '#eee',
-    },
-    emptyContainer: {
-      paddingVertical: 48,
-      alignItems: 'center',
-    },
-    emptyText: {
-      fontSize: 16,
-      color: colors.textSecondary,
     },
     userCard: {
       flexDirection: 'row',
@@ -152,6 +165,35 @@ const createStyles = (colors: ColorTheme) =>
     },
     userAge: {
       fontSize: 16,
+      color: colors.textSecondary,
+    },
+    separator: {
+      height: 1,
+      backgroundColor: colors.textSecondary,
+    },
+
+    emptyContainer: {
+      height: '85%',
+      justifyContent: 'center',
+      paddingHorizontal: 20,
+      paddingTop: 40,
+    },
+    emptyTitle: {
+      fontSize: 18,
+      fontWeight: 'bold',
+      marginBottom: 30,
+      textAlign: 'center',
+    },
+    gif: {
+      width: '100%',
+      height: 300,
+      alignSelf: 'center',
+      borderRadius: 20,
+      marginBottom: 40,
+    },
+    emptyText: {
+      fontSize: 16,
+      textAlign: 'center',
       color: colors.textSecondary,
     },
   });

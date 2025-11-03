@@ -1,10 +1,11 @@
 import { ReactNode, useCallback } from 'react';
 import { Keyboard, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
 
-import { ColorTheme } from '@app/Colors';
-import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { Ionicons } from '@expo/vector-icons';
 import Modal from 'react-native-modal';
+
+import { ColorTheme } from '@app/Colors';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
 
 export type BottomPopupModalProps = {
   children: ReactNode;

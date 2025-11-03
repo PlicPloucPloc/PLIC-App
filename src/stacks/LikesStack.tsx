@@ -1,5 +1,6 @@
-import { BottomTabStackScreenProps, LikesStackParamList } from '@navigation/Types';
 import { createStackNavigator, StackNavigationOptions } from '@react-navigation/stack';
+
+import { BottomTabStackScreenProps, LikesStackParamList } from '@navigation/Types';
 import LikesListScreen from '@screens/LikesListScreen';
 
 const Stack = createStackNavigator<LikesStackParamList>();

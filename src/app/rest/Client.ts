@@ -2,13 +2,14 @@ import { Alert } from 'react-native';
 
 import 'react-native-get-random-values';
 
+import * as SecureStore from 'expo-secure-store';
+import { v4 as uuidv4 } from 'uuid';
+
 import { API_TIMEOUT } from '@app/config/Constants';
 import { API_URL } from '@app/config/Env';
 import { RootEnum, TokenResponse } from '@app/definitions';
 import { setRoot } from '@app/redux/slices';
 import store from '@app/redux/Store';
-import * as SecureStore from 'expo-secure-store';
-import { v4 as uuidv4 } from 'uuid';
 
 import Endpoints from './Endpoints';
 

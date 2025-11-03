@@ -1,23 +1,8 @@
-import React, { useEffect, useRef, useState } from 'react';
-import {
-  FlatList,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  TextInput,
-  View,
-} from 'react-native';
+import React from 'react';
+import { StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
-import { AuthState } from '@app/definitions/redux';
-import { chatService, Message } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import store from '@app/redux/Store';
-import Loader from '@components/Loader';
-import { Ionicons } from '@expo/vector-icons';
 import { SharedStackScreenProps } from '@navigation/Types';
 
 export default function DirectMessageScreen({
@@ -26,6 +11,7 @@ export default function DirectMessageScreen({
 }: SharedStackScreenProps<'DirectMessage'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
+  /*
   const flatListRef = useRef<FlatList>(null);
   const { roomId: rawApartmentId } = route.params;
   const currentUserId = store.getState().authState.userId;
@@ -44,7 +30,6 @@ export default function DirectMessageScreen({
     profilePictureUri: null,
   } as AuthState);
   const apartmentId = rawApartmentId!;
-  /*
   const initializeChat = async () => {
     try {
       setLoading(true);
@@ -154,7 +139,6 @@ export default function DirectMessageScreen({
       setLoading(false);
     }
   };
-*/
   useEffect(() => {
     if (!apartmentId) {
       console.error('No apartment ID provided');
@@ -291,6 +275,13 @@ export default function DirectMessageScreen({
         </Pressable>
       </View>
     </KeyboardAvoidingView>
+  );
+    */
+
+  return (
+    <View style={styles.container}>
+      <Text>Direct Message Screen is under construction.</Text>
+    </View>
   );
 }
 

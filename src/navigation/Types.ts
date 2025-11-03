@@ -1,7 +1,8 @@
-import { ApartmentInfo } from '@app/definitions';
 import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { StackAnimationName, StackScreenProps } from '@react-navigation/stack';
+
+import { ApartmentInfo } from '@app/definitions';
 
 // ...ParamList is the list of all the screens in the navigator
 // and the types of the props used by the screen

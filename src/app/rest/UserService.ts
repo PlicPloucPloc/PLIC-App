@@ -1,25 +1,45 @@
 import { Alert } from 'react-native';
 
+import * as SecureStore from 'expo-secure-store';
+
+import { API_PAGE_SIZE } from '@app/config/Constants.ts';
 import {
+  AuthState,
   LoginRequest,
   LoginResponse,
-  RecommendedCollocResponse,
   RegisterRequest,
   RegisterResponse,
   ResendEmailRequest,
   RootEnum,
   UserInfoResponse,
 } from '@app/definitions';
-import { AuthState } from '@app/definitions/redux';
 import { setRoot, setUserInfo } from '@app/redux/slices';
 import store from '@app/redux/Store';
 import { alertOnResponseError } from '@app/utils/Error.ts';
 import { fetchAndCompressImage } from '@app/utils/Image.ts';
-import * as SecureStore from 'expo-secure-store';
 
 import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { checkProfilePictureExists, postProfilePictureFromSignedUrl } from './S3Service.ts';
+
+async function userInfoToAuthState(userInfo: UserInfoResponse): Promise<AuthState> {
+  const authState: AuthState = {
+    userId: userInfo.id,
+    email: '',
+    firstName: userInfo.firstname,
+    lastName: userInfo.lastname,
+    birthdate: userInfo.birthdate,
+    profilePictureUri: null,
+  };
+
+  const profilePictureUrl = await checkProfilePictureExists(authState.userId);
+
+  if (profilePictureUrl) {
+    authState.profilePictureUri = profilePictureUrl;
+  }
+
+  return authState;
+}
 
 async function getUserInfo(request: () => Promise<Response>): Promise<AuthState | null> {
   const response = await request();
@@ -30,22 +50,7 @@ async function getUserInfo(request: () => Promise<Response>): Promise<AuthState 
 
   const userInfo: UserInfoResponse = await response.json();
 
-  const authState: AuthState = {
-    userId: userInfo.id,
-    email: '',
-    firstName: userInfo.firstname,
-    lastName: userInfo.lastname,
-    birthdate: userInfo.birthdate,
-    profilePictureUri: null,
-  };
-
-  const profilePictureUrl = await checkProfilePictureExists(userInfo.id);
-
-  if (profilePictureUrl) {
-    authState.profilePictureUri = profilePictureUrl;
-  }
-
-  return authState;
+  return userInfoToAuthState(userInfo);
 }
 
 export async function getCurrentUserInfo() {
@@ -183,19 +188,30 @@ export async function resendVerificationEmail(body: ResendEmailRequest): Promise
 
   return true;
 }
-export async function getRecommendedColloc(): Promise<RecommendedCollocResponse> {
+
+export async function getRecommendedColloc(
+  offset: number,
+  pageSize: number = API_PAGE_SIZE,
+): Promise<AuthState[]> {
   const response = await apiFetch(
-    Endpoints.USER.RECOMMENDED_COLLOC,
+    Endpoints.USER.RECOMMENDED_COLLOC(offset, pageSize),
     {
       method: 'GET',
     },
     true,
   );
+
   if (await alertOnResponseError(response, 'User', 'getting recommended colloc')) {
-    return { users: [] };
+    return [];
   }
-  const data: RecommendedCollocResponse = await response.json();
-  return data;
+
+  const users: UserInfoResponse[] = await response.json();
+
+  const usersWithProfilePictures: AuthState[] = await Promise.all(
+    users.map(async (user) => userInfoToAuthState(user)),
+  );
+
+  return usersWithProfilePictures;
 }
 
 // TODO: Forgot password

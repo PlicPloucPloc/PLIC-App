@@ -1,13 +1,10 @@
-import React, { useCallback, useRef, useState } from 'react';
-import {
-  Alert,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
-  View,
-} from 'react-native';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { Alert, Image, StyleSheet, Text, TouchableWithoutFeedback, View } from 'react-native';
+
+import { SwipeDirection, Swiper, type SwiperCardRefType } from '@ellmos/rn-swiper-list';
+import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo, RELATION_TYPE } from '@app/definitions';
@@ -20,12 +17,10 @@ import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
 import { postRoom } from '@app/rest/ChatService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
+import EverythingSwiped from '@components/EverythingSwiped';
+import HeaderRefreshButton from '@components/HeaderRefreshButton';
 import Loader from '@components/Loader';
-import { SwipeDirection, Swiper, type SwiperCardRefType } from '@ellmos/rn-swiper-list';
-import { Ionicons } from '@expo/vector-icons';
 import { HomeStackScreenProps } from '@navigation/Types';
-import { useFocusEffect } from '@react-navigation/native';
-import { useSelector } from 'react-redux';
 
 const ICON_SIZE = 38;
 const SWIPE_DELAY = 300;
@@ -55,6 +50,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   );
 
   const [allSwiped, setAllSwiped] = useState(false);
+
   const [backButtonDisabled, setBackButtonDisabled] = useState(false);
   const authState = useSelector((state: RootState) => state.authState);
   const [apartmentInfo, setApartmentInfo] = useState<{
@@ -87,7 +83,24 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     data: apartments,
     refreshing,
     fetchMore,
+    refresh,
   } = usePaginatedQuery<ApartmentInfo>(fetchApartments, duplicateResolver);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <HeaderRefreshButton
+          icon="refresh"
+          onPress={async () => {
+            const result = await refresh();
+            if (result && result.length > 0) {
+              setAllSwiped(false);
+            }
+          }}
+        />
+      ),
+    });
+  }, [navigation, refresh]);
 
   const onIndexChange = useCallback(
     (index: number) => {
@@ -116,15 +129,21 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     [apartments, fetchMore],
   );
 
+  const onSwipedAll = useCallback(() => {
+    if (refreshing) return;
+    setTimeout(() => {
+      setAllSwiped(true);
+      setApartmentInfo({});
+    }, SWIPE_DELAY);
+  }, [refreshing]);
+
   async function handlePostRelation(apartmentId: number, type: RELATION_TYPE) {
     const hasPostedSuccesfully = await postRelation(apartmentId, type);
     if (!hasPostedSuccesfully) {
       Alert.alert(
         'Error',
-
         `An error occurred while ${type == RELATION_TYPE.LIKE ? 'Liking' : 'Disliking'} the apartment.`,
       );
-      return;
     }
   }
 
@@ -136,25 +155,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     <View style={styles.container}>
       <View style={styles.swiperContainer}>
         {/* End screen */}
-        {allSwiped && (
-          <View style={styles.endScreenContainer}>
-            <Text style={styles.modalText}>It looks like you swiped everything!</Text>
-
-            <TouchableOpacity
-              style={styles.modalButton}
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate('AccountStack', { screen: 'History' })}>
-              <Text style={styles.modalButtonText}>View history</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: '#7EC0FD', marginTop: 10 }]}
-              activeOpacity={0.7}
-              onPress={() => navigation.navigate('AccountStack', { screen: 'Filters' })}>
-              <Text style={styles.modalButtonText}>Expand filters</Text>
-            </TouchableOpacity>
-          </View>
-        )}
+        {!refreshing && allSwiped && <EverythingSwiped navigation={navigation} />}
 
         {/* Swiper */}
         <View style={[styles.touchableContainer, allSwiped ? { width: '0%', height: '0%' } : {}]}>
@@ -167,12 +168,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             disableBottomSwipe={true}
             disableTopSwipe={true}
             onIndexChange={onIndexChange}
-            onSwipedAll={() => {
-              setTimeout(() => {
-                setApartmentInfo({});
-                setAllSwiped(true);
-              }, SWIPE_DELAY);
-            }}
+            onSwipedAll={onSwipedAll}
             onSwipeRight={() => {
               handlePostRelation(
                 apartments[swiperRef.current?.activeIndex || 0].apartment_id,
@@ -349,31 +345,5 @@ const createStyles = (colors: ColorTheme) =>
       justifyContent: 'center',
       alignItems: 'center',
       shadowColor: 'black',
-    },
-
-    endScreenContainer: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 30,
-    },
-    modalText: {
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginBottom: 20,
-      textAlign: 'center',
-    },
-    modalButton: {
-      backgroundColor: colors.primary,
-      paddingHorizontal: 20,
-      paddingVertical: 10,
-      borderRadius: 10,
-      minWidth: 180,
-      alignItems: 'center',
-    },
-    modalButtonText: {
-      color: colors.contrast,
-      fontSize: 16,
-      fontWeight: '600',
     },
   });

@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { FlatList, Pressable, StyleSheet, View } from 'react-native';
 
+import { Image } from 'expo-image';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
+
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { InsideStackScreenProps } from '@navigation/Types';
-import { Image } from 'expo-image';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 export default function ImageListScreen({
   navigation,

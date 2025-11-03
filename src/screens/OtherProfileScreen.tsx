@@ -1,19 +1,19 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
+
 import { ColorTheme } from '@app/Colors';
-import { IoniconName } from '@app/definitions';
-import { AuthState } from '@app/definitions/redux';
+import { IoniconName, AuthState } from '@app/definitions';
 import { RoomRequest } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { postRoom } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
-import { CalculateAge } from '@app/utils/Profile';
+import { calculateAge } from '@app/utils/Misc';
 import ProfilePicture from '@components/ProfilePicture';
-import { Ionicons } from '@expo/vector-icons';
 import { SharedStackScreenProps } from '@navigation/Types';
-import { useSelector } from 'react-redux';
 
 type ProfileItem = {
   icon: IoniconName;
@@ -57,7 +57,7 @@ export default function OtherProfileScreen({
 
       setUserInfo(userInfo);
 
-      const age = CalculateAge(userInfo.birthdate);
+      const age = calculateAge(userInfo.birthdate);
 
       setProfileItems([
         { icon: 'person', label: 'First name', value: userInfo.firstName },

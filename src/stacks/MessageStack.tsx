@@ -1,10 +1,11 @@
-import HeaderBackButton from '@components/HeaderBackButton';
-import { BottomTabStackScreenProps, MessageStackParamList } from '@navigation/Types';
 import {
   createStackNavigator,
   StackNavigationOptions,
   StackNavigationProp,
 } from '@react-navigation/stack';
+
+import HeaderBackButton from '@components/HeaderBackButton';
+import { BottomTabStackScreenProps, MessageStackParamList } from '@navigation/Types';
 import DirectMessageListScreen from '@screens/DirectMessageListScreen';
 import GroupInfoScreen from '@screens/GroupInfo';
 import GroupMessageListScreen from '@screens/GroupMessageListScreen';

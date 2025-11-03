@@ -9,6 +9,8 @@ import {
   View,
 } from 'react-native';
 
+import { useSelector } from 'react-redux';
+
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
@@ -19,7 +21,6 @@ import BackgroundBuildings from '@components/BackgroundBuildings';
 import Loader from '@components/Loader';
 import PasswordInput from '@components/PasswordInput';
 import { AuthStackScreenProps } from '@navigation/Types';
-import { useSelector } from 'react-redux';
 
 export default function RegisterPasswordScreen({
   navigation,

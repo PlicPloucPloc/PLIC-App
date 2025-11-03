@@ -1,15 +1,16 @@
 import React from 'react';
 import { Alert, Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 
+import { Ionicons } from '@expo/vector-icons';
+import { useSelector } from 'react-redux';
+
 import { ColorTheme } from '@app/Colors';
 import { IoniconName } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { logoutUser } from '@app/rest/UserService';
 import ProfilePicture from '@components/ProfilePicture';
-import { Ionicons } from '@expo/vector-icons';
 import { AccountStackScreenProps } from '@navigation/Types';
-import { useSelector } from 'react-redux';
 
 type SettingItem = {
   title: string;
