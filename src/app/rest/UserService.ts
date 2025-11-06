@@ -200,7 +200,7 @@ export async function getRecommendedColloc(
     },
     true,
   );
-
+  console.log(response);
   if (await alertOnResponseError(response, 'User', 'getting recommended colloc')) {
     return [];
   }

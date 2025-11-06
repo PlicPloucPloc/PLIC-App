@@ -47,7 +47,7 @@ export async function getLikedApartmentsPaginated(
     },
     true,
   );
-
+  console.log(response);
   if (await alertOnResponseError(response, 'Relation', 'getting likes')) {
     return [];
   }

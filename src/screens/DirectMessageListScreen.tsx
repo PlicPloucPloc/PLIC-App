@@ -1,63 +1,20 @@
 import React, { useEffect, useState } from 'react';
-import {
-  ActivityIndicator,
-  FlatList,
-  Image,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { GetRoomResponse } from '@app/definitions/rest/ChatService';
+import { getRooms } from '@app/rest/ChatService';
 import { MessageStackScreenProps } from '@navigation/Types';
-
-type MessageItem = {
-  id: string;
-  name: string;
-  lastMessage: string;
-  time: string;
-  avatar: string;
-  unread?: boolean;
-};
 
 export default function DirectMessageListScreen({
   navigation,
 }: MessageStackScreenProps<'DirectMessageList'>) {
-  const [messages, setMessages] = useState<MessageItem[] | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [messages, setMessages] = useState<GetRoomResponse[] | null>(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
-      setLoading(true);
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
-
-      const mockData: MessageItem[] = [
-        {
-          id: '1',
-          name: 'Jean Baptiste',
-          lastMessage: 'Comment va-t-on sortir de là...',
-          time: '10:24',
-          avatar: 'https://i.pravatar.cc/100?img=1',
-          unread: true,
-        },
-        {
-          id: '2',
-          name: 'Marie Claire',
-          lastMessage: 'Evidemment !',
-          time: '09:51',
-          avatar: 'https://i.pravatar.cc/100?img=2',
-        },
-        {
-          id: '3',
-          name: 'Michel',
-          lastMessage: 'Ca me va :)',
-          time: 'Hier',
-          avatar: 'https://i.pravatar.cc/100?img=3',
-        },
-      ];
-
-      setMessages(mockData);
-      setLoading(false);
+      const rooms = await getRooms();
+      console.log('ROOMS', rooms);
+      setMessages(rooms);
     };
 
     fetchMessages();
@@ -74,38 +31,30 @@ export default function DirectMessageListScreen({
         </TouchableOpacity>
       </View>
 
-      {loading ? (
-        <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 20 }} />
-      ) : (
-        <FlatList
-          data={messages}
-          keyExtractor={(item) => item.id}
-          contentContainerStyle={{ paddingHorizontal: 16 }}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.messageContainer}
-              onPress={() =>
-                navigation.navigate('SharedStack', {
-                  screen: 'DirectMessage',
-                  params: { roomId: '0' },
-                })
-              }>
-              <Image source={{ uri: item.avatar }} style={styles.avatar} />
-              <View style={styles.messageContent}>
-                <View style={styles.messageHeader}>
-                  <Text style={styles.name}>{item.name}</Text>
-                  <Text style={styles.time}>{item.time}</Text>
-                </View>
-                <Text
-                  numberOfLines={1}
-                  style={[styles.lastMessage, item.unread && styles.unreadMessage]}>
-                  {item.lastMessage}
-                </Text>
+      <FlatList
+        data={messages}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            style={styles.messageContainer}
+            onPress={() =>
+              navigation.navigate('SharedStack', {
+                screen: 'DirectMessage',
+                params: { roomId: item.room_id },
+              })
+            }>
+            <Image source={{ uri: 'https://i.pravatar.cc/100?img=1' }} style={styles.avatar} />
+            <View style={styles.messageContent}>
+              <View style={styles.messageHeader}>
+                <Text style={styles.name}>{item.participants_id.join(', ')}</Text>
               </View>
-            </TouchableOpacity>
-          )}
-        />
-      )}
+              <Text numberOfLines={1} style={[styles.lastMessage]}>
+                {item.last_message}
+              </Text>
+            </View>
+          </TouchableOpacity>
+        )}
+      />
     </View>
   );
 }
@@ -162,16 +111,9 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  time: {
-    fontSize: 12,
-    color: '#888',
-  },
+
   lastMessage: {
     fontSize: 14,
     color: '#666',
-  },
-  unreadMessage: {
-    fontWeight: 'bold',
-    color: '#000',
   },
 });

@@ -1,236 +1,186 @@
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
 
 import { ColorTheme } from '@app/Colors';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { SharedStackScreenProps } from '@navigation/Types';
 
-export default function DirectMessageScreen({
-  navigation,
-  route,
-}: SharedStackScreenProps<'DirectMessage'>) {
+export default function DirectMessageScreen() {
   const colors = useThemeColors();
   const styles = createStyles(colors);
-  /*
-  const flatListRef = useRef<FlatList>(null);
-  const { roomId: rawApartmentId } = route.params;
-  const currentUserId = store.getState().authState.userId;
 
-  const [loading, setLoading] = useState(true);
-  const [roomId, _setRoomId] = useState<number | null>(null);
-  const [messages, _setMessages] = useState<Message[]>([]);
-  const [inputMessage, setInputMessage] = useState('');
-  const [sending, setSending] = useState(false);
-  const [isConnected, _setIsConnected] = useState(false);
-  const [otherUserName, _setOtherUserName] = useState('');
-  const [_, _setOtherUserId] = useState<string | null>(null);
-  const [userInfo, _setUserInfo] = useState<AuthState>({
-    firstName: '...',
-    lastName: '...',
-    profilePictureUri: null,
-  } as AuthState);
-  const apartmentId = rawApartmentId!;
-  const initializeChat = async () => {
-    try {
-      setLoading(true);
+  // const [loading, setLoading] = useState(true);
+  // const [messages, _setMessages] = useState<Message[]>([]);
+  // const [inputMessage, setInputMessage] = useState('');
+  // const [sending, setSending] = useState(false);
+  // const [isConnected, _setIsConnected] = useState(false);
+  // const [otherUserName, _setOtherUserName] = useState('');
+  // const [_, _setOtherUserId] = useState<string | null>(null);
+  // const [userInfo, _setUserInfo] = useState<AuthState>({
+  //   firstName: '...',
+  //   lastName: '...',
+  //   profilePictureUri: null,
+  // } as AuthState);
+  // const initializeChat = async () => {
+  //   try {
+  //     setLoading(true);
 
-      console.log('Fetching apartment owner...');
-      const ownerId = await getApartmentOwnerId(apartmentId);
+  //     console.log('Fetching apartment owner...');
+  //     const ownerId = await getApartmentOwnerId(apartmentId);
 
-      if (!ownerId) {
-        console.error('Failed to get apartment owner');
-        setLoading(false);
-        return;
-      }
+  //     if (!ownerId) {
+  //       console.error('Failed to get apartment owner');
+  //       setLoading(false);
+  //       return;
+  //     }
 
-      console.log('Found owner ID:', ownerId);
+  //     console.log('Found owner ID:', ownerId);
 
-      setOtherUserId(ownerId);
-      const userInfo = await getOtherUserInfo(ownerId);
+  //     setOtherUserId(ownerId);
+  //     const userInfo = await getOtherUserInfo(ownerId);
 
-      if (!userInfo) {
-        return;
-      }
+  //     if (!userInfo) {
+  //       return;
+  //     }
 
-      setUserInfo(userInfo);
+  //     setUserInfo(userInfo);
 
-      console.log('Fetching participant info...');
-      const participantInfo = await getParticipantInfo(ownerId);
-      if (participantInfo) {
-        const name = `${participantInfo.firstName} ${participantInfo.lastName}`;
-        setOtherUserName(name);
-        navigation.setOptions({ title: name });
-        console.log('Participant name:', name);
-      }
+  //     console.log('Fetching participant info...');
+  //     const participantInfo = await getParticipantInfo(ownerId);
+  //     if (participantInfo) {
+  //       const name = `${participantInfo.firstName} ${participantInfo.lastName}`;
+  //       setOtherUserName(name);
+  //       navigation.setOptions({ title: name });
+  //       console.log('Participant name:', name);
+  //     }
 
-      console.log('Getting or creating room...');
-      const fetchedRoomId = await getOrCreateRoomWithOwner(apartmentId, ownerId);
+  //     console.log('Getting or creating room...');
+  //     const fetchedRoomId = await getOrCreateRoomWithOwner(apartmentId, ownerId);
 
-      if (!fetchedRoomId) {
-        console.error('Failed to get room ID');
-        setLoading(false);
-        return;
-      }
+  //     if (!fetchedRoomId) {
+  //       console.error('Failed to get room ID');
+  //       setLoading(false);
+  //       return;
+  //     }
 
-      console.log('Room ID:', fetchedRoomId);
-      setRoomId(fetchedRoomId);
+  //     console.log('Room ID:', fetchedRoomId);
+  //     setRoomId(fetchedRoomId);
 
-      console.log('Connecting to WebSocket...');
-      await chatService.connect();
+  //     console.log('Connecting to WebSocket...');
+  //     await chatService.connect();
 
-      const unsubscribeConnection = chatService.onConnectionChange((connected) => {
-        console.log('Connection status changed:', connected);
-        setIsConnected(connected);
-      });
+  //     const unsubscribeConnection = chatService.onConnectionChange((connected) => {
+  //       console.log('Connection status changed:', connected);
+  //       setIsConnected(connected);
+  //     });
 
-      console.log('Loading message history...');
-      const historyMessages = await getRoomMessages(fetchedRoomId);
-      console.log('Loaded', historyMessages.length, 'messages');
+  //     console.log('Loading message history...');
+  //     const historyMessages = await getRoomMessages(fetchedRoomId);
+  //     console.log('Loaded', historyMessages.length, 'messages');
 
-      const formattedMessages: Message[] = historyMessages.map((msg) => ({
-        id: msg.id.toString(),
-        room_id: msg.room_id,
-        sender_id: msg.sender_id,
-        message: msg.message,
-        timestamp: new Date(msg.created_at),
-      }));
+  //     const formattedMessages: Message[] = historyMessages.map((msg) => ({
+  //       id: msg.id.toString(),
+  //       room_id: msg.room_id,
+  //       sender_id: msg.sender_id,
+  //       message: msg.message,
+  //       timestamp: new Date(msg.created_at),
+  //     }));
 
-      setMessages(formattedMessages);
+  //     setMessages(formattedMessages);
 
-      console.log('Subscribing to WebSocket messages...');
-      const unsubscribeWS = chatService.onMessageForRoom(fetchedRoomId, (newMessage) => {
-        console.log('New message from WebSocket:', newMessage);
-        setMessages((prev) => {
-          if (prev.some((m) => m.id === newMessage.id)) {
-            return prev;
-          }
-          return [...prev, newMessage];
-        });
-      });
+  //     console.log('Subscribing to WebSocket messages...');
+  //     const unsubscribeWS = chatService.onMessageForRoom(fetchedRoomId, (newMessage) => {
+  //       console.log('New message from WebSocket:', newMessage);
+  //       setMessages((prev) => {
+  //         if (prev.some((m) => m.id === newMessage.id)) {
+  //           return prev;
+  //         }
+  //         return [...prev, newMessage];
+  //       });
+  //     });
 
-      console.log('Subscribing to Supabase realtime...');
-      const unsubscribeSupabase = subscribeToRoomMessages(fetchedRoomId, (newMessage) => {
-        console.log('New message from Supabase:', newMessage);
-        const formattedMsg: Message = {
-          id: newMessage.id.toString(),
-          room_id: newMessage.room_id,
-          sender_id: newMessage.sender_id,
-          message: newMessage.message,
-          timestamp: new Date(newMessage.created_at),
-        };
+  //     console.log('Subscribing to Supabase realtime...');
+  //     const unsubscribeSupabase = subscribeToRoomMessages(fetchedRoomId, (newMessage) => {
+  //       console.log('New message from Supabase:', newMessage);
+  //       const formattedMsg: Message = {
+  //         id: newMessage.id.toString(),
+  //         room_id: newMessage.room_id,
+  //         sender_id: newMessage.sender_id,
+  //         message: newMessage.message,
+  //         timestamp: new Date(newMessage.created_at),
+  //       };
 
-        setMessages((prev) => {
-          if (prev.some((m) => m.id === formattedMsg.id)) {
-            return prev;
-          }
-          return [...prev, formattedMsg];
-        });
-      });
+  //       setMessages((prev) => {
+  //         if (prev.some((m) => m.id === formattedMsg.id)) {
+  //           return prev;
+  //         }
+  //         return [...prev, formattedMsg];
+  //       });
+  //     });
 
-      setLoading(false);
+  //     setLoading(false);
 
-      return () => {
-        unsubscribeConnection();
-        unsubscribeWS();
-        unsubscribeSupabase();
-      };
-    } catch (error) {
-      console.error('Error initializing chat:', error);
-      setLoading(false);
-    }
-  };
-  useEffect(() => {
-    if (!apartmentId) {
-      console.error('No apartment ID provided');
-      setLoading(false);
-      navigation.goBack();
-      return;
-    }
-    console.log('=== DirectMessageScreen mounted ===');
-    console.log('Apartment ID:', apartmentId);
-    console.log('Current user ID:', currentUserId);
+  //     return () => {
+  //       unsubscribeConnection();
+  //       unsubscribeWS();
+  //       unsubscribeSupabase();
+  //     };
+  //   } catch (error) {
+  //     console.error('Error initializing chat:', error);
+  //     setLoading(false);
+  //   }
+  // };
+  // useEffect(() => {
+  //   console.log('=== DirectMessageScreen mounted ===');
+  //   console.log('Current user ID:', currentUserId);
 
-    //initializeChat();
+  //   //initializeChat();
 
-    return () => {
-      console.log('=== DirectMessageScreen unmounted ===');
-    };
-  }, [apartmentId, currentUserId, navigation]);
+  //   return () => {
+  //     console.log('=== DirectMessageScreen unmounted ===');
+  //   };
+  // }, [currentUserId, navigation]);
 
-  const handleSend = async () => {
-    if (!inputMessage.trim() || !roomId || sending) {
-      console.log('Cannot send: empty message or no room');
-      return;
-    }
+  // const handleSend = async () => {
+  //   if (!inputMessage.trim() || !roomId || sending) {
+  //     console.log('Cannot send: empty message or no room');
+  //     return;
+  //   }
 
-    const messageToSend = inputMessage.trim();
-    setInputMessage('');
-    setSending(true);
+  //   const messageToSend = inputMessage.trim();
+  //   setInputMessage('');
+  //   setSending(true);
 
-    console.log('Sending message:', messageToSend);
+  //   console.log('Sending message:', messageToSend);
 
-    try {
-      const success = await chatService.sendMessage(roomId, messageToSend);
+  //   try {
+  //     const success = await chatService.sendMessage(roomId, messageToSend);
 
-      if (success) {
-        console.log('Message sent successfully');
-      } else {
-        console.error('Failed to send message');
-        alert('Failed to send message');
-        setInputMessage(messageToSend);
-      }
-    } catch (error) {
-      console.error('Error sending message:', error);
-      alert('Error sending message');
-      setInputMessage(messageToSend);
-    } finally {
-      setSending(false);
-    }
-  };
-
-  const renderMessage = ({ item }: { item: Message }) => {
-    const isMyMessage = item.sender_id === currentUserId;
-
-    return (
-      <View
-        style={[
-          styles.messageContainer,
-          isMyMessage ? styles.myMessageContainer : styles.theirMessageContainer,
-        ]}>
-        <View
-          style={[
-            styles.messageBubble,
-            isMyMessage ? styles.myMessageBubble : styles.theirMessageBubble,
-          ]}>
-          <Text style={[styles.messageText, isMyMessage && styles.myMessageText]}>
-            {item.message}
-          </Text>
-          <Text style={[styles.messageTime, isMyMessage && styles.myMessageTime]}>
-            {new Date(item.timestamp).toLocaleTimeString('fr-FR', {
-              hour: '2-digit',
-              minute: '2-digit',
-            })}
-          </Text>
-        </View>
-      </View>
-    );
-  };
-
-  if (loading) {
-    return <Loader loading={true} />;
-  }
+  //     if (success) {
+  //       console.log('Message sent successfully');
+  //     } else {
+  //       console.error('Failed to send message');
+  //       alert('Failed to send message');
+  //       setInputMessage(messageToSend);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error sending message:', error);
+  //     alert('Error sending message');
+  //     setInputMessage(messageToSend);
+  //   } finally {
+  //     setSending(false);
+  //   }
+  // };
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
-      {!isConnected && (
+      {
         <View style={styles.connectionBanner}>
           <Text style={styles.connectionText}>Connecting...</Text>
         </View>
-      )}
-
+      }
+      {/* 
       <View style={styles.senderInfo}>
         <Image source={{ uri: userInfo.profilePictureUri || undefined }} style={styles.avatar} />
         <Text style={styles.senderName}>{otherUserName}</Text>
@@ -248,9 +198,9 @@ export default function DirectMessageScreen({
             <Text style={styles.emptyText}>No messages yet. Say hi!</Text>
           </View>
         }
-      />
+      /> */}
 
-      <View style={styles.inputContainer}>
+      {/* <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Type a message..."
@@ -266,22 +216,9 @@ export default function DirectMessageScreen({
             (!inputMessage.trim() || sending) && styles.sendButtonDisabled,
           ]}
           onPress={handleSend}
-          disabled={!inputMessage.trim() || sending}>
-          <Ionicons
-            name={sending ? 'hourglass-outline' : 'send'}
-            size={24}
-            color={!inputMessage.trim() || sending ? colors.textSecondary : colors.primary}
-          />
-        </Pressable>
-      </View>
+          disabled={!inputMessage.trim() || sending}></Pressable>
+      </View> */}
     </KeyboardAvoidingView>
-  );
-    */
-
-  return (
-    <View style={styles.container}>
-      <Text>Direct Message Screen is under construction.</Text>
-    </View>
   );
 }
 

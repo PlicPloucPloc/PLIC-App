@@ -4,11 +4,9 @@ type CommandType = 'SendMessage';
 type ResponseType = 'Disconnection' | 'MessageReceived' | 'MessageSentConfirmation';
 
 export type GetRoomResponse = {
-  data: {
-    room_id: string;
-    participants: string[];
-    last_message: string | null;
-  };
+  room_id: string;
+  participants_id: string[];
+  last_message: string | null;
 };
 
 export type CreateRoomResponse = {
@@ -186,7 +184,7 @@ class ChatService {
     }
   }
 
-  sendMessage(roomId: number, message: string): Promise<boolean> {
+  sendMessage(roomId: string, message: string): Promise<boolean> {
     return new Promise((resolve) => {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
         console.error('WebSocket not connected');
@@ -200,7 +198,7 @@ class ChatService {
       const command: WebSocketCommand = {
         type: 'SendMessage',
         data: {
-          room_id: roomId,
+          room_id: roomId as unknown as number,
           message,
           message_temp_id: tempId,
         },
