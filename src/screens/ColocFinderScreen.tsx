@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   RefreshControl,
@@ -13,12 +14,13 @@ import { ColorTheme } from '@app/Colors';
 import { AuthState } from '@app/definitions';
 import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { updateAllowColloc } from '@app/rest/RelationService';
+import { isCollocEnabled, updateAllowColloc } from '@app/rest/RelationService';
 import { getRecommendedColloc } from '@app/rest/UserService';
 import { calculateAge } from '@app/utils/Misc';
 import { Images } from '@assets/index';
 import ColocFinderNotEnabled from '@components/ColocFinderNotEnabled';
 import HeaderSwitch from '@components/HeaderSwitch';
+import Loader from '@components/Loader';
 import ProfilePicture from '@components/ProfilePicture';
 import { ColocFinderStackScreenProps } from '@navigation/Types';
 
@@ -28,7 +30,18 @@ export default function ColocFinderScreen({
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
+  const [loading, setLoading] = useState(true);
   const [isEnabled, setIsEnabled] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      const collocEnabled = await isCollocEnabled().finally(() => setLoading(false));
+      setIsEnabled(collocEnabled);
+    })();
+  }, []);
+
+  console.log('Rendering ColocFinderScreen, isEnabled:', isEnabled);
 
   const fetchData = useCallback((offset: number) => {
     return getRecommendedColloc(offset);
@@ -37,11 +50,11 @@ export default function ColocFinderScreen({
   const {
     data: users,
     setData: setUsers,
-    // FIXME: loadingMore,
+    loadingMore,
     refresh,
     refreshing,
     setRefreshing,
-    // FIXME: fetchMore,
+    fetchMore,
   } = usePaginatedQuery<AuthState>(fetchData);
 
   const toggleSwitch = useCallback(
@@ -64,6 +77,10 @@ export default function ColocFinderScreen({
       headerRight: () => <HeaderSwitch value={isEnabled} onValueChange={toggleSwitch} />,
     });
   }, [navigation, isEnabled, toggleSwitch]);
+
+  if (loading) {
+    return <Loader loading={loading} />;
+  }
 
   return (
     <View style={styles.container}>
@@ -99,18 +116,17 @@ export default function ColocFinderScreen({
           keyExtractor={(item) => item.userId}
           contentContainerStyle={{ flexGrow: 1 }}
           ItemSeparatorComponent={() => <View style={styles.separator} />}
-          // FIXME: enable pagination when backend supports it
-          // onEndReached={() => fetchMore()}
-          // onEndReachedThreshold={0.2}
-          // ListFooterComponent={
-          //   loadingMore ? (
-          //     <ActivityIndicator
-          //       size="small"
-          //       color={colors.primary}
-          //       style={{ marginVertical: 20 }}
-          //     />
-          //   ) : null
-          // }
+          onEndReached={() => fetchMore()}
+          onEndReachedThreshold={0.2}
+          ListFooterComponent={
+            loadingMore ? (
+              <ActivityIndicator
+                size="small"
+                color={colors.primary}
+                style={{ marginVertical: 20 }}
+              />
+            ) : null
+          }
           refreshControl={
             <RefreshControl
               refreshing={refreshing}

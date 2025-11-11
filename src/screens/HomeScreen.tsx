@@ -16,6 +16,7 @@ import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
 import EverythingSwiped from '@components/EverythingSwiped';
+import FiltersNotSet from '@components/FiltersNotSet';
 import HeaderRefreshButton from '@components/HeaderRefreshButton';
 import Loader from '@components/Loader';
 import { HomeStackScreenProps } from '@navigation/Types';
@@ -31,6 +32,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   const swipeDirection = useSelector((state: RootState) => state.appState.swipeDirection);
   const filters = useSelector((state: RootState) => state.filtersState);
 
+  // handle swipe from details screen
   useFocusEffect(
     useCallback(() => {
       if (swipeDirection) {
@@ -49,7 +51,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   );
 
   const [allSwiped, setAllSwiped] = useState(false);
-
   const [backButtonDisabled, setBackButtonDisabled] = useState(false);
   const [apartmentInfo, setApartmentInfo] = useState<{
     title?: string;
@@ -80,18 +81,13 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   } = usePaginatedQuery<ApartmentInfo>(fetchApartments, duplicateResolver);
 
   useEffect(() => {
+    // handle reload of apartments
+    setAllSwiped(swiperRef.current?.activeIndex === apartments.length);
+  }, [apartments]);
+
+  useEffect(() => {
     navigation.setOptions({
-      headerRight: () => (
-        <HeaderRefreshButton
-          icon="refresh"
-          onPress={async () => {
-            const result = await refresh();
-            if (result && result.length > 0) {
-              setAllSwiped(false);
-            }
-          }}
-        />
-      ),
+      headerRight: () => <HeaderRefreshButton icon="refresh" onPress={refresh} />,
     });
   }, [navigation, refresh]);
 
@@ -141,6 +137,10 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
   if (refreshing) {
     return <Loader loading={true} />;
+  }
+
+  if (!filters.hasValues) {
+    return <FiltersNotSet navigation={navigation} />;
   }
 
   return (
@@ -228,7 +228,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
       {/* Buttons */}
       <View style={styles.buttonsContainer}>
         <SwipeButton
-          disabled={backButtonDisabled}
+          disabled={backButtonDisabled || apartments.length === 0}
           style={styles.button}
           onPress={() => {
             const currentIndex = swiperRef.current?.activeIndex || 0;

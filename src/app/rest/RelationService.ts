@@ -1,7 +1,7 @@
 import { Alert } from 'react-native';
 
 import { API_PAGE_SIZE } from '@app/config/Constants.ts';
-import { RELATION_TYPE, RelationInfo } from '@app/definitions';
+import { IsCollocEnabledRepsonse, RELATION_TYPE, RelationInfo } from '@app/definitions';
 import { setShouldRefetchHistory, setShouldRefetchLikeList } from '@app/redux/slices/index.ts';
 import store from '@app/redux/Store.ts';
 import { alertOnResponseError } from '@app/utils/Error.ts';
@@ -141,12 +141,33 @@ export async function updateAllowColloc(allowColloc: boolean): Promise<boolean> 
   const response = await apiFetch(
     Endpoints.RELATIONS.UPDATE_ALLOW_COLLOC(allowColloc),
     {
-      method: 'PUT',
+      method: 'PATCH',
     },
     true,
   );
 
-  if (await alertOnResponseError(response, 'Relation', 'updating allow colloc')) return false;
+  if (await alertOnResponseError(response, 'Relation', 'updating allow colloc')) {
+    return false;
+  }
 
   return true;
+}
+
+export async function isCollocEnabled(): Promise<boolean> {
+  const response = await apiFetch(
+    Endpoints.RELATIONS.IS_COLLOC_ENABLED,
+    {
+      method: 'GET',
+    },
+    true,
+  );
+
+  if (await alertOnResponseError(response, 'Relation', 'checking if colloc is enabled')) {
+    return false;
+  }
+
+  const data = (await response.json()) as IsCollocEnabledRepsonse;
+  console.log('isCollocEnabled response data:', data);
+
+  return data.isCollocEnabled;
 }

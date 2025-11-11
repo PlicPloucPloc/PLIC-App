@@ -44,6 +44,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
   const [maxSurfaceText, setMaxSurfaceText] = useState(String(FILTERS_SURFACE_MAX));
   const [placeDetails, setPlaceDetails] = useState<PlaceSearchResponse>(defultPlaceDetails);
   const [maxPrice, setMaxPrice] = useState('');
+  const [isFurnished, setIsFurnished] = useState(false);
 
   const isApplyingRef = useRef(false);
 
@@ -90,6 +91,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
       hasValues: true,
       minSurface: minSurface,
       maxSurface: maxSurface,
+      isFurnished: isFurnished,
       maxPrice: parseInt(maxPrice, 10),
       location: {
         name: placeDetails.structuredFormat.mainText.text,
@@ -119,9 +121,17 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
       minSurface !== filtersState.minSurface ||
       maxSurface !== filtersState.maxSurface ||
       parseInt(maxPrice, 10) !== filtersState.maxPrice ||
+      isFurnished !== filtersState.isFurnished ||
       placeDetails?.structuredFormat.mainText.text !== filtersState.location?.name
     );
-  }, [filtersState, minSurface, maxSurface, maxPrice, placeDetails.structuredFormat.mainText.text]);
+  }, [
+    filtersState,
+    minSurface,
+    maxSurface,
+    maxPrice,
+    isFurnished,
+    placeDetails.structuredFormat.mainText.text,
+  ]);
 
   useEffect(() => {
     async function loadFilters() {
@@ -138,6 +148,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
           setMinSurfaceText(String(stored.minSurface));
           setMaxSurfaceText(String(stored.maxSurface));
           setMaxPrice(String(stored.maxPrice));
+          setIsFurnished(stored.isFurnished);
           setPlaceDetails({
             structuredFormat: { mainText: { text: stored.location.name } },
             details: {
@@ -243,6 +254,22 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
           keyboardType="numeric"
         />
 
+        {/* ======== Furnitures ======== */}
+        <Text style={styles.sectionTitle}>Furnitures</Text>
+        <TouchableOpacity
+          style={styles.isFurnishedContainer}
+          onPress={() => setIsFurnished(!isFurnished)}>
+          <View
+            style={[
+              styles.isFurnishedButton,
+              { backgroundColor: isFurnished ? colors.primary : 'transparent' },
+            ]}
+          />
+          <Text style={{ color: colors.textPrimary, fontSize: 16 }}>
+            Only show furnished apartments
+          </Text>
+        </TouchableOpacity>
+
         {/* ======== Buttons ======== */}
         {hasChanges ? (
           <TouchableOpacity
@@ -308,6 +335,21 @@ const createStyles = (colors: ColorTheme) =>
       borderRadius: 10,
       fontSize: 16,
       color: colors.textPrimary,
+    },
+
+    isFurnishedContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 10,
+    },
+
+    isFurnishedButton: {
+      width: 24,
+      height: 24,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: colors.contrast,
+      marginRight: 10,
     },
 
     button: {

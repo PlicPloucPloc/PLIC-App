@@ -20,6 +20,7 @@ const Endpoints = {
     DELETE_RELATION: '/relations',
     UPDATE_ALLOW_COLLOC: (allowColloc: boolean) =>
       `/relations/allowColloc?allowColloc=${allowColloc}`,
+    IS_COLLOC_ENABLED: '/relations/isColloc',
   },
   APARTMENT: {
     NO_RELATIONS_PAGINATED: (offset: number, limit: number, filters: string) =>

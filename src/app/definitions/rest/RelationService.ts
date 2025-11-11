@@ -9,3 +9,7 @@ export type RelationInfo = {
   type: RELATION_TYPE;
   apt: ApartmentInfo;
 };
+
+export type IsCollocEnabledRepsonse = {
+  isCollocEnabled: boolean;
+};
