@@ -61,7 +61,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     apartment_id?: number;
   }>({});
   const roomRequest: RoomRequest = {
-    users: ['82dd0f62-70a4-4ad4-a76a-dd30028a6920'],
+    users: ['5537300f-2247-4444-93a4-d55104475859'],
     apartment_id: null,
     owner_id: authState.userId,
   };

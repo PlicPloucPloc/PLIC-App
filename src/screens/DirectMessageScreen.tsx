@@ -1,206 +1,225 @@
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import {
+  FlatList,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  TextInput,
+  Pressable,
+} from 'react-native';
+
+import { Ionicons } from '@expo/vector-icons';
 
 import { ColorTheme } from '@app/Colors';
+import { chatService, Message, MessageResponse } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import store from '@app/redux/Store';
+import { getMessage } from '@app/rest/ChatService';
+import Loader from '@components/Loader';
+import { SharedStackScreenProps } from '@navigation/Types';
 
-export default function DirectMessageScreen() {
+type FlatMessage = {
+  id: number | string;
+  room_id: number;
+  message: string;
+  sender_id: string;
+  created_at: string;
+  participants: string[];
+  isSending?: boolean;
+};
+
+export default function DirectMessageScreen({
+  navigation,
+  route,
+}: SharedStackScreenProps<'DirectMessage'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
+  const flatListRef = useRef<FlatList>(null);
+  const currentUserId: string = store.getState().authState.userId;
 
-  // const [loading, setLoading] = useState(true);
-  // const [messages, _setMessages] = useState<Message[]>([]);
-  // const [inputMessage, setInputMessage] = useState('');
-  // const [sending, setSending] = useState(false);
-  // const [isConnected, _setIsConnected] = useState(false);
-  // const [otherUserName, _setOtherUserName] = useState('');
-  // const [_, _setOtherUserId] = useState<string | null>(null);
-  // const [userInfo, _setUserInfo] = useState<AuthState>({
-  //   firstName: '...',
-  //   lastName: '...',
-  //   profilePictureUri: null,
-  // } as AuthState);
-  // const initializeChat = async () => {
-  //   try {
-  //     setLoading(true);
+  const [loading, setLoading] = useState(true);
+  const [inputMessage, setInputMessage] = useState('');
+  const [sending, setSending] = useState(false);
+  const [isConnected, setIsConnected] = useState(false);
+  const [messages, setMessages] = useState<FlatMessage[]>([]);
+  const [roomId, setRoomId] = useState<number>(0);
 
-  //     console.log('Fetching apartment owner...');
-  //     const ownerId = await getApartmentOwnerId(apartmentId);
+  useEffect(() => {
+    console.log('=== DirectMessageScreen mounted ===');
+    console.log('Current user ID:', currentUserId);
+    console.log('Room ID:', roomId);
+    if (route.params.roomId == null) {
+      console.log('no roomid');
+      setLoading(false);
+      return;
+    }
 
-  //     if (!ownerId) {
-  //       console.error('Failed to get apartment owner');
-  //       setLoading(false);
-  //       return;
-  //     }
+    setRoomId(route.params.roomId);
+    chatService.connect();
+    const unsubscribeConnection = chatService.onConnectionChange((connected) => {
+      console.log('Connection status changed:', connected);
+      setIsConnected(connected);
+    });
 
-  //     console.log('Found owner ID:', ownerId);
+    const fetchMessages = async () => {
+      try {
+        const messageResponse: MessageResponse | null = await getMessage(roomId);
+        console.log('Messages for room', roomId, ':', messageResponse);
 
-  //     setOtherUserId(ownerId);
-  //     const userInfo = await getOtherUserInfo(ownerId);
+        if (!messageResponse) {
+          console.error('No messages found');
+          return;
+        }
+        const allMessages: FlatMessage[] = messageResponse.messages.map((msg) => ({
+          id: msg.id,
+          room_id: msg.room_id,
+          message: msg.message,
+          sender_id: msg.sender_id,
+          created_at: msg.created_at,
+          participants: messageResponse.participants,
+        }));
 
-  //     if (!userInfo) {
-  //       return;
-  //     }
+        console.log('Flattened messages:', allMessages);
+        setMessages(allMessages);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  //     setUserInfo(userInfo);
+    fetchMessages();
+    const unsubscribeMessages = chatService.onMessageForRoom(roomId, (newMessage: Message) => {
+      console.log('New message received:', newMessage);
 
-  //     console.log('Fetching participant info...');
-  //     const participantInfo = await getParticipantInfo(ownerId);
-  //     if (participantInfo) {
-  //       const name = `${participantInfo.firstName} ${participantInfo.lastName}`;
-  //       setOtherUserName(name);
-  //       navigation.setOptions({ title: name });
-  //       console.log('Participant name:', name);
-  //     }
+      const flatMessage: FlatMessage = {
+        id: newMessage.id,
+        room_id: newMessage.room_id,
+        message: newMessage.message,
+        sender_id: newMessage.sender_id,
+        created_at: new Date().toISOString(),
+        participants: [],
+      };
 
-  //     console.log('Getting or creating room...');
-  //     const fetchedRoomId = await getOrCreateRoomWithOwner(apartmentId, ownerId);
+      setMessages((prev) => [...prev, flatMessage]);
+    });
 
-  //     if (!fetchedRoomId) {
-  //       console.error('Failed to get room ID');
-  //       setLoading(false);
-  //       return;
-  //     }
+    return () => {
+      console.log('=== DirectMessageScreen unmounted ===');
+      unsubscribeConnection();
+      unsubscribeMessages();
+    };
+  }, [route.params.roomId, currentUserId, roomId]);
 
-  //     console.log('Room ID:', fetchedRoomId);
-  //     setRoomId(fetchedRoomId);
+  const handleSend = async () => {
+    if (!inputMessage.trim() || !roomId) return;
 
-  //     console.log('Connecting to WebSocket...');
-  //     await chatService.connect();
+    const messageText = inputMessage.trim();
+    const tempId = `temp-${Date.now()}`;
+    const optimisticMessage: FlatMessage = {
+      id: tempId,
+      room_id: roomId,
+      message: messageText,
+      sender_id: currentUserId,
+      created_at: new Date().toISOString(),
+      participants: [],
+      isSending: true,
+    };
 
-  //     const unsubscribeConnection = chatService.onConnectionChange((connected) => {
-  //       console.log('Connection status changed:', connected);
-  //       setIsConnected(connected);
-  //     });
+    setMessages((prev) => [...prev, optimisticMessage]);
+    setInputMessage('');
+    setSending(true);
 
-  //     console.log('Loading message history...');
-  //     const historyMessages = await getRoomMessages(fetchedRoomId);
-  //     console.log('Loaded', historyMessages.length, 'messages');
+    try {
+      const success = await chatService.sendMessage(roomId, messageText);
 
-  //     const formattedMessages: Message[] = historyMessages.map((msg) => ({
-  //       id: msg.id.toString(),
-  //       room_id: msg.room_id,
-  //       sender_id: msg.sender_id,
-  //       message: msg.message,
-  //       timestamp: new Date(msg.created_at),
-  //     }));
+      if (success) {
+        console.log('Message sent successfully');
+        setMessages((prev) =>
+          prev.map((msg) => (msg.id === tempId ? { ...msg, isSending: false } : msg)),
+        );
+      } else {
+        console.error('Failed to send message');
+        setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
+        setInputMessage(messageText);
+      }
+    } catch (error) {
+      console.error('Error sending message:', error);
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
+      setInputMessage(messageText);
+    } finally {
+      setSending(false);
+    }
+  };
 
-  //     setMessages(formattedMessages);
+  const renderMessage = ({ item }: { item: FlatMessage }) => {
+    const isMyMessage = item.sender_id === currentUserId;
 
-  //     console.log('Subscribing to WebSocket messages...');
-  //     const unsubscribeWS = chatService.onMessageForRoom(fetchedRoomId, (newMessage) => {
-  //       console.log('New message from WebSocket:', newMessage);
-  //       setMessages((prev) => {
-  //         if (prev.some((m) => m.id === newMessage.id)) {
-  //           return prev;
-  //         }
-  //         return [...prev, newMessage];
-  //       });
-  //     });
+    return (
+      <View
+        style={[
+          styles.messageContainer,
+          isMyMessage ? styles.myMessageContainer : styles.theirMessageContainer,
+        ]}>
+        <View
+          style={[
+            styles.messageBubble,
+            isMyMessage ? styles.myMessageBubble : styles.theirMessageBubble,
+            item.isSending && styles.messageSending,
+          ]}>
+          <Text style={[styles.messageText, isMyMessage && styles.myMessageText]}>
+            {item.message}
+          </Text>
+          <Text style={[styles.messageTime, isMyMessage && styles.myMessageTime]}>
+            {new Date(item.created_at).toLocaleTimeString('fr-FR', {
+              hour: '2-digit',
+              minute: '2-digit',
+            })}
+            {item.isSending && ' ⏳'}
+          </Text>
+        </View>
+      </View>
+    );
+  };
 
-  //     console.log('Subscribing to Supabase realtime...');
-  //     const unsubscribeSupabase = subscribeToRoomMessages(fetchedRoomId, (newMessage) => {
-  //       console.log('New message from Supabase:', newMessage);
-  //       const formattedMsg: Message = {
-  //         id: newMessage.id.toString(),
-  //         room_id: newMessage.room_id,
-  //         sender_id: newMessage.sender_id,
-  //         message: newMessage.message,
-  //         timestamp: new Date(newMessage.created_at),
-  //       };
-
-  //       setMessages((prev) => {
-  //         if (prev.some((m) => m.id === formattedMsg.id)) {
-  //           return prev;
-  //         }
-  //         return [...prev, formattedMsg];
-  //       });
-  //     });
-
-  //     setLoading(false);
-
-  //     return () => {
-  //       unsubscribeConnection();
-  //       unsubscribeWS();
-  //       unsubscribeSupabase();
-  //     };
-  //   } catch (error) {
-  //     console.error('Error initializing chat:', error);
-  //     setLoading(false);
-  //   }
-  // };
-  // useEffect(() => {
-  //   console.log('=== DirectMessageScreen mounted ===');
-  //   console.log('Current user ID:', currentUserId);
-
-  //   //initializeChat();
-
-  //   return () => {
-  //     console.log('=== DirectMessageScreen unmounted ===');
-  //   };
-  // }, [currentUserId, navigation]);
-
-  // const handleSend = async () => {
-  //   if (!inputMessage.trim() || !roomId || sending) {
-  //     console.log('Cannot send: empty message or no room');
-  //     return;
-  //   }
-
-  //   const messageToSend = inputMessage.trim();
-  //   setInputMessage('');
-  //   setSending(true);
-
-  //   console.log('Sending message:', messageToSend);
-
-  //   try {
-  //     const success = await chatService.sendMessage(roomId, messageToSend);
-
-  //     if (success) {
-  //       console.log('Message sent successfully');
-  //     } else {
-  //       console.error('Failed to send message');
-  //       alert('Failed to send message');
-  //       setInputMessage(messageToSend);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error sending message:', error);
-  //     alert('Error sending message');
-  //     setInputMessage(messageToSend);
-  //   } finally {
-  //     setSending(false);
-  //   }
-  // };
+  if (loading) {
+    return <Loader loading={true} />;
+  }
 
   return (
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
-      {
+      {!isConnected && (
         <View style={styles.connectionBanner}>
           <Text style={styles.connectionText}>Connecting...</Text>
         </View>
-      }
-      {/* 
+      )}
+
       <View style={styles.senderInfo}>
-        <Image source={{ uri: userInfo.profilePictureUri || undefined }} style={styles.avatar} />
-        <Text style={styles.senderName}>{otherUserName}</Text>
+        <Image source={{ uri: undefined }} style={styles.avatar} />
+        <Text style={styles.senderName}>{'otherUserName'}</Text>
       </View>
 
       <FlatList
         ref={flatListRef}
         data={messages}
         renderItem={renderMessage}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => `${item.room_id}-${item.id}`}
         contentContainerStyle={styles.messagesList}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: false })}
+        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>No messages yet. Say hi!</Text>
           </View>
         }
-      /> */}
+      />
 
-      {/* <View style={styles.inputContainer}>
+      <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
           placeholder="Type a message..."
@@ -209,6 +228,7 @@ export default function DirectMessageScreen() {
           onChangeText={setInputMessage}
           multiline
           maxLength={500}
+          onSubmitEditing={handleSend}
         />
         <Pressable
           style={[
@@ -216,8 +236,14 @@ export default function DirectMessageScreen() {
             (!inputMessage.trim() || sending) && styles.sendButtonDisabled,
           ]}
           onPress={handleSend}
-          disabled={!inputMessage.trim() || sending}></Pressable>
-      </View> */}
+          disabled={!inputMessage.trim() || sending}>
+          <Ionicons
+            name="send"
+            size={24}
+            color={!inputMessage.trim() || sending ? colors.textSecondary : colors.primary}
+          />
+        </Pressable>
+      </View>
     </KeyboardAvoidingView>
   );
 }
@@ -275,6 +301,9 @@ const createStyles = (colors: ColorTheme) =>
     theirMessageBubble: {
       backgroundColor: '#E5E5EA',
     },
+    messageSending: {
+      opacity: 0.6,
+    },
     messageText: {
       fontSize: 16,
       color: colors.textPrimary,
@@ -317,6 +346,7 @@ const createStyles = (colors: ColorTheme) =>
       borderRadius: 20,
       justifyContent: 'center',
       alignItems: 'center',
+      backgroundColor: '#F2F2F7',
     },
     sendButtonDisabled: {
       opacity: 0.5,
@@ -335,5 +365,7 @@ const createStyles = (colors: ColorTheme) =>
       flexDirection: 'row',
       alignItems: 'center',
       marginBottom: 4,
+      paddingHorizontal: 16,
+      paddingVertical: 8,
     },
   });

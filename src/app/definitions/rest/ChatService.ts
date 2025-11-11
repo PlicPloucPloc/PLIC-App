@@ -1,16 +1,15 @@
 import * as SecureStore from 'expo-secure-store';
 
-type CommandType = 'SendMessage';
-type ResponseType = 'Disconnection' | 'MessageReceived' | 'MessageSentConfirmation';
-
+// API Types
 export type GetRoomResponse = {
-  room_id: string;
+  room_id: number;
   participants_id: string[];
   last_message: string | null;
 };
 
 export type CreateRoomResponse = {
-  data: string | null;
+  error_message: string | null;
+  data: number | null;
 };
 
 export type RoomRequest = {
@@ -25,14 +24,31 @@ export type UpdateRoomRequest = {
   users_to_remove: string[];
 };
 
-//autre
+export type MessageResponse = {
+  apartment_id: number | null;
+  created_at: string;
+  messages: {
+    id: number;
+    room_id: number;
+    message: string;
+    sender_id: string;
+    created_at: string;
+  }[];
+  owner_id: string;
+  participants: string[];
+  room_id: number;
+};
+
+// WebSocket Types
+type CommandType = 'SendMessage';
+type ResponseType = 'Disconnection' | 'MessageReceived' | 'MessageSentConfirmation';
 
 export type Message = {
-  id: string;
+  id: number;
   room_id: number;
   sender_id: string;
   message: string;
-  timestamp: Date;
+  created_at: string;
   isSending?: boolean;
 };
 
@@ -79,7 +95,7 @@ class ChatService {
         return;
       }
 
-      const wsUrl = `ws://10.41.175.234:3030?token=${token}`;
+      const wsUrl = `ws://192.168.0.34:3030?token=${token}`;
       console.log('Connecting to WebSocket:', wsUrl);
 
       this.ws = new WebSocket(wsUrl);
@@ -132,11 +148,11 @@ class ChatService {
         console.log('Message received - Room:', msgData.room_id, 'From:', msgData.sender_id);
 
         const newMessage: Message = {
-          id: `${Date.now()}-${msgData.sender_id}`,
+          id: Date.now(), // Temporaire, sera remplacé par l'ID du serveur
           room_id: msgData.room_id,
           sender_id: msgData.sender_id,
           message: msgData.message,
-          timestamp: new Date(),
+          created_at: new Date().toISOString(),
         };
 
         this.notifyMessageListeners(msgData.room_id, newMessage);
@@ -184,7 +200,7 @@ class ChatService {
     }
   }
 
-  sendMessage(roomId: string, message: string): Promise<boolean> {
+  sendMessage(roomId: number, message: string): Promise<boolean> {
     return new Promise((resolve) => {
       if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
         console.error('WebSocket not connected');
@@ -198,7 +214,7 @@ class ChatService {
       const command: WebSocketCommand = {
         type: 'SendMessage',
         data: {
-          room_id: roomId as unknown as number,
+          room_id: roomId,
           message,
           message_temp_id: tempId,
         },

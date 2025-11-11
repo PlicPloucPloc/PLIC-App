@@ -3,12 +3,13 @@ import * as SecureStore from 'expo-secure-store';
 import {
   CreateRoomResponse,
   GetRoomResponse,
+  MessageResponse,
   RoomRequest,
   UpdateRoomRequest,
 } from '@app/definitions/rest/ChatService';
 import { alertOnResponseError } from '@app/utils/Error';
 
-import { apiFetch, apiFetchHadrien } from './Client';
+import { apiFetchHadrien } from './Client';
 import Endpoints from './Endpoints';
 
 export async function getRooms(): Promise<GetRoomResponse[]> {
@@ -30,9 +31,8 @@ export async function getRooms(): Promise<GetRoomResponse[]> {
   return data;
 }
 
-export async function postRoom(room: RoomRequest): Promise<string | null> {
-  const participants = room.users;
-  participants.push(room.owner_id);
+export async function postRoom(room: RoomRequest): Promise<number | null> {
+  const participants = [...new Set([...room.users, room.owner_id])];
   const existingRoom = await isRoomExisting(participants);
   if (existingRoom) {
     return existingRoom;
@@ -55,7 +55,7 @@ export async function postRoom(room: RoomRequest): Promise<string | null> {
 }
 
 export async function updateRoom(room: UpdateRoomRequest): Promise<boolean> {
-  const response = await apiFetch(
+  const response = await apiFetchHadrien(
     Endpoints.CHAT.UPDATE_ROOMS,
     {
       method: 'PUT',
@@ -72,7 +72,7 @@ export async function updateRoom(room: UpdateRoomRequest): Promise<boolean> {
 }
 
 export async function deleteRoom(id: number): Promise<boolean> {
-  const response = await apiFetch(
+  const response = await apiFetchHadrien(
     Endpoints.CHAT.DELETE_ROOM(id),
     {
       method: 'DELETE',
@@ -87,8 +87,8 @@ export async function deleteRoom(id: number): Promise<boolean> {
   return true;
 }
 
-export async function isRoomExisting(participants: string[]): Promise<string | null> {
-  const response = await apiFetch(
+export async function isRoomExisting(participants: string[]): Promise<number | null> {
+  const response = await apiFetchHadrien(
     Endpoints.CHAT.GET_ROOMS,
     {
       method: 'GET',
@@ -98,16 +98,18 @@ export async function isRoomExisting(participants: string[]): Promise<string | n
   if (await alertOnResponseError(response, 'Chat', 'getting rooms')) {
     return null;
   }
+
   const rooms: GetRoomResponse[] = await response.json();
-  for (let i = 0; i < rooms.length; i++) {
-    const roomParticipants = rooms[i].participants_id;
-    if (roomParticipants.length != participants.length) {
-      continue;
-    }
-    roomParticipants.sort();
-    participants.sort();
-    if (participants.join(',') == roomParticipants.join(',')) {
-      return rooms[i].room_id;
+  const normalizedParticipants = [...new Set(participants)].sort();
+
+  for (const room of rooms) {
+    const normalizedRoomParticipants = [...new Set(room.participants_id)].sort();
+
+    if (
+      normalizedRoomParticipants.length === normalizedParticipants.length &&
+      normalizedParticipants.every((p, i) => p === normalizedRoomParticipants[i])
+    ) {
+      return room.room_id;
     }
   }
   return null;
@@ -117,4 +119,23 @@ export async function getMyRooms(): Promise<GetRoomResponse[]> {
   const token = await SecureStore.getItemAsync('token');
   const data: GetRoomResponse[] = await getRooms();
   return data.filter((room) => room.participants_id.includes(token || ''));
+}
+
+export async function getMessage(id: number): Promise<MessageResponse | null> {
+  const token = await SecureStore.getItemAsync('token');
+  const response = await apiFetchHadrien(
+    Endpoints.CHAT.GET_MESSAGE(id),
+    {
+      method: 'GET',
+      headers: { token: token || '' },
+    },
+    true,
+  );
+  console.log('response', response);
+
+  if (await alertOnResponseError(response, 'Chat', 'getting Messages')) {
+    return null;
+  }
+  const data: MessageResponse = await response.json();
+  return data;
 }

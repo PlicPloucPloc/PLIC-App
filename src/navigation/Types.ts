@@ -52,7 +52,7 @@ export type SharedStackParamList = {
     enableRelationButtons?: boolean;
   };
   OtherProfile: { userId: string };
-  DirectMessage: { roomId: string | null };
+  DirectMessage: { roomId: number | null };
 };
 
 export type SharedStackScreenProps<T extends keyof SharedStackParamList> = CompositeScreenProps<
