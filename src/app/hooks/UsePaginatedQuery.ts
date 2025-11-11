@@ -11,20 +11,17 @@ export function usePaginatedQuery<T>(
   const [refreshing, setRefreshing] = useState(true);
   const [hasMore, setHasMore] = useState(true);
 
-  // FIXME: backend is currently not providing total count, so we cannot determine hasMore accurately
-
   const fetchInitialData = useCallback(async () => {
     setRefreshing(true);
     setHasMore(true);
     try {
       const result = await fetchFunction(0);
+      console.log('initial fetch length: ' + result.length);
       setData(result);
-      // FIXME: remove comment when backend fixed
-      // setHasMore(result.length === API_PAGE_SIZE);
+      setHasMore(result.length === API_PAGE_SIZE);
       return result;
     } catch (err) {
       console.error(err);
-      console.log('Failed to fetch initial data');
     } finally {
       setRefreshing(false);
     }
@@ -38,14 +35,15 @@ export function usePaginatedQuery<T>(
         const offsetValue = typeof offset === 'number' ? offset : data.length;
         const result = await fetchFunction(offsetValue);
 
+        console.log('fetch more length: ' + result.length);
+        if (result.length < API_PAGE_SIZE) {
+          setHasMore(false);
+        }
+
         if (duplicateResolver) {
           setData((prevData) => duplicateResolver([...prevData, ...result]));
         } else {
           setData((prevData) => [...prevData, ...result]);
-        }
-
-        if (result.length < API_PAGE_SIZE) {
-          // setHasMore(false);
         }
 
         return result;

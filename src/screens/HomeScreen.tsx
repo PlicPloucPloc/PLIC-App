@@ -29,6 +29,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
   const swiperRef = useRef<SwiperCardRefType>(null);
   const swipeDirection = useSelector((state: RootState) => state.appState.swipeDirection);
+  const filters = useSelector((state: RootState) => state.filtersState);
 
   useFocusEffect(
     useCallback(() => {
@@ -58,8 +59,8 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   }>({});
 
   const fetchApartments = useCallback(
-    (offset: number) => getApartmentsNoRelationPaginated(offset),
-    [],
+    (offset: number) => getApartmentsNoRelationPaginated(offset, filters),
+    [filters],
   );
 
   const duplicateResolver = useCallback((data: ApartmentInfo[]) => {

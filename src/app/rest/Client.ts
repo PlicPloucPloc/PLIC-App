@@ -2,7 +2,6 @@ import { Alert } from 'react-native';
 
 import 'react-native-get-random-values';
 
-import * as SecureStore from 'expo-secure-store';
 import { v4 as uuidv4 } from 'uuid';
 
 import { API_TIMEOUT } from '@app/config/Constants';
@@ -12,6 +11,7 @@ import { setRoot } from '@app/redux/slices';
 import store from '@app/redux/Store';
 
 import Endpoints from './Endpoints';
+import { storageManager } from './Storage';
 
 /**
  * Fetches data from the API with optional authentication.
@@ -104,7 +104,7 @@ async function handleErrorResponse(
 
   if (data.includes('token is expired')) {
     console.log('--- Token expired, begin rotation ---');
-    await SecureStore.deleteItemAsync('token');
+    await storageManager.deleteToken();
     if (!(await getToken())) {
       return await userNeedsLogin(requestId);
     }
@@ -127,12 +127,12 @@ async function handleErrorResponse(
  * Returns the token or null if not available.
  */
 export async function getToken(): Promise<string | null> {
-  const token = await SecureStore.getItemAsync('token');
+  const token = await storageManager.getToken();
   if (token) {
     return token;
   }
 
-  const refreshToken = await SecureStore.getItemAsync('refresh_token');
+  const refreshToken = await storageManager.getRefreshToken();
   if (refreshToken) {
     return await rotateTokens(refreshToken);
   }
@@ -157,8 +157,8 @@ async function rotateTokens(refreshToken: string): Promise<string | null> {
   }
 
   const data: TokenResponse = await response.json();
-  await SecureStore.setItemAsync('token', data.access_token);
-  await SecureStore.setItemAsync('refresh_token', data.refresh_token);
+  await storageManager.setToken(data.access_token);
+  await storageManager.setRefreshToken(data.refresh_token);
   return data.access_token;
 }
 
@@ -174,8 +174,7 @@ async function userNeedsLogin(requestId: string): Promise<Response> {
 
   console.error(`Request ID: ${requestId} | Token rotation failed, user needs to login`);
 
-  await SecureStore.deleteItemAsync('token');
-  await SecureStore.deleteItemAsync('refresh_token');
+  await storageManager.clearSecureStore();
 
   return new Response(null, {
     status: 401,

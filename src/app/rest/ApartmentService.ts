@@ -1,42 +1,19 @@
 import { API_PAGE_SIZE } from '@app/config/Constants.ts';
-import { ApartmentInfo } from '@app/definitions';
+import { ApartmentInfo, FiltersState } from '@app/definitions';
 import { alertOnResponseError } from '@app/utils/Error.ts';
 
 import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { getApartmentImages, getApartmentThumbnail } from './S3Service.ts';
-
-export async function getApartmentsInfoPaginated(
-  offset: number,
-  pageSize: number = API_PAGE_SIZE,
-): Promise<ApartmentInfo[] | undefined> {
-  const response = await apiFetch(
-    Endpoints.APARTMENT.GET_INFO_PAGINATED(offset, pageSize),
-    {
-      method: 'GET',
-    },
-    true,
-  );
-
-  if (await alertOnResponseError(response, 'Apartment', 'fetching the apartments')) {
-    return;
-  }
-
-  const apartments: ApartmentInfo[] = await response.json();
-
-  for (const apt of apartments) {
-    apt.image_thumbnail = await getApartmentThumbnail(apt);
-  }
-
-  return apartments;
-}
+import { filtersToQueryString } from './Utils.ts';
 
 export async function getApartmentsNoRelationPaginated(
   offset: number,
+  filters: FiltersState,
   pageSize: number = API_PAGE_SIZE,
 ): Promise<ApartmentInfo[]> {
   const response = await apiFetch(
-    Endpoints.APARTMENT.NO_RELATIONS_PAGINATED(offset, pageSize),
+    Endpoints.APARTMENT.NO_RELATIONS_PAGINATED(offset, pageSize, filtersToQueryString(filters)),
     {
       method: 'GET',
     },

@@ -61,27 +61,6 @@ export async function getLikedApartmentsPaginated(
   return relationsInfo;
 }
 
-export async function getDislikedApartmentPaginated(
-  offset: number,
-  pageSize: number = API_PAGE_SIZE,
-): Promise<RelationInfo[]> {
-  const response = await apiFetch(
-    Endpoints.RELATIONS.GET_DISLIKES_PAGINATED(offset, pageSize),
-    {
-      method: 'GET',
-    },
-    true,
-  );
-
-  if (await alertOnResponseError(response, 'Relation', 'getting dislikes')) {
-    return [];
-  }
-
-  const relationsInfo = (await response.json()) as RelationInfo[];
-
-  return relationsInfo;
-}
-
 export async function postRelation(apartmentId: number, type: RELATION_TYPE): Promise<boolean> {
   const response = await apiFetch(
     Endpoints.RELATIONS.POST_RELATION,

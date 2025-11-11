@@ -1,5 +1,5 @@
 import React from 'react';
-import { Image, Text, View, StyleSheet } from 'react-native';
+import { Image, Text, View, StyleSheet, TouchableOpacity } from 'react-native';
 
 import { ParamListBase } from '@react-navigation/native';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -12,7 +12,7 @@ type EverythingSwipedProps = {
   navigation: StackNavigationProp<ParamListBase>;
 };
 
-export default function EverythingSwiped(_: EverythingSwipedProps) {
+export default function EverythingSwiped({ navigation }: EverythingSwipedProps) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -24,9 +24,9 @@ export default function EverythingSwiped(_: EverythingSwipedProps) {
         Try expanding your filters or check your favorites while we look for new listings.
       </Text>
 
-      {/* <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AccountStack')}> */}
-      {/*   <Text style={styles.buttonText}>Edit preferences</Text> */}
-      {/* </TouchableOpacity> */}
+      <TouchableOpacity style={styles.button} onPress={() => navigation.navigate('AccountStack')}>
+        <Text style={styles.buttonText}>Edit preferences</Text>
+      </TouchableOpacity>
     </View>
   );
 }

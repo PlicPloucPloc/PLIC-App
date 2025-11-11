@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 
 import { Slider } from '@miblanchard/react-native-slider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usePreventRemove } from '@react-navigation/native';
 import GooglePlacesTextInput from 'react-native-google-places-textinput';
 import { useSelector } from 'react-redux';
@@ -19,11 +18,11 @@ import { useSelector } from 'react-redux';
 import { ColorTheme } from '@app/Colors';
 import { FILTERS_SURFACE_MAX, FILTERS_SURFACE_MIN } from '@app/config/Constants';
 import { GOOGLE_API_KEY } from '@app/config/Env';
-import { AppStorage } from '@app/config/Storage';
 import { FiltersState, PlaceSearchResponse } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setFiltersState } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
+import { storageManager } from '@app/rest/Storage';
 import { alertUnsaveChangesAsync } from '@app/utils/Misc';
 import Loader from '@components/Loader';
 import { AccountStackScreenProps } from '@navigation/Types';
@@ -37,6 +36,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
   const styles = createStyles(colors);
 
   const filtersState = useSelector((state: RootState) => state.filtersState);
+  const userId = useSelector((state: RootState) => state.authState.userId);
 
   const [minSurface, setMinSurface] = useState(FILTERS_SURFACE_MIN);
   const [maxSurface, setMaxSurface] = useState(FILTERS_SURFACE_MAX);
@@ -100,7 +100,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
 
     setIsLoading(true);
     try {
-      await AsyncStorage.setItem(AppStorage.filters, JSON.stringify(filters));
+      await storageManager.setFilters(userId, filters);
       store.dispatch(setFiltersState(filters));
       isApplyingRef.current = true;
       Keyboard.dismiss();
@@ -129,7 +129,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
       try {
         const stored = filtersState.hasValues
           ? filtersState
-          : JSON.parse((await AsyncStorage.getItem(AppStorage.filters)) || '{}');
+          : await storageManager.getFilters(userId);
 
         if (stored && stored.hasValues) {
           store.dispatch(setFiltersState(stored));
@@ -140,7 +140,12 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
           setMaxPrice(String(stored.maxPrice));
           setPlaceDetails({
             structuredFormat: { mainText: { text: stored.location.name } },
-            details: { location: stored.location },
+            details: {
+              location: {
+                latitude: stored.location.latitude,
+                longitude: stored.location.longitude,
+              },
+            },
           } as PlaceSearchResponse);
         }
       } finally {
@@ -149,7 +154,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
     }
 
     loadFilters();
-  }, [filtersState]);
+  }, [filtersState, userId]);
 
   usePreventRemove(hasChanges, async (options) => {
     if (isApplyingRef.current || (await alertUnsaveChangesAsync())) {

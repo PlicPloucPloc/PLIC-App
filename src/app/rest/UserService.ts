@@ -1,7 +1,5 @@
 import { Alert } from 'react-native';
 
-import * as SecureStore from 'expo-secure-store';
-
 import { API_PAGE_SIZE } from '@app/config/Constants.ts';
 import {
   AuthState,
@@ -13,7 +11,7 @@ import {
   RootEnum,
   UserInfoResponse,
 } from '@app/definitions';
-import { setRoot, setUserInfo } from '@app/redux/slices';
+import { setFiltersState, setRoot, setUserInfo } from '@app/redux/slices';
 import store from '@app/redux/Store';
 import { alertOnResponseError } from '@app/utils/Error.ts';
 import { fetchAndCompressImage } from '@app/utils/Image.ts';
@@ -21,6 +19,7 @@ import { fetchAndCompressImage } from '@app/utils/Image.ts';
 import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { checkProfilePictureExists, postProfilePictureFromSignedUrl } from './S3Service.ts';
+import { storageManager } from './Storage.ts';
 
 async function userInfoToAuthState(userInfo: UserInfoResponse): Promise<AuthState> {
   const authState: AuthState = {
@@ -54,7 +53,7 @@ async function getUserInfo(request: () => Promise<Response>): Promise<AuthState 
 }
 
 export async function getCurrentUserInfo() {
-  return getUserInfo(() => apiFetch(Endpoints.USER.INFO, { method: 'GET' }));
+  return getUserInfo(() => apiFetch(Endpoints.USER.MY_INFO, { method: 'GET' }));
 }
 
 export async function getOtherUserInfo(userId: string): Promise<AuthState | null> {
@@ -69,6 +68,10 @@ export async function loadCurrentUserInfo(): Promise<void> {
   }
 
   store.dispatch(setUserInfo(userInfo));
+  const filters = await storageManager.getFilters(userInfo.userId);
+  if (filters) {
+    store.dispatch(setFiltersState(filters));
+  }
 }
 
 export async function loginUser(credentials: LoginRequest): Promise<boolean | null> {
@@ -93,18 +96,15 @@ export async function loginUser(credentials: LoginRequest): Promise<boolean | nu
   }
 
   const userData: LoginResponse = await response.json();
-  await SecureStore.setItemAsync('token', userData.session.access_token);
-  await SecureStore.setItemAsync('refresh_token', userData.session.refresh_token);
+  await storageManager.setToken(userData.session.access_token);
+  await storageManager.setRefreshToken(userData.session.refresh_token);
   await loadCurrentUserInfo();
 
   return true;
 }
 
 export async function logoutUser(): Promise<void> {
-  await Promise.all([
-    SecureStore.deleteItemAsync('token'),
-    SecureStore.deleteItemAsync('refresh_token'),
-  ]);
+  await storageManager.clearSecureStore(); // Do not clear async storage to keep filters
 
   store.dispatch(setRoot(RootEnum.ROOT_AUTH));
   store.dispatch(
