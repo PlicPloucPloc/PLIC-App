@@ -1,24 +1,58 @@
 import React, { useEffect, useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
+import { useSelector } from 'react-redux';
+
+import { AuthState } from '@app/definitions';
 import { GetRoomResponse } from '@app/definitions/rest/ChatService';
+import { RootState } from '@app/redux/Store';
 import { getRooms } from '@app/rest/ChatService';
+import { getOtherUserInfo } from '@app/rest/UserService';
+import ProfilePicture from '@components/ProfilePicture';
 import { MessageStackScreenProps } from '@navigation/Types';
+
+type RoomWithUserInfo = GetRoomResponse & {
+  otherUser?: AuthState;
+};
 
 export default function DirectMessageListScreen({
   navigation,
 }: MessageStackScreenProps<'DirectMessageList'>) {
-  const [messages, setMessages] = useState<GetRoomResponse[] | null>(null);
+  const [messages, setMessages] = useState<RoomWithUserInfo[] | null>(null);
+  const currentUserId = useSelector((state: RootState) => state.authState.userId);
 
   useEffect(() => {
     const fetchMessages = async () => {
       const rooms = await getRooms();
       console.log('ROOMS', rooms);
-      setMessages(rooms);
+
+      if (!rooms) {
+        setMessages(null);
+        return;
+      }
+      const roomsWithUsers = await Promise.all(
+        rooms.map(async (room) => {
+          const otherUserId = room.participants_id.find((id) => id !== currentUserId);
+
+          if (!otherUserId) {
+            return { ...room, otherUser: undefined };
+          }
+
+          try {
+            const userInfo = await getOtherUserInfo(otherUserId);
+            return { ...room, otherUser: userInfo || undefined };
+          } catch (error) {
+            console.error('Error fetching user info for', otherUserId, error);
+            return { ...room, otherUser: undefined };
+          }
+        }),
+      );
+
+      setMessages(roomsWithUsers);
     };
 
     fetchMessages();
-  }, []);
+  }, [currentUserId]);
 
   return (
     <View style={styles.container}>
@@ -34,26 +68,39 @@ export default function DirectMessageListScreen({
       <FlatList
         data={messages}
         contentContainerStyle={{ paddingHorizontal: 16 }}
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.messageContainer}
-            onPress={() =>
-              navigation.navigate('SharedStack', {
-                screen: 'DirectMessage',
-                params: { roomId: item.room_id },
-              })
-            }>
-            <Image source={{ uri: 'https://i.pravatar.cc/100?img=1' }} style={styles.avatar} />
-            <View style={styles.messageContent}>
-              <View style={styles.messageHeader}>
-                <Text style={styles.name}>{item.participants_id.join(', ')}</Text>
+        renderItem={({ item }) => {
+          const otherUser = item.otherUser;
+          const displayName = otherUser
+            ? `${otherUser.firstName} ${otherUser.lastName}`
+            : 'Unknown User';
+
+          return (
+            <TouchableOpacity
+              style={styles.messageContainer}
+              onPress={() =>
+                navigation.navigate('SharedStack', {
+                  screen: 'DirectMessage',
+                  params: { roomId: item.room_id },
+                })
+              }>
+              <ProfilePicture
+                size={48}
+                imageUri={otherUser?.profilePictureUri ?? null}
+                firstName={otherUser?.firstName ?? '?'}
+                lastName={otherUser?.lastName ?? '?'}
+                borderRadius={24}
+              />
+              <View style={styles.messageContent}>
+                <View style={styles.messageHeader}>
+                  <Text style={styles.name}>{displayName}</Text>
+                </View>
+                <Text numberOfLines={1} style={[styles.lastMessage]}>
+                  {item.last_message || 'No messages yet'}
+                </Text>
               </View>
-              <Text numberOfLines={1} style={[styles.lastMessage]}>
-                {item.last_message}
-              </Text>
-            </View>
-          </TouchableOpacity>
-        )}
+            </TouchableOpacity>
+          );
+        }}
       />
     </View>
   );
@@ -92,15 +139,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: '#eee',
   },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-  },
   messageContent: {
     flex: 1,
     justifyContent: 'center',
+    marginLeft: 12,
   },
   messageHeader: {
     flexDirection: 'row',
@@ -111,7 +153,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-
   lastMessage: {
     fontSize: 14,
     color: '#666',

@@ -45,27 +45,28 @@ export default function DirectMessageScreen({
   const [sending, setSending] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState<FlatMessage[]>([]);
-  const [roomId, setRoomId] = useState<number>(0);
+
+  const roomId = route.params.roomId;
 
   useEffect(() => {
     console.log('=== DirectMessageScreen mounted ===');
     console.log('Current user ID:', currentUserId);
     console.log('Room ID:', roomId);
-    if (route.params.roomId == null) {
+
+    if (roomId == null) {
       console.log('no roomid');
       setLoading(false);
       return;
     }
 
-    setRoomId(route.params.roomId);
     chatService.connect();
     const unsubscribeConnection = chatService.onConnectionChange((connected) => {
       console.log('Connection status changed:', connected);
       setIsConnected(connected);
     });
-
     const fetchMessages = async () => {
       try {
+        console.log('Fetching messages for room:', roomId);
         const messageResponse: MessageResponse | null = await getMessage(roomId);
         console.log('Messages for room', roomId, ':', messageResponse);
 
@@ -73,6 +74,7 @@ export default function DirectMessageScreen({
           console.error('No messages found');
           return;
         }
+
         const allMessages: FlatMessage[] = messageResponse.messages.map((msg) => ({
           id: msg.id,
           room_id: msg.room_id,
@@ -112,7 +114,7 @@ export default function DirectMessageScreen({
       unsubscribeConnection();
       unsubscribeMessages();
     };
-  }, [route.params.roomId, currentUserId, roomId]);
+  }, [roomId, currentUserId]);
 
   const handleSend = async () => {
     if (!inputMessage.trim() || !roomId) return;
