@@ -7,6 +7,7 @@ import {
   RoomRequest,
   UpdateRoomRequest,
 } from '@app/definitions/rest/ChatService';
+import store from '@app/redux/Store';
 import { alertOnResponseError } from '@app/utils/Error';
 
 import { apiFetchHadrien } from './Client';
@@ -115,10 +116,27 @@ export async function isRoomExisting(participants: string[]): Promise<number | n
   return null;
 }
 
-export async function getMyRooms(): Promise<GetRoomResponse[]> {
-  const token = await SecureStore.getItemAsync('token');
+export async function getMyRoomswith2participants(): Promise<GetRoomResponse[]> {
+  const currentUserId = store.getState().authState.userId;
   const data: GetRoomResponse[] = await getRooms();
-  return data.filter((room) => room.participants_id.includes(token || ''));
+  return data.filter(
+    (room) =>
+      room.participants_id.includes(currentUserId || '') && room.participants_id.length <= 2,
+  );
+}
+
+export async function getMyRoomswithGroupParticipants(): Promise<GetRoomResponse[]> {
+  const currentUserId = store.getState().authState.userId;
+  const data: GetRoomResponse[] = await getRooms();
+  return data.filter(
+    (room) => room.participants_id.includes(currentUserId || '') && room.participants_id.length > 2,
+  );
+}
+
+export async function getMyRooms(): Promise<GetRoomResponse[]> {
+  const currentUserId = store.getState().authState.userId;
+  const data: GetRoomResponse[] = await getRooms();
+  return data.filter((room) => room.participants_id.includes(currentUserId || '') && room.is_owner);
 }
 
 export async function getMessage(id: number): Promise<MessageResponse | null> {
@@ -137,5 +155,25 @@ export async function getMessage(id: number): Promise<MessageResponse | null> {
     return null;
   }
   const data: MessageResponse = await response.json();
+  return data;
+}
+
+export async function addParticipant(
+  updateRoomRequest: UpdateRoomRequest,
+): Promise<MessageResponse[]> {
+  const response = await apiFetchHadrien(
+    Endpoints.CHAT.UPDATE_ROOMS,
+    {
+      method: 'PUT',
+      body: JSON.stringify(updateRoomRequest),
+    },
+    true,
+  );
+
+  if (await alertOnResponseError(response, 'Chat', 'adding participants')) {
+    return [];
+  }
+
+  const data: MessageResponse[] = await response.json();
   return data;
 }

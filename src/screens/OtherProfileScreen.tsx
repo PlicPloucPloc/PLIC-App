@@ -47,6 +47,7 @@ export default function OtherProfileScreen({
     apartment_id: null,
     owner_id: authState.userId,
   };
+
   useEffect(() => {
     (async () => {
       const userInfo = isCurrentUser ? authState : await getOtherUserInfo(route.params.userId);
@@ -80,14 +81,29 @@ export default function OtherProfileScreen({
       </View>
 
       {!isCurrentUser && (
-        <TouchableOpacity
-          onPress={async () => {
-            const roomId = await postRoom(roomRequest);
-            navigation.navigate('DirectMessage', { roomId });
-          }}
-          style={{ marginTop: 12, alignSelf: 'center' }}>
-          <Text style={{ color: colors.primary, fontWeight: '600' }}>Send message</Text>
-        </TouchableOpacity>
+        <View>
+          <TouchableOpacity
+            onPress={async () => {
+              const roomId = await postRoom(roomRequest);
+              navigation.navigate('DirectMessage', { roomId });
+            }}
+            style={{ marginTop: 12, alignSelf: 'center' }}>
+            <Text style={{ color: colors.primary, fontWeight: '600' }}>Send message</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={async () => {
+              navigation.navigate('BottomTabStack', {
+                screen: 'MessageStack',
+                params: {
+                  screen: 'AddToARoom',
+                  params: { userId: route.params.userId },
+                },
+              });
+            }}
+            style={{ marginTop: 12, alignSelf: 'center' }}>
+            <Text style={{ color: colors.primary, fontWeight: '600' }}>Add to a room</Text>
+          </TouchableOpacity>
+        </View>
       )}
 
       {profileItems.map((item, index) => (

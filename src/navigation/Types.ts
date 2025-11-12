@@ -92,6 +92,7 @@ export type MessageStackParamList = {
   GroupMessageList: undefined;
   GroupMessage: undefined;
   GroupInfo: undefined;
+  AddToARoom: { userId: string };
   SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };
 

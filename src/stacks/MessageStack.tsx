@@ -6,6 +6,7 @@ import {
 
 import HeaderBackButton from '@components/HeaderBackButton';
 import { BottomTabStackScreenProps, MessageStackParamList } from '@navigation/Types';
+import AddToARoomScreen from '@screens/AddToAroom';
 import DirectMessageListScreen from '@screens/DirectMessageListScreen';
 import GroupInfoScreen from '@screens/GroupInfo';
 import GroupMessageListScreen from '@screens/GroupMessageListScreen';
@@ -37,6 +38,7 @@ export default function MessageStack(_: BottomTabStackScreenProps<'MessageStack'
     <Stack.Navigator initialRouteName="DirectMessageList" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="DirectMessageList" component={DirectMessageListScreen} />
       <Stack.Screen name="GroupMessageList" component={GroupMessageListScreen} />
+      <Stack.Screen name="AddToARoom" component={AddToARoomScreen} />
       <Stack.Screen
         name="GroupInfo"
         component={GroupInfoScreen}

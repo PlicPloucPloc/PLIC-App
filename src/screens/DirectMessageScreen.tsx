@@ -6,19 +6,22 @@ import {
   StyleSheet,
   Text,
   View,
-  Image,
   TextInput,
   Pressable,
+  TouchableOpacity,
 } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 
 import { ColorTheme } from '@app/Colors';
+import { AuthState } from '@app/definitions';
 import { chatService, Message, MessageResponse } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import store from '@app/redux/Store';
 import { getMessage } from '@app/rest/ChatService';
+import { getOtherUserInfo } from '@app/rest/UserService';
 import Loader from '@components/Loader';
+import ProfilePicture from '@components/ProfilePicture';
 import { SharedStackScreenProps } from '@navigation/Types';
 
 type FlatMessage = {
@@ -45,6 +48,7 @@ export default function DirectMessageScreen({
   const [sending, setSending] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState<FlatMessage[]>([]);
+  const [otherUserInfo, setOtherUserInfo] = useState<AuthState | null>(null);
 
   const roomId = route.params.roomId;
 
@@ -64,6 +68,7 @@ export default function DirectMessageScreen({
       console.log('Connection status changed:', connected);
       setIsConnected(connected);
     });
+
     const fetchMessages = async () => {
       try {
         console.log('Fetching messages for room:', roomId);
@@ -73,6 +78,12 @@ export default function DirectMessageScreen({
         if (!messageResponse) {
           console.error('No messages found');
           return;
+        }
+
+        const otherUserId = messageResponse.participants.find((id) => id !== currentUserId);
+        if (otherUserId) {
+          const userInfo = await getOtherUserInfo(otherUserId);
+          setOtherUserInfo(userInfo);
         }
 
         const allMessages: FlatMessage[] = messageResponse.messages.map((msg) => ({
@@ -192,10 +203,7 @@ export default function DirectMessageScreen({
   }
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}>
+    <View style={styles.container}>
       {!isConnected && (
         <View style={styles.connectionBanner}>
           <Text style={styles.connectionText}>Connecting...</Text>
@@ -203,50 +211,72 @@ export default function DirectMessageScreen({
       )}
 
       <View style={styles.senderInfo}>
-        <Image source={{ uri: undefined }} style={styles.avatar} />
-        <Text style={styles.senderName}>{'otherUserName'}</Text>
-      </View>
-
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        renderItem={renderMessage}
-        keyExtractor={(item) => `${item.room_id}-${item.id}`}
-        contentContainerStyle={styles.messagesList}
-        onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No messages yet. Say hi!</Text>
-          </View>
-        }
-      />
-
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Type a message..."
-          placeholderTextColor={colors.textSecondary}
-          value={inputMessage}
-          onChangeText={setInputMessage}
-          multiline
-          maxLength={500}
-          onSubmitEditing={handleSend}
-        />
-        <Pressable
-          style={[
-            styles.sendButton,
-            (!inputMessage.trim() || sending) && styles.sendButtonDisabled,
-          ]}
-          onPress={handleSend}
-          disabled={!inputMessage.trim() || sending}>
-          <Ionicons
-            name="send"
-            size={24}
-            color={!inputMessage.trim() || sending ? colors.textSecondary : colors.primary}
+        <TouchableOpacity
+          onPress={() =>
+            navigation.navigate('SharedStack', {
+              screen: 'OtherProfile',
+              params: { userId: otherUserInfo?.userId || '' },
+            })
+          }>
+          <ProfilePicture
+            size={70}
+            imageUri={otherUserInfo?.profilePictureUri ?? null}
+            firstName={otherUserInfo?.firstName || ''}
+            lastName={otherUserInfo?.lastName || ''}
+            borderRadius={10}
           />
-        </Pressable>
+        </TouchableOpacity>
+
+        <Text style={styles.senderName}>
+          {otherUserInfo ? `${otherUserInfo.firstName} ${otherUserInfo.lastName}` : 'Loading...'}
+        </Text>
       </View>
-    </KeyboardAvoidingView>
+
+      <KeyboardAvoidingView
+        style={styles.messagesContainer}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}>
+        <FlatList
+          ref={flatListRef}
+          data={messages}
+          renderItem={renderMessage}
+          keyExtractor={(item) => `${item.room_id}-${item.id}`}
+          contentContainerStyle={styles.messagesList}
+          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>No messages yet. Say hi!</Text>
+            </View>
+          }
+        />
+
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Type a message..."
+            placeholderTextColor={colors.textSecondary}
+            value={inputMessage}
+            onChangeText={setInputMessage}
+            multiline
+            maxLength={500}
+            onSubmitEditing={handleSend}
+          />
+          <Pressable
+            style={[
+              styles.sendButton,
+              (!inputMessage.trim() || sending) && styles.sendButtonDisabled,
+            ]}
+            onPress={handleSend}
+            disabled={!inputMessage.trim() || sending}>
+            <Ionicons
+              name="send"
+              size={24}
+              color={!inputMessage.trim() || sending ? colors.textSecondary : colors.primary}
+            />
+          </Pressable>
+        </View>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -265,6 +295,25 @@ const createStyles = (colors: ColorTheme) =>
       color: '#fff',
       fontSize: 12,
       fontWeight: '600',
+    },
+    senderInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingHorizontal: 16,
+      paddingTop: 25,
+      paddingBottom: 12,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: '#E5E5EA',
+      backgroundColor: colors.background,
+    },
+    senderName: {
+      fontSize: 15,
+      fontWeight: '600',
+      color: colors.textPrimary,
+      marginLeft: 10,
+    },
+    messagesContainer: {
+      flex: 1,
     },
     messagesList: {
       paddingHorizontal: 16,
@@ -352,22 +401,5 @@ const createStyles = (colors: ColorTheme) =>
     },
     sendButtonDisabled: {
       opacity: 0.5,
-    },
-    avatar: {
-      width: 28,
-      height: 28,
-      borderRadius: 14,
-      marginRight: 6,
-    },
-    senderName: {
-      fontWeight: '600',
-      color: '#333',
-    },
-    senderInfo: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 4,
-      paddingHorizontal: 16,
-      paddingVertical: 8,
     },
   });
