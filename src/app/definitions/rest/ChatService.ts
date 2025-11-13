@@ -97,7 +97,7 @@ class ChatService {
         return;
       }
 
-      const wsUrl = `ws://192.168.228.81:3030?token=${token}`;
+      const wsUrl = `ws://192.168.1.22:3030?token=${token}`;
       console.log('Connecting to WebSocket:', wsUrl);
 
       this.ws = new WebSocket(wsUrl);

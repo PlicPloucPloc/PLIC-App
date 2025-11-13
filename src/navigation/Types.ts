@@ -90,8 +90,8 @@ export type MessageStackParamList = {
   DirectMessageList: undefined;
   DirectMessage: undefined;
   GroupMessageList: undefined;
-  GroupMessage: undefined;
-  GroupInfo: undefined;
+  GroupMessage: { roomId: number | null };
+  GroupInfo: { roomId: number };
   AddToARoom: { userId: string };
   SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };

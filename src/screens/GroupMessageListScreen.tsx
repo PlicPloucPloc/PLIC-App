@@ -238,7 +238,7 @@ export default function GroupMessageListScreen({
         <TouchableOpacity
           style={styles.roomiesButton}
           onPress={() => navigation.navigate('DirectMessageList')}>
-          <Text style={styles.roomiesText}>Roomies</Text>
+          <Text style={styles.roomiesText}>Roomie</Text>
         </TouchableOpacity>
       </View>
 
@@ -255,9 +255,8 @@ export default function GroupMessageListScreen({
             <TouchableOpacity
               style={styles.messageContainer}
               onPress={() =>
-                navigation.navigate('SharedStack', {
-                  screen: 'DirectMessage',
-                  params: { roomId: item.room_id },
+                navigation.navigate('GroupMessage', {
+                  roomId: item.room_id,
                 })
               }>
               <ProfilePicture

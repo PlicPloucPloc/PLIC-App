@@ -10,20 +10,17 @@ import {
 import store from '@app/redux/Store';
 import { alertOnResponseError } from '@app/utils/Error';
 
-import { apiFetchHadrien } from './Client';
+import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 
 export async function getRooms(): Promise<GetRoomResponse[]> {
-  const token = await SecureStore.getItemAsync('token');
-  const response = await apiFetchHadrien(
+  const response = await apiFetch(
     Endpoints.CHAT.GET_ROOMS,
     {
       method: 'GET',
-      headers: { token: token || '' },
     },
     true,
   );
-  console.log('response', response);
 
   if (await alertOnResponseError(response, 'Chat', 'getting rooms')) {
     return [];
@@ -38,7 +35,7 @@ export async function postRoom(room: RoomRequest): Promise<number | null> {
   if (existingRoom) {
     return existingRoom;
   }
-  const response = await apiFetchHadrien(
+  const response = await apiFetch(
     Endpoints.CHAT.CREATE_ROOM,
     {
       method: 'POST',
@@ -55,25 +52,8 @@ export async function postRoom(room: RoomRequest): Promise<number | null> {
   return data.data;
 }
 
-export async function updateRoom(room: UpdateRoomRequest): Promise<boolean> {
-  const response = await apiFetchHadrien(
-    Endpoints.CHAT.UPDATE_ROOMS,
-    {
-      method: 'PUT',
-      body: JSON.stringify(room),
-    },
-    true,
-  );
-
-  if (await alertOnResponseError(response, 'Chat', 'updating room')) {
-    return false;
-  }
-
-  return true;
-}
-
 export async function deleteRoom(id: number): Promise<boolean> {
-  const response = await apiFetchHadrien(
+  const response = await apiFetch(
     Endpoints.CHAT.DELETE_ROOM(id),
     {
       method: 'DELETE',
@@ -89,7 +69,7 @@ export async function deleteRoom(id: number): Promise<boolean> {
 }
 
 export async function isRoomExisting(participants: string[]): Promise<number | null> {
-  const response = await apiFetchHadrien(
+  const response = await apiFetch(
     Endpoints.CHAT.GET_ROOMS,
     {
       method: 'GET',
@@ -141,7 +121,7 @@ export async function getMyRooms(): Promise<GetRoomResponse[]> {
 
 export async function getMessage(id: number): Promise<MessageResponse | null> {
   const token = await SecureStore.getItemAsync('token');
-  const response = await apiFetchHadrien(
+  const response = await apiFetch(
     Endpoints.CHAT.GET_MESSAGE(id),
     {
       method: 'GET',
@@ -158,10 +138,10 @@ export async function getMessage(id: number): Promise<MessageResponse | null> {
   return data;
 }
 
-export async function addParticipant(
+export async function updateParticipant(
   updateRoomRequest: UpdateRoomRequest,
 ): Promise<MessageResponse[]> {
-  const response = await apiFetchHadrien(
+  const response = await apiFetch(
     Endpoints.CHAT.UPDATE_ROOMS,
     {
       method: 'PUT',

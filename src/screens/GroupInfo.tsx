@@ -1,84 +1,198 @@
-import React, { useState } from 'react';
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  ActivityIndicator,
+} from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { useSelector } from 'react-redux';
 
+import { AuthState } from '@app/definitions';
+import { MessageResponse, UpdateRoomRequest } from '@app/definitions/rest/ChatService';
+import { RootState } from '@app/redux/Store';
+import { deleteRoom, getMessage, updateParticipant } from '@app/rest/ChatService';
+import { getOtherUserInfo } from '@app/rest/UserService';
+import { calculateAge } from '@app/utils/Misc';
 import MessageHeader, { User } from '@components/MessageHeader';
+import ProfilePicture from '@components/ProfilePicture';
 import { MessageStackScreenProps } from '@navigation/Types';
 
-type Member = {
-  id: string;
-  name: string;
-  age: string;
-  avatar: string;
+type MemberWithInfo = {
+  userId: string;
+  userInfo: AuthState;
+  age: number;
 };
 
-export default function GroupInfoScreen({ navigation }: MessageStackScreenProps<'GroupInfo'>) {
-  const groupInfo: User = {
-    id: 1,
-    name: 'Appartement Paris 12e',
-    lastMessage: 'Visite prévue demain à 18h',
-    avatar:
-      'https://images.unsplash.com/photo-1580587771525-78b9dba3b914?auto=format&fit=crop&w=100&q=80',
+export default function GroupInfoScreen({
+  navigation,
+  route,
+}: MessageStackScreenProps<'GroupInfo'>) {
+  const [roomData, setRoomData] = useState<MessageResponse | null>(null);
+  const [members, setMembers] = useState<MemberWithInfo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const currentUserId = useSelector((state: RootState) => state.authState.userId);
+
+  useEffect(() => {
+    const fetchRoomData = async () => {
+      try {
+        setLoading(true);
+        const data = await getMessage(route.params.roomId);
+
+        if (!data) {
+          console.error('No room data found');
+          return;
+        }
+
+        setRoomData(data);
+        const membersData = await Promise.all(
+          data.participants.map(async (userId) => {
+            try {
+              const userInfo = await getOtherUserInfo(userId);
+              if (!userInfo) {
+                return null;
+              }
+              const age = calculateAge(userInfo.birthdate);
+              return {
+                userId,
+                userInfo,
+                age,
+              };
+            } catch (error) {
+              console.error(`Error fetching user info for ${userId}:`, error);
+              return null;
+            }
+          }),
+        );
+
+        // Filtrer les résultats null
+        const validMembers = membersData.filter(
+          (member): member is MemberWithInfo => member !== null,
+        );
+        setMembers(validMembers);
+      } catch (error) {
+        console.error('Error fetching room data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchRoomData();
+  }, [route.params.roomId]);
+
+  const handleDeleteMember = async (userId: string) => {
+    if (!roomData) return;
+
+    try {
+      const updateRequest: UpdateRoomRequest = {
+        room_id: roomData.room_id,
+        users_to_add: [],
+        users_to_remove: [userId],
+      };
+
+      await updateParticipant(updateRequest);
+      setMembers(members.filter((member) => member.userId !== userId));
+      if (members.length <= 1) {
+        await deleteRoom(route.params.roomId);
+        await navigation.goBack();
+      }
+    } catch (error) {
+      console.error('Error removing participant:', error);
+    }
   };
 
-  const [members, setMembers] = useState<Member[]>([
-    {
-      id: '1',
-      name: 'Obiwan Kenobi',
-      age: '23 years',
-      avatar: 'https://i.pravatar.cc/150?img=12',
-    },
-    { id: '3', name: 'Jean Baptiste', age: '30 years', avatar: 'https://i.pravatar.cc/100?img=1' },
-    {
-      id: '2',
-      name: 'Marie Claire',
-      age: '27 years',
-      avatar: 'https://i.pravatar.cc/100?img=2',
-    },
-    {
-      id: '4',
-      name: 'Michel Vaillant',
-      age: '28 years',
-      avatar: 'https://i.pravatar.cc/150?img=56',
-    },
-  ]);
+  const renderRightActions = (userId: string) => {
+    if (userId === currentUserId) {
+      return null;
+    }
 
-  const handleDeleteMember = (memberId: string) => {
-    setMembers(members.filter((member) => member.id !== memberId));
-  };
-
-  const renderRightActions = (memberId: string) => {
     return (
-      <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteMember(memberId)}>
+      <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteMember(userId)}>
         <Ionicons name="trash-outline" size={24} color="#fff" />
         <Text style={styles.deleteText}>Supprimer</Text>
       </TouchableOpacity>
     );
   };
 
-  const renderMemberItem = ({ item }: { item: Member }) => (
-    <Swipeable renderRightActions={() => renderRightActions(item.id)}>
-      <View style={styles.memberContainer}>
-        <Image source={{ uri: item.avatar }} style={styles.avatar} />
+  const renderMemberItem = ({ item }: { item: MemberWithInfo }) => (
+    <Swipeable
+      renderRightActions={() => renderRightActions(item.userId)}
+      enabled={item.userId !== currentUserId} // Désactiver le swipe pour soi-même
+    >
+      <TouchableOpacity
+        style={styles.memberContainer}
+        onPress={() => {
+          navigation.navigate('SharedStack', {
+            screen: 'OtherProfile',
+            params: { userId: item.userId },
+          });
+        }}>
+        <ProfilePicture
+          size={48}
+          imageUri={item.userInfo.profilePictureUri ?? null}
+          firstName={item.userInfo.firstName}
+          lastName={item.userInfo.lastName}
+          borderRadius={24}
+        />
         <View style={styles.memberInfo}>
-          <Text style={styles.memberName}>{item.name}</Text>
-          <Text style={styles.memberAge}>{item.age}</Text>
+          <Text style={styles.memberName}>
+            {item.userInfo.firstName} {item.userInfo.lastName}
+            {item.userId === currentUserId && ' (Vous)'}
+          </Text>
+          <Text style={styles.memberAge}>{item.age} ans</Text>
         </View>
-      </View>
+      </TouchableOpacity>
     </Swipeable>
   );
 
+  if (loading) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+    );
+  }
+
+  if (!roomData) {
+    return (
+      <View style={[styles.container, styles.centerContent]}>
+        <Text style={styles.errorText}>Erreur lors du chargement des informations</Text>
+      </View>
+    );
+  }
+
+  const groupInfo: User = {
+    id: roomData.room_id,
+    name: `Groupe (${members.length} membres)`,
+    lastMessage: roomData.messages[roomData.messages.length - 1]?.message || 'Aucun message',
+    avatar: members[0]?.userInfo.profilePictureUri || '',
+  };
+
   return (
     <View style={styles.container}>
-      <MessageHeader user={groupInfo} onBackPress={() => navigation.goBack()} />
+      <MessageHeader
+        user={groupInfo}
+        onBackPress={() => navigation.navigate('DirectMessageList')}
+      />
+
+      <View style={styles.headerInfo}>
+        <Text style={styles.memberCount}>{members.length} participant(s)</Text>
+      </View>
 
       <FlatList
         data={members}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.userId}
         contentContainerStyle={styles.listContainer}
         renderItem={renderMemberItem}
+        ListEmptyComponent={
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Aucun participant</Text>
+          </View>
+        }
       />
     </View>
   );
@@ -89,15 +203,20 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#fff',
   },
-  groupNameContainer: {
+  centerContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  headerInfo: {
     paddingHorizontal: 16,
-    paddingVertical: 20,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  groupName: {
-    fontSize: 24,
-    fontWeight: 'bold',
+  memberCount: {
+    fontSize: 14,
+    color: '#666',
+    fontWeight: '500',
   },
   listContainer: {
     paddingTop: 8,
@@ -111,15 +230,9 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#eee',
   },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    marginRight: 12,
-    backgroundColor: '#4CAF50',
-  },
   memberInfo: {
     flex: 1,
+    marginLeft: 12,
   },
   memberName: {
     fontSize: 16,
@@ -142,5 +255,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginTop: 4,
+  },
+  errorText: {
+    fontSize: 16,
+    color: '#666',
+  },
+  emptyContainer: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#999',
   },
 });

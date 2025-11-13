@@ -30,11 +30,11 @@ const Endpoints = {
     GET_INFO_BY_ID: (id: number) => `/apartment/${id}`,
   },
   CHAT: {
-    GET_ROOMS: '/rooms',
-    UPDATE_ROOMS: '/rooms',
-    CREATE_ROOM: '/rooms',
-    DELETE_ROOM: (id: number) => `/rooms/${id}`,
-    GET_MESSAGE: (id: number) => `/rooms/${id}`,
+    GET_ROOMS: '/chat/rooms',
+    UPDATE_ROOMS: '/chat/rooms',
+    CREATE_ROOM: '/chat/rooms',
+    DELETE_ROOM: (id: number) => `/chat/rooms/${id}`,
+    GET_MESSAGE: (id: number) => `/chat/rooms/${id}`,
   },
 };
 

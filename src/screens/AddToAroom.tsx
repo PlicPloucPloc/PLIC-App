@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { AuthState } from '@app/definitions';
 import { GetRoomResponse, UpdateRoomRequest } from '@app/definitions/rest/ChatService';
 import { RootState } from '@app/redux/Store';
-import { addParticipant, getMyRooms } from '@app/rest/ChatService';
+import { updateParticipant, getMyRooms } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import ProfilePicture from '@components/ProfilePicture';
 import { MessageStackScreenProps } from '@navigation/Types';
@@ -75,7 +75,7 @@ export default function AddToARoomScreen({
               style={styles.messageContainer}
               onPress={async () => {
                 updateRoomRequest.room_id = item.room_id;
-                await addParticipant(updateRoomRequest);
+                await updateParticipant(updateRoomRequest);
                 navigation.navigate('SharedStack', {
                   screen: 'OtherProfile',
                   params: { userId: route.params.userId },

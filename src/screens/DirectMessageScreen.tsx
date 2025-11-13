@@ -53,8 +53,6 @@ export default function DirectMessageScreen({
   const roomId = route.params.roomId;
 
   useEffect(() => {
-    console.log('=== DirectMessageScreen mounted ===');
-    console.log('Current user ID:', currentUserId);
     console.log('Room ID:', roomId);
 
     if (roomId == null) {

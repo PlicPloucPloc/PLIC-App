@@ -6,7 +6,7 @@ import * as SecureStore from 'expo-secure-store';
 import { v4 as uuidv4 } from 'uuid';
 
 import { API_TIMEOUT } from '@app/config/Constants';
-import { API_URL, API_URL2 } from '@app/config/Env';
+import { API_URL } from '@app/config/Env';
 import { RootEnum, TokenResponse } from '@app/definitions';
 import { setRoot } from '@app/redux/slices';
 import store from '@app/redux/Store';
@@ -182,68 +182,4 @@ async function userNeedsLogin(requestId: string): Promise<Response> {
     status: 401,
     statusText: 'Unauthorized',
   });
-}
-
-// La version du chat est différente
-export async function apiFetchHadrien(
-  endpoint: string,
-  options: RequestInit = {},
-  withAuth: boolean = true,
-  prefix: string = API_URL2,
-): Promise<Response> {
-  const requestId = uuidv4();
-  console.log(
-    `Request ID: ${requestId} ${withAuth ? '(authed)' : ''} | ${options.method || 'GET'} ${endpoint} | Body:`,
-    options.body,
-  );
-  console.log(API_URL2);
-  const headers = await prepareHeadersHadrien(options, withAuth);
-  if (!headers) {
-    return await userNeedsLogin(requestId);
-  }
-
-  let response: Response;
-  try {
-    response = await fetchWithTimeout(`${prefix}${endpoint}`, { ...options, headers });
-  } catch (error: any) {
-    if (error.name === 'AbortError') {
-      console.error(`Request ID: ${requestId} | Request timed out after ${API_TIMEOUT}ms`);
-      return new Response(JSON.stringify({ message: `Request timed out after ${API_TIMEOUT}ms` }), {
-        status: 408,
-        statusText: 'Request Timeout',
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-    console.error(`Request ID: ${requestId} | Fetch failed:`, error);
-    throw error;
-  }
-
-  if (!response.ok) {
-    return await handleErrorResponse(response, endpoint, options, withAuth, requestId);
-  }
-
-  console.log(`Request ID: ${requestId} | Success`);
-  console.log(API_URL2);
-  return response.clone();
-}
-
-async function prepareHeadersHadrien(
-  options: RequestInit,
-  withAuth: boolean,
-): Promise<HeadersInit | null> {
-  const headers: HeadersInit = new Headers();
-  headers.set('Content-Type', 'application/json');
-  headers.set('X-Request-ID', uuidv4());
-
-  for (const [key, value] of Object.entries(options.headers || {})) {
-    headers.set(key, value as string);
-  }
-
-  if (withAuth) {
-    const token = await getToken();
-    if (!token) return null;
-    headers.set('token', `${token}`);
-  }
-
-  return headers;
 }
