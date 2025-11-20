@@ -11,20 +11,16 @@ import { getOtherUserInfo } from '@app/rest/UserService';
 import ProfilePicture from '@components/ProfilePicture';
 import { MessageStackScreenProps } from '@navigation/Types';
 
-type RoomWithUserInfo = GetRoomResponse & {
-  otherUser?: AuthState;
-};
-
 export default function DirectMessageListScreen({
   navigation,
 }: MessageStackScreenProps<'DirectMessageList'>) {
-  const [messages, setMessages] = useState<RoomWithUserInfo[] | null>(null);
+  const [messages, setMessages] = useState<GetRoomResponse[] | null>(null);
   const currentUserId = useSelector((state: RootState) => state.authState.userId);
+  const [otherUserInfo, setOtherUserInfo] = useState<AuthState | null>(null);
 
   useEffect(() => {
     const fetchMessages = async () => {
       const rooms = await getMyRoomswith2participants();
-      console.log('ROOMS', rooms);
 
       if (!rooms) {
         setMessages(null);
@@ -40,6 +36,7 @@ export default function DirectMessageListScreen({
 
           try {
             const userInfo = await getOtherUserInfo(otherUserId);
+            setOtherUserInfo(userInfo);
             return { ...room, otherUser: userInfo || undefined };
           } catch (error) {
             console.error('Error fetching user info for', otherUserId, error);
@@ -69,7 +66,7 @@ export default function DirectMessageListScreen({
         data={messages}
         contentContainerStyle={{ paddingHorizontal: 16 }}
         renderItem={({ item }) => {
-          const otherUser = item.otherUser;
+          const otherUser = otherUserInfo;
           const displayName = otherUser
             ? `${otherUser.firstName} ${otherUser.lastName}`
             : 'Unknown User';

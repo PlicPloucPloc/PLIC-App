@@ -1,6 +1,6 @@
 import * as SecureStore from 'expo-secure-store';
 
-import { API_URL_2 } from '@app/config/Env';
+import { EXPO_PUBLIC_API_WEBSOCKET_URL } from '@app/config/Env';
 
 export type GetRoomResponse = {
   room_id: number;
@@ -97,13 +97,10 @@ class ChatService {
         return;
       }
 
-      const wsUrl = `ws://${API_URL_2}?token=${token}`;
-      console.log('Connecting to WebSocket:', wsUrl);
-
+      const wsUrl = `ws://${EXPO_PUBLIC_API_WEBSOCKET_URL}?token=${token}`;
       this.ws = new WebSocket(wsUrl);
 
       this.ws.onopen = () => {
-        console.log('WebSocket connected successfully');
         this.notifyConnectionListeners(true);
         if (this.reconnectTimeout) {
           clearTimeout(this.reconnectTimeout);
@@ -112,10 +109,8 @@ class ChatService {
       };
 
       this.ws.onmessage = (event) => {
-        console.log('Raw WebSocket message:', event.data);
         try {
           const response: WebSocketResponse = JSON.parse(event.data);
-          console.log('Parsed message type:', response.type);
           this.handleMessage(response);
         } catch (error) {
           console.error('Error parsing WebSocket message:', error);
@@ -123,14 +118,12 @@ class ChatService {
       };
 
       this.ws.onerror = (error) => {
-        console.error('WebSocket error occurred');
         console.error('Error details:', JSON.stringify(error, null, 2));
         console.error('WebSocket state:', this.ws?.readyState);
         console.error('WebSocket URL:', this.ws?.url);
       };
 
       this.ws.onclose = (event) => {
-        console.log('WebSocket closed');
         console.log('Close code:', event.code);
         console.log('Close reason:', event.reason);
         console.log('Was clean:', event.wasClean);
@@ -147,7 +140,6 @@ class ChatService {
     switch (response.type) {
       case 'MessageReceived':
         const msgData = response.data as MessageReceivedData;
-        console.log('Message received - Room:', msgData.room_id, 'From:', msgData.sender_id);
 
         const newMessage: Message = {
           id: Date.now(),
@@ -162,7 +154,6 @@ class ChatService {
 
       case 'MessageSentConfirmation':
         const confirmData = response.data as MessageSentConfirmationData;
-        console.log('Message confirmation:', confirmData.confirmed);
 
         const callback = this.messageCallbacks.get(confirmData.message_id);
         if (callback) {
@@ -173,7 +164,6 @@ class ChatService {
 
       case 'Disconnection':
         const discData = response.data as { code: number; reason: string };
-        console.log('Disconnection event:', discData);
         this.handleDisconnection(discData.code);
         break;
     }
@@ -195,9 +185,7 @@ class ChatService {
     };
 
     console.log(`Disconnection: ${codeMessages[code] || 'Unknown'}`);
-
     if ([4006, 4007, 4009].includes(code) && !this.reconnectTimeout) {
-      console.log('Reconnecting in 3 seconds...');
       this.reconnectTimeout = setTimeout(() => this.connect(), 3000);
     }
   }
@@ -211,7 +199,6 @@ class ChatService {
       }
 
       const tempId = `temp-${Date.now()}-${Math.random()}`;
-      console.log('Sending message to room:', roomId);
 
       const command: WebSocketCommand = {
         type: 'SendMessage',
@@ -223,7 +210,6 @@ class ChatService {
       };
 
       this.messageCallbacks.set(tempId, (confirmed) => {
-        console.log(confirmed ? 'Message sent' : 'Message failed');
         resolve(confirmed);
       });
 
@@ -240,8 +226,6 @@ class ChatService {
   }
 
   onMessageForRoom(roomId: number, callback: (message: Message) => void) {
-    console.log('Listening to room:', roomId);
-
     if (!this.messageListeners.has(roomId)) {
       this.messageListeners.set(roomId, []);
     }
@@ -249,7 +233,6 @@ class ChatService {
     this.messageListeners.get(roomId)!.push(callback);
 
     return () => {
-      console.log('Stopped listening to room:', roomId);
       const listeners = this.messageListeners.get(roomId);
       if (listeners) {
         const filtered = listeners.filter((cb) => cb !== callback);
@@ -283,7 +266,6 @@ class ChatService {
   }
 
   disconnect() {
-    console.log('🔌 Disconnecting...');
     if (this.reconnectTimeout) clearTimeout(this.reconnectTimeout);
     if (this.ws) this.ws.close();
     this.messageListeners.clear();

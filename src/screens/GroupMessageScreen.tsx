@@ -53,25 +53,19 @@ export default function GroupMessageScreen({
   const roomId = route.params.roomId;
 
   useEffect(() => {
-    console.log('Room ID:', roomId);
-
     if (roomId == null) {
-      console.log('no roomid');
       setLoading(false);
       return;
     }
 
     chatService.connect();
     const unsubscribeConnection = chatService.onConnectionChange((connected) => {
-      console.log('Connection status changed:', connected);
       setIsConnected(connected);
     });
 
     const fetchMessages = async () => {
       try {
-        console.log('Fetching messages for room:', roomId);
         const messageResponse: MessageResponse | null = await getMessage(roomId);
-        console.log('Messages for room', roomId, ':', messageResponse);
 
         if (!messageResponse) {
           console.error('No messages found');
@@ -92,8 +86,6 @@ export default function GroupMessageScreen({
           created_at: msg.created_at,
           participants: messageResponse.participants,
         }));
-
-        console.log('Flattened messages:', allMessages);
         setMessages(allMessages);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -104,8 +96,6 @@ export default function GroupMessageScreen({
 
     fetchMessages();
     const unsubscribeMessages = chatService.onMessageForRoom(roomId, (newMessage: Message) => {
-      console.log('New message received:', newMessage);
-
       const flatMessage: FlatMessage = {
         id: newMessage.id,
         room_id: newMessage.room_id,
@@ -119,7 +109,6 @@ export default function GroupMessageScreen({
     });
 
     return () => {
-      console.log('=== DirectMessageScreen unmounted ===');
       unsubscribeConnection();
       unsubscribeMessages();
     };
@@ -148,7 +137,6 @@ export default function GroupMessageScreen({
       const success = await chatService.sendMessage(roomId, messageText);
 
       if (success) {
-        console.log('Message sent successfully');
         setMessages((prev) =>
           prev.map((msg) => (msg.id === tempId ? { ...msg, isSending: false } : msg)),
         );

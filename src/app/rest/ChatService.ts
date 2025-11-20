@@ -1,5 +1,3 @@
-import * as SecureStore from 'expo-secure-store';
-
 import {
   CreateRoomResponse,
   GetRoomResponse,
@@ -120,17 +118,13 @@ export async function getMyRooms(): Promise<GetRoomResponse[]> {
 }
 
 export async function getMessage(id: number): Promise<MessageResponse | null> {
-  const token = await SecureStore.getItemAsync('token');
   const response = await apiFetch(
     Endpoints.CHAT.GET_MESSAGE(id),
     {
       method: 'GET',
-      headers: { token: token || '' },
     },
     true,
   );
-  console.log('response', response);
-
   if (await alertOnResponseError(response, 'Chat', 'getting Messages')) {
     return null;
   }

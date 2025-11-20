@@ -11,20 +11,16 @@ import { getOtherUserInfo } from '@app/rest/UserService';
 import ProfilePicture from '@components/ProfilePicture';
 import { MessageStackScreenProps } from '@navigation/Types';
 
-type RoomWithUserInfo = GetRoomResponse & {
-  otherUser?: AuthState;
-};
-
 export default function GroupMessageListScreen({
   navigation,
 }: MessageStackScreenProps<'GroupMessageList'>) {
-  const [messages, setMessages] = useState<RoomWithUserInfo[] | null>(null);
+  const [messages, setMessages] = useState<GetRoomResponse[] | null>(null);
   const currentUserId = useSelector((state: RootState) => state.authState.userId);
+  const [otherUserInfo, setOtherUserInfo] = useState<AuthState[] | []>([]);
 
   useEffect(() => {
     const fetchMessages = async () => {
       const rooms = await getMyRoomswithGroupParticipants();
-      console.log('ROOMS', rooms);
 
       if (!rooms) {
         setMessages(null);
@@ -39,8 +35,13 @@ export default function GroupMessageListScreen({
           }
 
           try {
-            const userInfo = await getOtherUserInfo(otherUserId);
-            return { ...room, otherUser: userInfo || undefined };
+            const others = room.participants_id.filter((id) => id !== currentUserId);
+            for (let i = 0; i < others.length; i++) {
+              const userInfo = await getOtherUserInfo(others[i]);
+              others.push(userInfo as unknown as string);
+            }
+            setOtherUserInfo(others as unknown as AuthState[]);
+            return { ...room, otherUser: others || undefined };
           } catch (error) {
             console.error('Error fetching user info for', otherUserId, error);
             return { ...room, otherUser: undefined };
@@ -69,9 +70,9 @@ export default function GroupMessageListScreen({
         data={messages}
         contentContainerStyle={{ paddingHorizontal: 16 }}
         renderItem={({ item }) => {
-          const otherUser = item.otherUser;
+          const otherUser = otherUserInfo;
           const displayName = otherUser
-            ? `${otherUser.firstName} ${otherUser.lastName}`
+            ? `${otherUser[0]?.firstName} ${otherUser[0]?.lastName}`
             : 'Unknown User';
 
           return (
@@ -84,9 +85,9 @@ export default function GroupMessageListScreen({
               }>
               <ProfilePicture
                 size={48}
-                imageUri={otherUser?.profilePictureUri ?? null}
-                firstName={otherUser?.firstName ?? '?'}
-                lastName={otherUser?.lastName ?? '?'}
+                imageUri={otherUserInfo[0]?.profilePictureUri ?? null}
+                firstName={otherUserInfo[0]?.firstName ?? '?'}
+                lastName={otherUserInfo[0]?.lastName ?? '?'}
                 borderRadius={24}
               />
               <View style={styles.messageContent}>

@@ -61,7 +61,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     apartment_id?: number;
   }>({});
   const roomRequest: RoomRequest = {
-    users: ['f11e1201-8918-498c-b2f1-d8a054f71cdb'],
+    users: [],
     apartment_id: null,
     owner_id: authState.userId,
   };
@@ -266,6 +266,8 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
           disabled={allSwiped}
           onPress={async () => {
             const roomId = await postRoom(roomRequest);
+            roomRequest.apartment_id = apartments[swiperRef.current?.activeIndex || 0].apartment_id;
+            roomRequest.users = ['']; // Add user IDs to the roomRequest
             navigation.navigate('SharedStack', {
               screen: 'DirectMessage',
               params: { roomId },
