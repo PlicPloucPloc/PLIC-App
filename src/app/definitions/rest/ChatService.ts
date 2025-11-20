@@ -1,6 +1,7 @@
 import * as SecureStore from 'expo-secure-store';
 
-// API Types
+import { API_URL_2 } from '@app/config/Env';
+
 export type GetRoomResponse = {
   room_id: number;
   participants_id: string[];
@@ -41,7 +42,6 @@ export type MessageResponse = {
   room_id: number;
 };
 
-// WebSocket Types
 type CommandType = 'SendMessage';
 type ResponseType = 'Disconnection' | 'MessageReceived' | 'MessageSentConfirmation';
 
@@ -97,7 +97,7 @@ class ChatService {
         return;
       }
 
-      const wsUrl = `ws://10.41.176.85:3030?token=${token}`;
+      const wsUrl = `ws://${API_URL_2}?token=${token}`;
       console.log('Connecting to WebSocket:', wsUrl);
 
       this.ws = new WebSocket(wsUrl);
@@ -150,7 +150,7 @@ class ChatService {
         console.log('Message received - Room:', msgData.room_id, 'From:', msgData.sender_id);
 
         const newMessage: Message = {
-          id: Date.now(), // Temporaire, sera remplacé par l'ID du serveur
+          id: Date.now(),
           room_id: msgData.room_id,
           sender_id: msgData.sender_id,
           message: msgData.message,
