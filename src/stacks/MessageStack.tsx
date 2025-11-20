@@ -44,11 +44,7 @@ export default function MessageStack(_: BottomTabStackScreenProps<'MessageStack'
         component={GroupInfoScreen}
         options={({ navigation }) => headerOptions(navigation, 'Group Info')}
       />
-      <Stack.Screen
-        name="GroupMessage"
-        component={GroupMessageScreen}
-        options={({ navigation }) => headerOptions(navigation, 'Group')}
-      />
+      <Stack.Screen name="GroupMessage" component={GroupMessageScreen} />
       <Stack.Screen name="SharedStack" component={SharedStack} />
     </Stack.Navigator>
   );

@@ -18,7 +18,6 @@ import { RootState } from '@app/redux/Store';
 import { deleteRoom, getMessage, updateParticipant } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import { calculateAge } from '@app/utils/Misc';
-import MessageHeader, { User } from '@components/MessageHeader';
 import ProfilePicture from '@components/ProfilePicture';
 import { MessageStackScreenProps } from '@navigation/Types';
 
@@ -68,8 +67,6 @@ export default function GroupInfoScreen({
             }
           }),
         );
-
-        // Filtrer les résultats null
         const validMembers = membersData.filter(
           (member): member is MemberWithInfo => member !== null,
         );
@@ -121,8 +118,7 @@ export default function GroupInfoScreen({
   const renderMemberItem = ({ item }: { item: MemberWithInfo }) => (
     <Swipeable
       renderRightActions={() => renderRightActions(item.userId)}
-      enabled={item.userId !== currentUserId} // Désactiver le swipe pour soi-même
-    >
+      enabled={item.userId !== currentUserId}>
       <TouchableOpacity
         style={styles.memberContainer}
         onPress={() => {
@@ -165,20 +161,8 @@ export default function GroupInfoScreen({
     );
   }
 
-  const groupInfo: User = {
-    id: roomData.room_id,
-    name: `Groupe (${members.length} membres)`,
-    lastMessage: roomData.messages[roomData.messages.length - 1]?.message || 'Aucun message',
-    avatar: members[0]?.userInfo.profilePictureUri || '',
-  };
-
   return (
     <View style={styles.container}>
-      <MessageHeader
-        user={groupInfo}
-        onBackPress={() => navigation.navigate('DirectMessageList')}
-      />
-
       <View style={styles.headerInfo}>
         <Text style={styles.memberCount}>{members.length} participant(s)</Text>
       </View>
