@@ -41,8 +41,6 @@ export default function ColocFinderScreen({
     })();
   }, []);
 
-  console.log('Rendering ColocFinderScreen, isEnabled:', isEnabled);
-
   const fetchData = useCallback((offset: number) => {
     return getRecommendedColloc(offset);
   }, []);
