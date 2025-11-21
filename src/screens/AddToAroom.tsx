@@ -4,23 +4,32 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 import { useSelector } from 'react-redux';
 
 import { AuthState } from '@app/definitions';
-import { GetRoomResponse } from '@app/definitions/rest/ChatService';
+import { GetRoomResponse, UpdateRoomRequest } from '@app/definitions/rest/ChatService';
 import { RootState } from '@app/redux/Store';
-import { getMyRoomswith2participants } from '@app/rest/ChatService';
+import { updateParticipant, getMyRooms } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import ProfilePicture from '@components/ProfilePicture';
 import { MessageStackScreenProps } from '@navigation/Types';
 
-export default function DirectMessageListScreen({
-  navigation,
-}: MessageStackScreenProps<'DirectMessageList'>) {
-  const [messages, setMessages] = useState<GetRoomResponse[] | null>(null);
-  const currentUserId = useSelector((state: RootState) => state.authState.userId);
-  const [otherUserInfo, setOtherUserInfo] = useState<AuthState | null>(null);
+type RoomWithUserInfo = GetRoomResponse & {
+  otherUser?: AuthState;
+};
 
+export default function AddToARoomScreen({
+  navigation,
+  route,
+}: MessageStackScreenProps<'AddToARoom'>) {
+  const [messages, setMessages] = useState<RoomWithUserInfo[] | null>(null);
+  const currentUserId = useSelector((state: RootState) => state.authState.userId);
+  const updateRoomRequest: UpdateRoomRequest = {
+    room_id: 0,
+    users_to_add: [route.params.userId],
+    users_to_remove: [],
+  };
   useEffect(() => {
     const fetchMessages = async () => {
-      const rooms = await getMyRoomswith2participants();
+      const rooms = await getMyRooms();
+      console.log('ROOMS', rooms);
 
       if (!rooms) {
         setMessages(null);
@@ -36,7 +45,6 @@ export default function DirectMessageListScreen({
 
           try {
             const userInfo = await getOtherUserInfo(otherUserId);
-            setOtherUserInfo(userInfo);
             return { ...room, otherUser: userInfo || undefined };
           } catch (error) {
             console.error('Error fetching user info for', otherUserId, error);
@@ -53,20 +61,11 @@ export default function DirectMessageListScreen({
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Messages</Text>
-        <TouchableOpacity
-          style={styles.roomiesButton}
-          onPress={() => navigation.navigate('GroupMessageList')}>
-          <Text style={styles.roomiesText}>Roomies</Text>
-        </TouchableOpacity>
-      </View>
-
       <FlatList
         data={messages}
         contentContainerStyle={{ paddingHorizontal: 16 }}
         renderItem={({ item }) => {
-          const otherUser = otherUserInfo;
+          const otherUser = item.otherUser;
           const displayName = otherUser
             ? `${otherUser.firstName} ${otherUser.lastName}`
             : 'Unknown User';
@@ -74,12 +73,14 @@ export default function DirectMessageListScreen({
           return (
             <TouchableOpacity
               style={styles.messageContainer}
-              onPress={() =>
+              onPress={async () => {
+                updateRoomRequest.room_id = item.room_id;
+                await updateParticipant(updateRoomRequest);
                 navigation.navigate('SharedStack', {
-                  screen: 'DirectMessage',
-                  params: { roomId: item.room_id },
-                })
-              }>
+                  screen: 'OtherProfile',
+                  params: { userId: route.params.userId },
+                });
+              }}>
               <ProfilePicture
                 size={48}
                 imageUri={otherUser?.profilePictureUri ?? null}

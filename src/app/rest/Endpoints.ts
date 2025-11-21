@@ -27,6 +27,13 @@ const Endpoints = {
       `/apt/noRelations?offset=${offset}&limit=${limit}&${filters}`,
     GET_INFO_BY_ID: (id: number) => `/apartment/${id}`,
   },
+  CHAT: {
+    GET_ROOMS: '/chat/rooms',
+    UPDATE_ROOMS: '/chat/rooms',
+    CREATE_ROOM: '/chat/rooms',
+    DELETE_ROOM: (id: number) => `/chat/rooms/${id}`,
+    GET_MESSAGE: (id: number) => `/chat/rooms/${id}`,
+  },
 };
 
 export default Endpoints;

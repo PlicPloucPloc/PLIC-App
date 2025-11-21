@@ -19,6 +19,9 @@ const baseConfig = defineConfig([
       parserOptions: {
         project: './tsconfig.json',
       },
+      globals: {
+        NodeJS: true
+      },
     },
     rules: {
       eqeqeq: 'off',

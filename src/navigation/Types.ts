@@ -52,7 +52,7 @@ export type SharedStackParamList = {
     enableRelationButtons?: boolean;
   };
   OtherProfile: { userId: string };
-  DirectMessage: { userId: string };
+  DirectMessage: { roomId: number | null };
 };
 
 export type SharedStackScreenProps<T extends keyof SharedStackParamList> = CompositeScreenProps<
@@ -90,8 +90,9 @@ export type MessageStackParamList = {
   DirectMessageList: undefined;
   DirectMessage: undefined;
   GroupMessageList: undefined;
-  GroupMessage: undefined;
-  GroupInfo: undefined;
+  GroupMessage: { roomId: number | null };
+  GroupInfo: { roomId: number };
+  AddToARoom: { userId: string };
   SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };
 

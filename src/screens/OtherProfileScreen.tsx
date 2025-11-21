@@ -5,9 +5,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
-import { AuthState, IoniconName } from '@app/definitions';
+import { IoniconName, AuthState } from '@app/definitions';
+import { RoomRequest } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
+import { postRoom } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import { calculateAge } from '@app/utils/Misc';
 import ProfilePicture from '@components/ProfilePicture';
@@ -31,7 +33,6 @@ export default function OtherProfileScreen({
 }: SharedStackScreenProps<'OtherProfile'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
-
   const [profileItems, setProfileItems] = useState<ProfileItem[]>(defaultProfileItems);
   const [userInfo, setUserInfo] = useState<AuthState>({
     firstName: '...',
@@ -41,6 +42,11 @@ export default function OtherProfileScreen({
 
   const authState = useSelector((state: RootState) => state.authState);
   const isCurrentUser = authState.userId === route.params.userId;
+  const roomRequest: RoomRequest = {
+    users: [route.params.userId],
+    apartment_id: null,
+    owner_id: authState.userId,
+  };
 
   useEffect(() => {
     (async () => {
@@ -75,11 +81,29 @@ export default function OtherProfileScreen({
       </View>
 
       {!isCurrentUser && (
-        <TouchableOpacity
-          onPress={() => navigation.navigate('DirectMessage', { userId: route.params.userId })}
-          style={{ marginTop: 12, alignSelf: 'center' }}>
-          <Text style={{ color: colors.primary, fontWeight: '600' }}>Send message</Text>
-        </TouchableOpacity>
+        <View>
+          <TouchableOpacity
+            onPress={async () => {
+              const roomId = await postRoom(roomRequest);
+              navigation.navigate('DirectMessage', { roomId });
+            }}
+            style={{ marginTop: 12, alignSelf: 'center' }}>
+            <Text style={{ color: colors.primary, fontWeight: '600' }}>Send message</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={async () => {
+              navigation.navigate('BottomTabStack', {
+                screen: 'MessageStack',
+                params: {
+                  screen: 'AddToARoom',
+                  params: { userId: route.params.userId },
+                },
+              });
+            }}
+            style={{ marginTop: 12, alignSelf: 'center' }}>
+            <Text style={{ color: colors.primary, fontWeight: '600' }}>Add to a room</Text>
+          </TouchableOpacity>
+        </View>
       )}
 
       {profileItems.map((item, index) => (

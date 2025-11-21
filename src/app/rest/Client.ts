@@ -27,7 +27,6 @@ export async function apiFetch(
     `Request ID: ${requestId} ${withAuth ? '(authed)' : ''} | ${options.method || 'GET'} ${endpoint} | Body:`,
     options.body,
   );
-
   const headers = await prepareHeaders(options, withAuth);
   if (!headers) {
     return await userNeedsLogin(requestId);
@@ -53,7 +52,6 @@ export async function apiFetch(
     return await handleErrorResponse(response, endpoint, options, withAuth, requestId);
   }
 
-  console.log(`Request ID: ${requestId} | Success`);
   return response.clone();
 }
 
