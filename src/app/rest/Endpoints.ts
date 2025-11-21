@@ -1,7 +1,7 @@
 const Endpoints = {
   USER: {
-    INFO: '/user/id',
-    OTHER_INFO: (userId: string) => `/user/${userId}`,
+    MY_INFO: '/user/check',
+    OTHER_INFO: (userId: string) => `/user/?id=${userId}`,
     LOGIN: '/user/login',
     REGISTER: '/user/register',
     CHECK_EMAIL: (email: string) => `/user/checkEmail/${email.toLowerCase()}`,
@@ -15,18 +15,16 @@ const Endpoints = {
       `/relations/all?skip=${offset}&limit=${limit}`,
     GET_LIKES_PAGINATED: (isFilterColoc: boolean, offset: number, limit: number) =>
       `/relations/likes/${isFilterColoc}?skip=${offset}&limit=${limit}`,
-    GET_DISLIKES_PAGINATED: (offset: number, limit: number) =>
-      `/relations/dislikes?skip=${offset}&limit=${limit}`,
     POST_RELATION: '/relations',
     UPDATE_RELATION: '/relations',
     DELETE_RELATION: '/relations',
     UPDATE_ALLOW_COLLOC: (allowColloc: boolean) =>
       `/relations/allowColloc?allowColloc=${allowColloc}`,
+    IS_COLLOC_ENABLED: '/relations/isColloc',
   },
   APARTMENT: {
-    NO_RELATIONS_PAGINATED: (offset: number, limit: number) =>
-      `/apt/noRelations?offset=${offset}&limit=${limit}`,
-    GET_INFO_PAGINATED: (offset: number, limit: number) => `/apt?offset=${offset}&limit=${limit}`,
+    NO_RELATIONS_PAGINATED: (offset: number, limit: number, filters: string) =>
+      `/apt/noRelations?offset=${offset}&limit=${limit}&${filters}`,
     GET_INFO_BY_ID: (id: number) => `/apartment/${id}`,
   },
   CHAT: {

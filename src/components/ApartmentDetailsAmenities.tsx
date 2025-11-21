@@ -60,8 +60,8 @@ export default function ApartmentDetailsAmenities({ apartment }: AmenitiesProps)
         { icon: 'cube', label: 'Furnished', value: apartment.is_furnished ? 'Yes' : 'No' },
         {
           icon: 'calendar',
-          label: 'Available',
-          value: apartment.available_from?.toString() ?? null,
+          label: 'Available From',
+          value: apartment.available_from?.toLocaleString().split('T')[0] ?? null,
         },
         { icon: 'flame', label: 'Heating Type', value: apartment.heating_type },
         { icon: 'thermometer', label: 'Heating Mode', value: apartment.heating_mode },

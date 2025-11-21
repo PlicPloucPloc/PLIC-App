@@ -8,6 +8,7 @@ const initialState: FiltersState | null = {
   minSurface: FILTERS_SURFACE_MIN,
   maxSurface: FILTERS_SURFACE_MAX,
   maxPrice: 0,
+  isFurnished: false,
   location: {
     name: '',
     latitude: 0,

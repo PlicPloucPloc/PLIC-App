@@ -3,6 +3,7 @@ export type FiltersState = {
   minSurface: number;
   maxSurface: number;
   maxPrice: number;
+  isFurnished: boolean;
   location: {
     name: string;
     latitude: number;

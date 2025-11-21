@@ -1,7 +1,7 @@
 import { Alert } from 'react-native';
 
 import { API_PAGE_SIZE } from '@app/config/Constants.ts';
-import { RELATION_TYPE, RelationInfo } from '@app/definitions';
+import { IsCollocEnabledRepsonse, RELATION_TYPE, RelationInfo } from '@app/definitions';
 import { setShouldRefetchHistory, setShouldRefetchLikeList } from '@app/redux/slices/index.ts';
 import store from '@app/redux/Store.ts';
 import { alertOnResponseError } from '@app/utils/Error.ts';
@@ -56,27 +56,6 @@ export async function getLikedApartmentsPaginated(
   for (const relation of relationsInfo) {
     relation.apt.image_thumbnail = await getApartmentThumbnail(relation.apt);
   }
-
-  return relationsInfo;
-}
-
-export async function getDislikedApartmentPaginated(
-  offset: number,
-  pageSize: number = API_PAGE_SIZE,
-): Promise<RelationInfo[]> {
-  const response = await apiFetch(
-    Endpoints.RELATIONS.GET_DISLIKES_PAGINATED(offset, pageSize),
-    {
-      method: 'GET',
-    },
-    true,
-  );
-
-  if (await alertOnResponseError(response, 'Relation', 'getting dislikes')) {
-    return [];
-  }
-
-  const relationsInfo = (await response.json()) as RelationInfo[];
 
   return relationsInfo;
 }
@@ -161,12 +140,33 @@ export async function updateAllowColloc(allowColloc: boolean): Promise<boolean> 
   const response = await apiFetch(
     Endpoints.RELATIONS.UPDATE_ALLOW_COLLOC(allowColloc),
     {
-      method: 'PUT',
+      method: 'PATCH',
     },
     true,
   );
 
-  if (await alertOnResponseError(response, 'Relation', 'updating allow colloc')) return false;
+  if (await alertOnResponseError(response, 'Relation', 'updating allow colloc')) {
+    return false;
+  }
 
   return true;
+}
+
+export async function isCollocEnabled(): Promise<boolean> {
+  const response = await apiFetch(
+    Endpoints.RELATIONS.IS_COLLOC_ENABLED,
+    {
+      method: 'GET',
+    },
+    true,
+  );
+
+  if (await alertOnResponseError(response, 'Relation', 'checking if colloc is enabled')) {
+    return false;
+  }
+
+  const data = (await response.json()) as IsCollocEnabledRepsonse;
+  console.log('isCollocEnabled response data:', data);
+
+  return data.isCollocEnabled;
 }

@@ -11,7 +11,6 @@ import {
 } from 'react-native';
 
 import { Slider } from '@miblanchard/react-native-slider';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { usePreventRemove } from '@react-navigation/native';
 import GooglePlacesTextInput from 'react-native-google-places-textinput';
 import { useSelector } from 'react-redux';
@@ -19,11 +18,11 @@ import { useSelector } from 'react-redux';
 import { ColorTheme } from '@app/Colors';
 import { FILTERS_SURFACE_MAX, FILTERS_SURFACE_MIN } from '@app/config/Constants';
 import { GOOGLE_API_KEY } from '@app/config/Env';
-import { AppStorage } from '@app/config/Storage';
 import { FiltersState, PlaceSearchResponse } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setFiltersState } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
+import { storageManager } from '@app/rest/Storage';
 import { alertUnsaveChangesAsync } from '@app/utils/Misc';
 import Loader from '@components/Loader';
 import { AccountStackScreenProps } from '@navigation/Types';
@@ -37,6 +36,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
   const styles = createStyles(colors);
 
   const filtersState = useSelector((state: RootState) => state.filtersState);
+  const userId = useSelector((state: RootState) => state.authState.userId);
 
   const [minSurface, setMinSurface] = useState(FILTERS_SURFACE_MIN);
   const [maxSurface, setMaxSurface] = useState(FILTERS_SURFACE_MAX);
@@ -44,6 +44,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
   const [maxSurfaceText, setMaxSurfaceText] = useState(String(FILTERS_SURFACE_MAX));
   const [placeDetails, setPlaceDetails] = useState<PlaceSearchResponse>(defultPlaceDetails);
   const [maxPrice, setMaxPrice] = useState('');
+  const [isFurnished, setIsFurnished] = useState(false);
 
   const isApplyingRef = useRef(false);
 
@@ -90,6 +91,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
       hasValues: true,
       minSurface: minSurface,
       maxSurface: maxSurface,
+      isFurnished: isFurnished,
       maxPrice: parseInt(maxPrice, 10),
       location: {
         name: placeDetails.structuredFormat.mainText.text,
@@ -100,7 +102,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
 
     setIsLoading(true);
     try {
-      await AsyncStorage.setItem(AppStorage.filters, JSON.stringify(filters));
+      await storageManager.setFilters(userId, filters);
       store.dispatch(setFiltersState(filters));
       isApplyingRef.current = true;
       Keyboard.dismiss();
@@ -119,9 +121,17 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
       minSurface !== filtersState.minSurface ||
       maxSurface !== filtersState.maxSurface ||
       parseInt(maxPrice, 10) !== filtersState.maxPrice ||
+      isFurnished !== filtersState.isFurnished ||
       placeDetails?.structuredFormat.mainText.text !== filtersState.location?.name
     );
-  }, [filtersState, minSurface, maxSurface, maxPrice, placeDetails.structuredFormat.mainText.text]);
+  }, [
+    filtersState,
+    minSurface,
+    maxSurface,
+    maxPrice,
+    isFurnished,
+    placeDetails.structuredFormat.mainText.text,
+  ]);
 
   useEffect(() => {
     async function loadFilters() {
@@ -129,7 +139,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
       try {
         const stored = filtersState.hasValues
           ? filtersState
-          : JSON.parse((await AsyncStorage.getItem(AppStorage.filters)) || '{}');
+          : await storageManager.getFilters(userId);
 
         if (stored && stored.hasValues) {
           store.dispatch(setFiltersState(stored));
@@ -138,9 +148,15 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
           setMinSurfaceText(String(stored.minSurface));
           setMaxSurfaceText(String(stored.maxSurface));
           setMaxPrice(String(stored.maxPrice));
+          setIsFurnished(stored.isFurnished);
           setPlaceDetails({
             structuredFormat: { mainText: { text: stored.location.name } },
-            details: { location: stored.location },
+            details: {
+              location: {
+                latitude: stored.location.latitude,
+                longitude: stored.location.longitude,
+              },
+            },
           } as PlaceSearchResponse);
         }
       } finally {
@@ -149,7 +165,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
     }
 
     loadFilters();
-  }, [filtersState]);
+  }, [filtersState, userId]);
 
   usePreventRemove(hasChanges, async (options) => {
     if (isApplyingRef.current || (await alertUnsaveChangesAsync())) {
@@ -238,6 +254,22 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
           keyboardType="numeric"
         />
 
+        {/* ======== Furnitures ======== */}
+        <Text style={styles.sectionTitle}>Furnitures</Text>
+        <TouchableOpacity
+          style={styles.isFurnishedContainer}
+          onPress={() => setIsFurnished(!isFurnished)}>
+          <View
+            style={[
+              styles.isFurnishedButton,
+              { backgroundColor: isFurnished ? colors.primary : 'transparent' },
+            ]}
+          />
+          <Text style={{ color: colors.textPrimary, fontSize: 16 }}>
+            Only show furnished apartments
+          </Text>
+        </TouchableOpacity>
+
         {/* ======== Buttons ======== */}
         {hasChanges ? (
           <TouchableOpacity
@@ -303,6 +335,21 @@ const createStyles = (colors: ColorTheme) =>
       borderRadius: 10,
       fontSize: 16,
       color: colors.textPrimary,
+    },
+
+    isFurnishedContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      marginTop: 10,
+    },
+
+    isFurnishedButton: {
+      width: 24,
+      height: 24,
+      borderRadius: 4,
+      borderWidth: 1,
+      borderColor: colors.contrast,
+      marginRight: 10,
     },
 
     button: {
