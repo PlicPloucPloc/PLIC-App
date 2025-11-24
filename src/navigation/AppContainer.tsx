@@ -18,9 +18,10 @@ import SplashScreen from '@screens/SplashScreen';
 
 import AuthNavigator from './AuthNavigator';
 import InsideNavigator from './InsideNavigator';
+import { AndroidSoftInputModes, KeyboardController } from 'react-native-keyboard-controller';
 
 export default function AppContainer() {
-  const appState = useSelector((state: RootState) => state.appState);
+  const root = useSelector((state: RootState) => state.appState.root);
   const scheme = useColorScheme();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +58,22 @@ export default function AppContainer() {
     })();
   }, []);
 
+  useEffect(() => {
+    console.log('AppContainer detected root change to:', root);
+    const mode =
+      root === RootEnum.ROOT_INSIDE
+        ? AndroidSoftInputModes.SOFT_INPUT_ADJUST_RESIZE
+        : AndroidSoftInputModes.SOFT_INPUT_ADJUST_PAN;
+
+    console.log('Setting keyboard input mode to:', mode);
+
+    KeyboardController.setInputMode(
+      root === RootEnum.ROOT_INSIDE
+        ? AndroidSoftInputModes.SOFT_INPUT_ADJUST_RESIZE
+        : AndroidSoftInputModes.SOFT_INPUT_ADJUST_PAN,
+    );
+  }, [root]);
+
   if (isLoading) {
     return <SplashScreen />;
   }
@@ -64,7 +81,7 @@ export default function AppContainer() {
   return (
     <NavigationContainer>
       <StatusBar style={scheme == 'dark' ? 'dark' : 'light'} />
-      {appState.root === RootEnum.ROOT_INSIDE ? <InsideNavigator /> : <AuthNavigator />}
+      {root === RootEnum.ROOT_INSIDE ? <InsideNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }

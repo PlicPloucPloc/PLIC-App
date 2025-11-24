@@ -59,11 +59,11 @@ const createStyles = (colors: ColorTheme) =>
       marginTop: 20,
       borderRadius: 8,
       borderWidth: 1,
-      elevation: 3,
+      elevation: 5,
     },
     buttonText: {
       color: colors.textPrimary,
       fontWeight: '600',
-      fontSize: 16,
+      fontSize: 18,
     },
   });

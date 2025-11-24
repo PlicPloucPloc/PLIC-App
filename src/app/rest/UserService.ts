@@ -19,7 +19,7 @@ import { fetchAndCompressImage } from '@app/utils/Image.ts';
 import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { checkProfilePictureExists, postProfilePictureFromSignedUrl } from './S3Service.ts';
-import { storageManager } from './Storage.ts';
+import { storageManager } from '@app/internal/Storage';
 
 async function userInfoToAuthState(userInfo: UserInfoResponse): Promise<AuthState> {
   const authState: AuthState = {
@@ -91,7 +91,7 @@ export async function loginUser(credentials: LoginRequest): Promise<boolean | nu
       return null; // Signal to navigate to VerifyEmail screen
     }
 
-    Alert.alert('User Error', errorData.message || 'An error occurred during login.');
+    Alert.alert('Login failed', errorData.message || 'An error occurred during login.');
     return false;
   }
 

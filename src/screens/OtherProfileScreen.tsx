@@ -6,10 +6,10 @@ import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
 import { IoniconName, AuthState } from '@app/definitions';
-import { RoomRequest } from '@app/definitions/rest/ChatService';
+import { CreateRoomRequest } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
-import { postRoom } from '@app/rest/ChatService';
+import { createRoom } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import { calculateAge } from '@app/utils/Misc';
 import ProfilePicture from '@components/ProfilePicture';
@@ -42,7 +42,7 @@ export default function OtherProfileScreen({
 
   const authState = useSelector((state: RootState) => state.authState);
   const isCurrentUser = authState.userId === route.params.userId;
-  const roomRequest: RoomRequest = {
+  const roomRequest: CreateRoomRequest = {
     users: [route.params.userId],
     apartment_id: null,
     owner_id: authState.userId,
@@ -84,7 +84,7 @@ export default function OtherProfileScreen({
         <View>
           <TouchableOpacity
             onPress={async () => {
-              const roomId = await postRoom(roomRequest);
+              const roomId = await createRoom(roomRequest);
               navigation.navigate('DirectMessage', { roomId });
             }}
             style={{ marginTop: 12, alignSelf: 'center' }}>

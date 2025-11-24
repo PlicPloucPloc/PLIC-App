@@ -1,5 +1,6 @@
 export type ApartmentInfo = {
   apartment_id: number;
+  owner_id: string;
   name: string;
   location: string;
   is_furnished: boolean;

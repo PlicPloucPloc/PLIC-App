@@ -1,17 +1,54 @@
 import {
   CreateRoomResponse,
-  GetRoomResponse,
-  MessageResponse,
-  RoomRequest,
+  Room,
+  RoomDetails,
+  CreateRoomRequest,
   UpdateRoomRequest,
 } from '@app/definitions/rest/ChatService';
-import store from '@app/redux/Store';
 import { alertOnResponseError } from '@app/utils/Error';
 
 import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
+import { getOtherUserInfo } from './UserService';
+import { AuthState } from '@app/definitions';
 
-export async function getRooms(): Promise<GetRoomResponse[]> {
+// Add participant details to a room
+async function addRoomParticipants<T extends Room | RoomDetails>(
+  userId: string,
+  room: T,
+): Promise<T | null> {
+  const otherUsers = room.participants_id.filter((id) => id !== userId);
+  const participants = otherUsers.map((id) => getOtherUserInfo(id));
+
+  const resolvedParticipants = await Promise.all(participants);
+  if (resolvedParticipants.includes(null)) {
+    return null;
+  }
+
+  resolvedParticipants.filter((participant) => participant !== null);
+
+  room.participants = resolvedParticipants as AuthState[];
+
+  return room;
+}
+
+// Add participant details to multiple rooms
+async function addRoomsParticipants<T extends Room | RoomDetails>(
+  userId: string,
+  rooms: T[],
+): Promise<T[]> {
+  const promises = [];
+
+  for (const room of rooms) {
+    promises.push(addRoomParticipants(userId, room));
+  }
+
+  const roomsInfo = await Promise.all(promises);
+
+  return roomsInfo.filter((room) => room !== null);
+}
+
+async function getRooms(): Promise<Room[]> {
   const response = await apiFetch(
     Endpoints.CHAT.GET_ROOMS,
     {
@@ -23,16 +60,54 @@ export async function getRooms(): Promise<GetRoomResponse[]> {
   if (await alertOnResponseError(response, 'Chat', 'getting rooms')) {
     return [];
   }
-  const data: GetRoomResponse[] = await response.json();
+  const data: Room[] = await response.json();
   return data;
 }
 
-export async function postRoom(room: RoomRequest): Promise<number | null> {
-  const participants = [...new Set([...room.users, room.owner_id])];
-  const existingRoom = await isRoomExisting(participants);
-  if (existingRoom) {
-    return existingRoom;
+export async function getDirectMessageRooms(userId: string): Promise<Room[]> {
+  const allRooms = await getRooms();
+  const directMessageRooms = allRooms.filter((room) => room.participants_id.length == 2);
+  return addRoomsParticipants(userId, directMessageRooms);
+}
+
+export async function getGroupMessageRooms(userId: string): Promise<Room[]> {
+  const allRooms = await getRooms();
+  const groupMessageRooms = allRooms.filter((room) => room.participants_id.length > 2);
+  return addRoomsParticipants(userId, groupMessageRooms);
+}
+
+export async function getMyRooms(userId: string): Promise<Room[]> {
+  const allRooms = await getRooms();
+  const myRooms = allRooms.filter((room) => room.is_owner);
+  return addRoomsParticipants(userId, myRooms);
+}
+
+export async function getRoomDetails(userId: string, roomId: number): Promise<RoomDetails | null> {
+  const response = await apiFetch(
+    Endpoints.CHAT.GET_ROOM_DETAILS(roomId),
+    {
+      method: 'GET',
+    },
+    true,
+  );
+
+  if (await alertOnResponseError(response, 'Chat', 'getting room by ID')) {
+    return null;
   }
+
+  const data: RoomDetails = await response.json();
+
+  return addRoomParticipants(userId, data);
+}
+
+export async function createRoom(room: CreateRoomRequest): Promise<number | null> {
+  const participants = [...room.users, room.owner_id];
+
+  const roomExists = await doesRoomExists(participants);
+  if (roomExists) {
+    return roomExists;
+  }
+
   const response = await apiFetch(
     Endpoints.CHAT.CREATE_ROOM,
     {
@@ -66,7 +141,7 @@ export async function deleteRoom(id: number): Promise<boolean> {
   return true;
 }
 
-export async function isRoomExisting(participants: string[]): Promise<number | null> {
+export async function doesRoomExists(participants: string[]): Promise<number | null> {
   const response = await apiFetch(
     Endpoints.CHAT.GET_ROOMS,
     {
@@ -74,11 +149,12 @@ export async function isRoomExisting(participants: string[]): Promise<number | n
     },
     true,
   );
+
   if (await alertOnResponseError(response, 'Chat', 'getting rooms')) {
     return null;
   }
 
-  const rooms: GetRoomResponse[] = await response.json();
+  const rooms: Room[] = await response.json();
   const normalizedParticipants = [...new Set(participants)].sort();
 
   for (const room of rooms) {
@@ -94,30 +170,7 @@ export async function isRoomExisting(participants: string[]): Promise<number | n
   return null;
 }
 
-export async function getMyRoomswith2participants(): Promise<GetRoomResponse[]> {
-  const currentUserId = store.getState().authState.userId;
-  const data: GetRoomResponse[] = await getRooms();
-  return data.filter(
-    (room) =>
-      room.participants_id.includes(currentUserId || '') && room.participants_id.length <= 2,
-  );
-}
-
-export async function getMyRoomswithGroupParticipants(): Promise<GetRoomResponse[]> {
-  const currentUserId = store.getState().authState.userId;
-  const data: GetRoomResponse[] = await getRooms();
-  return data.filter(
-    (room) => room.participants_id.includes(currentUserId || '') && room.participants_id.length > 2,
-  );
-}
-
-export async function getMyRooms(): Promise<GetRoomResponse[]> {
-  const currentUserId = store.getState().authState.userId;
-  const data: GetRoomResponse[] = await getRooms();
-  return data.filter((room) => room.participants_id.includes(currentUserId || '') && room.is_owner);
-}
-
-export async function getMessage(id: number): Promise<MessageResponse | null> {
+export async function getMessage(id: number): Promise<RoomDetails | null> {
   const response = await apiFetch(
     Endpoints.CHAT.GET_MESSAGE(id),
     {
@@ -128,13 +181,13 @@ export async function getMessage(id: number): Promise<MessageResponse | null> {
   if (await alertOnResponseError(response, 'Chat', 'getting Messages')) {
     return null;
   }
-  const data: MessageResponse = await response.json();
+  const data: RoomDetails = await response.json();
   return data;
 }
 
 export async function updateParticipant(
   updateRoomRequest: UpdateRoomRequest,
-): Promise<MessageResponse[]> {
+): Promise<RoomDetails[]> {
   const response = await apiFetch(
     Endpoints.CHAT.UPDATE_ROOMS,
     {
@@ -148,6 +201,6 @@ export async function updateParticipant(
     return [];
   }
 
-  const data: MessageResponse[] = await response.json();
+  const data: RoomDetails[] = await response.json();
   return data;
 }

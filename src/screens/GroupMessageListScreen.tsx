@@ -4,9 +4,9 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 import { useSelector } from 'react-redux';
 
 import { AuthState } from '@app/definitions';
-import { GetRoomResponse } from '@app/definitions/rest/ChatService';
+import { Room } from '@app/definitions/rest/ChatService';
 import { RootState } from '@app/redux/Store';
-import { getMyRoomswithGroupParticipants } from '@app/rest/ChatService';
+import { getGroupMessageRooms } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import ProfilePicture from '@components/ProfilePicture';
 import { MessageStackScreenProps } from '@navigation/Types';
@@ -14,13 +14,14 @@ import { MessageStackScreenProps } from '@navigation/Types';
 export default function GroupMessageListScreen({
   navigation,
 }: MessageStackScreenProps<'GroupMessageList'>) {
-  const [messages, setMessages] = useState<GetRoomResponse[] | null>(null);
   const currentUserId = useSelector((state: RootState) => state.authState.userId);
+
+  const [messages, setMessages] = useState<Room[] | null>(null);
   const [otherUserInfo, setOtherUserInfo] = useState<AuthState[] | []>([]);
 
   useEffect(() => {
     const fetchMessages = async () => {
-      const rooms = await getMyRoomswithGroupParticipants();
+      const rooms = await getGroupMessageRooms(currentUserId);
 
       if (!rooms) {
         setMessages(null);
@@ -62,7 +63,7 @@ export default function GroupMessageListScreen({
         <TouchableOpacity
           style={styles.roomiesButton}
           onPress={() => navigation.navigate('DirectMessageList')}>
-          <Text style={styles.roomiesText}>Roomie</Text>
+          <Text style={styles.roomiesText}>Direct message</Text>
         </TouchableOpacity>
       </View>
 

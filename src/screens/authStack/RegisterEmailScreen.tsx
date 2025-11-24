@@ -51,7 +51,7 @@ export default function RegisterEmailScreen({ navigation }: AuthStackScreenProps
     }
 
     const data = await response.json();
-    if (data.emailTaken) {
+    if (data.emailExist) {
       Alert.alert(
         'Register Error',
         'This email is already registered. Please use a different email.',
@@ -64,11 +64,11 @@ export default function RegisterEmailScreen({ navigation }: AuthStackScreenProps
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={styles.container}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
       <View style={styles.container}>
         <Loader loading={loading} />
 
-        <View style={styles.buttonContainer}>
+        <View style={styles.bodyContainer}>
           <Text style={styles.title}>Register - Email</Text>
           <TextInput
             placeholder="Email"
@@ -100,22 +100,19 @@ const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
       backgroundColor: colors.background,
     },
     title: {
       fontSize: 28,
       fontWeight: 'bold',
       color: colors.textPrimary,
+      alignSelf: 'center',
     },
 
-    buttonContainer: {
-      flex: 3,
-      width: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
+    bodyContainer: {
+      flex: 1,
       gap: 20,
+      justifyContent: 'center',
       paddingHorizontal: 20,
     },
     input: {

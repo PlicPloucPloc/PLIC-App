@@ -9,6 +9,7 @@ import { SharedStackParamList } from '@navigation/Types';
 import ApartmentDetailsScreen from '@screens/ApartmentDetailsScreen';
 import DirectMessageScreen from '@screens/DirectMessageScreen';
 import OtherProfileScreen from '@screens/OtherProfileScreen';
+import HeaderMessageInfo from '@components/HeaderMessageInfo';
 
 const Stack = createStackNavigator<SharedStackParamList>();
 
@@ -31,7 +32,7 @@ function headerOptions(
 
 export default function SharedStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator>
       <Stack.Screen
         name="ApartmentDetails"
         component={ApartmentDetailsScreen}
@@ -42,7 +43,16 @@ export default function SharedStack() {
         component={OtherProfileScreen}
         options={({ navigation }) => headerOptions(navigation, 'Profile')}
       />
-      <Stack.Screen name="DirectMessage" component={DirectMessageScreen} />
+      <Stack.Screen
+        name="DirectMessage"
+        component={DirectMessageScreen}
+        options={({ navigation }) => {
+          return {
+            ...headerOptions(navigation, ''),
+            headerTitle: () => <HeaderMessageInfo />,
+          };
+        }}
+      />
     </Stack.Navigator>
   );
 }

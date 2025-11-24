@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { StyleSheet, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { ColorTheme } from '@app/Colors';
 
 interface PasswordInputProps extends TextInputProps {
   inputStyle?: object;
@@ -9,6 +11,9 @@ interface PasswordInputProps extends TextInputProps {
 }
 
 const PasswordInput = React.forwardRef<TextInput, PasswordInputProps>((props, ref) => {
+  const colors = useThemeColors();
+  const styles = createStyles(colors);
+
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [isFocused, setIsFocused] = useState<boolean>(false);
 
@@ -36,28 +41,30 @@ const PasswordInput = React.forwardRef<TextInput, PasswordInputProps>((props, re
 });
 
 PasswordInput.displayName = 'PasswordInput';
+
 export default PasswordInput;
 
-const styles = StyleSheet.create({
-  inputWrapper: {
-    width: '100%',
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  passwordInput: {
-    width: '100%',
-    padding: 12,
-    paddingRight: 40,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 10,
-    fontSize: 16,
-  },
-  eyeIcon: {
-    position: 'absolute',
-    right: 10,
-    height: '100%',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});
+const createStyles = (colors: ColorTheme) =>
+  StyleSheet.create({
+    inputWrapper: {
+      width: '100%',
+      position: 'relative',
+      justifyContent: 'center',
+    },
+    passwordInput: {
+      width: '100%',
+      padding: 12,
+      paddingRight: 40,
+      borderWidth: 1,
+      borderColor: colors.contrast,
+      borderRadius: 10,
+      fontSize: 16,
+    },
+    eyeIcon: {
+      position: 'absolute',
+      right: 10,
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+  });

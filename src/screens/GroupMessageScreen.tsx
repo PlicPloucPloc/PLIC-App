@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { ColorTheme } from '@app/Colors';
 import { AuthState } from '@app/definitions';
-import { chatService, Message, MessageResponse } from '@app/definitions/rest/ChatService';
+import { chatService, Message, RoomDetails } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import store from '@app/redux/Store';
 import { getMessage } from '@app/rest/ChatService';
@@ -65,7 +65,7 @@ export default function GroupMessageScreen({
 
     const fetchMessages = async () => {
       try {
-        const messageResponse: MessageResponse | null = await getMessage(roomId);
+        const messageResponse: RoomDetails | null = await getMessage(roomId);
 
         if (!messageResponse) {
           console.error('No messages found');

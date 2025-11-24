@@ -5,13 +5,16 @@ import { Provider } from 'react-redux';
 
 import store from '@app/redux/Store';
 import AppContainer from '@navigation/AppContainer';
+import { KeyboardProvider } from 'react-native-keyboard-controller';
 
 export default function App() {
   return (
     <Provider store={store}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <AppContainer />
-      </GestureHandlerRootView>
+      <KeyboardProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <AppContainer />
+        </GestureHandlerRootView>
+      </KeyboardProvider>
     </Provider>
   );
 }

@@ -4,7 +4,7 @@ const Endpoints = {
     OTHER_INFO: (userId: string) => `/user/?id=${userId}`,
     LOGIN: '/user/login',
     REGISTER: '/user/register',
-    CHECK_EMAIL: (email: string) => `/user/checkEmail/${email.toLowerCase()}`,
+    CHECK_EMAIL: (email: string) => `/user/checkEmail?email=${email.toLowerCase()}`,
     RESEND_EMAIL: () => '/user/resend',
     REFRESH: '/user/refresh',
     RECOMMENDED_COLLOC: (offset: number, limit: number) =>
@@ -28,6 +28,7 @@ const Endpoints = {
     GET_INFO_BY_ID: (id: number) => `/apartment/${id}`,
   },
   CHAT: {
+    GET_ROOM_DETAILS: (id: number) => `/chat/rooms/${id}`,
     GET_ROOMS: '/chat/rooms',
     UPDATE_ROOMS: '/chat/rooms',
     CREATE_ROOM: '/chat/rooms',

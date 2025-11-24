@@ -8,13 +8,13 @@ import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo, RELATION_TYPE } from '@app/definitions';
-import { RoomRequest } from '@app/definitions/rest/ChatService';
+import { CreateRoomRequest } from '@app/definitions/rest/ChatService';
 import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setSwipeDirection } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
 import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
-import { postRoom } from '@app/rest/ChatService';
+import { createRoom } from '@app/rest/ChatService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
 import EverythingSwiped from '@components/EverythingSwiped';
@@ -30,9 +30,11 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
+  const filters = useSelector((state: RootState) => state.filtersState);
+  const authState = useSelector((state: RootState) => state.authState);
+
   const swiperRef = useRef<SwiperCardRefType>(null);
   const swipeDirection = useSelector((state: RootState) => state.appState.swipeDirection);
-  const filters = useSelector((state: RootState) => state.filtersState);
 
   // handle swipe from details screen
   useFocusEffect(
@@ -54,7 +56,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
   const [allSwiped, setAllSwiped] = useState(false);
   const [backButtonDisabled, setBackButtonDisabled] = useState(false);
-  const authState = useSelector((state: RootState) => state.authState);
   const [apartmentInfo, setApartmentInfo] = useState<{
     title?: string;
     surface?: number;
@@ -62,11 +63,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     rent?: number;
     apartment_id?: number;
   }>({});
-  const roomRequest: RoomRequest = {
-    users: [],
-    apartment_id: null,
-    owner_id: authState.userId,
-  };
+
   const fetchApartments = useCallback(
     (offset: number) => getApartmentsNoRelationPaginated(offset, filters),
     [filters],
@@ -141,6 +138,32 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
         'Error',
         `An error occurred while ${type == RELATION_TYPE.LIKE ? 'Liking' : 'Disliking'} the apartment.`,
       );
+    }
+  }
+
+  async function createChat(apartmentId: number, owner_id: string) {
+    if (owner_id === authState.userId) {
+      Alert.alert(
+        'Could not create chat !',
+        'This apartment belongs to you, we cannot create a chat room.',
+      );
+    }
+
+    const roomRequest: CreateRoomRequest = {
+      apartment_id: apartmentId,
+      owner_id: authState.userId,
+      users: [owner_id],
+    };
+
+    const roomId = await createRoom(roomRequest);
+
+    if (roomId) {
+      navigation.navigate('SharedStack', {
+        screen: 'DirectMessage',
+        params: { roomId },
+      });
+    } else {
+      Alert.alert('Error', 'An error occurred while creating the chat room.');
     }
   }
 
@@ -265,14 +288,9 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
         <SwipeButton
           style={styles.button}
           disabled={allSwiped}
-          onPress={async () => {
-            const roomId = await postRoom(roomRequest);
-            roomRequest.apartment_id = apartments[swiperRef.current?.activeIndex || 0].apartment_id;
-            roomRequest.users = ['']; // Add user IDs to the roomRequest
-            navigation.navigate('SharedStack', {
-              screen: 'DirectMessage',
-              params: { roomId },
-            });
+          onPress={() => {
+            const currentIndex = swiperRef.current?.activeIndex || 0;
+            createChat(apartments[currentIndex].apartment_id, apartments[currentIndex].owner_id);
           }}>
           <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />
         </SwipeButton>

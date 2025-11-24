@@ -4,14 +4,14 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native
 import { useSelector } from 'react-redux';
 
 import { AuthState } from '@app/definitions';
-import { GetRoomResponse, UpdateRoomRequest } from '@app/definitions/rest/ChatService';
+import { Room, UpdateRoomRequest } from '@app/definitions/rest/ChatService';
 import { RootState } from '@app/redux/Store';
 import { updateParticipant, getMyRooms } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import ProfilePicture from '@components/ProfilePicture';
 import { MessageStackScreenProps } from '@navigation/Types';
 
-type RoomWithUserInfo = GetRoomResponse & {
+type RoomWithUserInfo = Room & {
   otherUser?: AuthState;
 };
 

@@ -13,7 +13,7 @@ import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useSelector } from 'react-redux';
 
 import { AuthState } from '@app/definitions';
-import { MessageResponse, UpdateRoomRequest } from '@app/definitions/rest/ChatService';
+import { RoomDetails, UpdateRoomRequest } from '@app/definitions/rest/ChatService';
 import { RootState } from '@app/redux/Store';
 import { deleteRoom, getMessage, updateParticipant } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
@@ -31,7 +31,7 @@ export default function GroupInfoScreen({
   navigation,
   route,
 }: MessageStackScreenProps<'GroupInfo'>) {
-  const [roomData, setRoomData] = useState<MessageResponse | null>(null);
+  const [roomData, setRoomData] = useState<RoomDetails | null>(null);
   const [members, setMembers] = useState<MemberWithInfo[]>([]);
   const [loading, setLoading] = useState(true);
   const currentUserId = useSelector((state: RootState) => state.authState.userId);

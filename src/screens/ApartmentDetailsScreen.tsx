@@ -11,7 +11,6 @@ import { ApartmentInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setSwipeDirection } from '@app/redux/slices';
 import store from '@app/redux/Store';
-import { getApartmentInfoById } from '@app/rest/ApartmentService';
 import { getApartmentImages } from '@app/rest/S3Service';
 import SwipeButton from '@components/ActionButton';
 import ApartmentDetailsAmenities from '@components/ApartmentDetailsAmenities';
@@ -40,22 +39,10 @@ export default function ApartmentDetailsScreen({
     (async () => {
       setLoading(true);
 
-      let apartmentTmp: ApartmentInfo;
-      if (route.params?.apartment) {
-        apartmentTmp = { ...route.params.apartment };
-      } else if (route.params?.apartmentId) {
-        const apartmentResponse = await getApartmentInfoById(route.params.apartmentId);
-        if (!apartmentResponse) return;
+      const apartment: ApartmentInfo = route.params.apartment;
+      apartment.images = await getApartmentImages(apartment).finally(() => setLoading(false));
 
-        apartmentTmp = apartmentResponse;
-      } else {
-        console.warn('No apartment data provided in route params');
-        return;
-      }
-
-      apartmentTmp.images = await getApartmentImages(apartmentTmp);
-      setApartment(apartmentTmp);
-      setLoading(false);
+      setApartment(apartment);
     })();
   }, [route.params]);
 
