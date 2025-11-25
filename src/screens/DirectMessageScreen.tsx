@@ -1,31 +1,20 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  Pressable,
-  TouchableOpacity,
-} from 'react-native';
+import { FlatList, StyleSheet, Text, View, TextInput, Pressable } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
 import { AuthState } from '@app/definitions';
 import { Message } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import store, { RootState } from '@app/redux/Store';
+import { RootState } from '@app/redux/Store';
 import { getRoomDetails } from '@app/rest/ChatService';
-import { getOtherUserInfo } from '@app/rest/UserService';
-import Loader from '@components/Loader';
-import ProfilePicture from '@components/ProfilePicture';
-import { SharedStackScreenProps } from '@navigation/Types';
-import HeaderMessageInfo from '@components/HeaderMessageInfo';
 import { chatService } from '@app/socket/ChatService';
-import { useSelector } from 'react-redux';
+import HeaderMessageInfo from '@components/HeaderMessageInfo';
+import Loader from '@components/Loader';
+import { SharedStackScreenProps } from '@navigation/Types';
 
 export default function DirectMessageScreen({
   navigation,
@@ -61,6 +50,7 @@ export default function DirectMessageScreen({
     });
   }, [navigation, otherUserInfo]);
 
+  // Effect to fetch room details and messages
   useEffect(() => {
     const fetchRoomDetails = async () => {
       setLoading(true);
@@ -80,68 +70,21 @@ export default function DirectMessageScreen({
     fetchRoomDetails();
   }, [currentUserId, route.params.roomId]);
 
+  // Effect to handle WebSocket connection and incoming messages
   useEffect(() => {
-    // if (roomId == null) {
-    //   setLoading(false);
-    //   return;
-    // }
-    //
-    // chatService.connect();
-    // const unsubscribeConnection = chatService.onConnectionChange((connected) => {
-    //   setIsConnected(connected);
-    // });
-    //
-    // const fetchMessages = async () => {
-    //   try {
-    //     const messageResponse: MessageResponse | null = await getMessage(roomId);
-    //
-    //     if (!messageResponse) {
-    //       console.error('No messages found');
-    //       return;
-    //     }
-    //
-    //     const otherUserId = messageResponse.participants.find((id) => id !== currentUserId);
-    //     if (otherUserId) {
-    //       const userInfo = await getOtherUserInfo(otherUserId);
-    //       setOtherUserInfo(userInfo);
-    //     }
-    //
-    //     const allMessages: FlatMessage[] = messageResponse.messages.map((msg) => ({
-    //       id: msg.id,
-    //       room_id: msg.room_id,
-    //       message: msg.message,
-    //       sender_id: msg.sender_id,
-    //       created_at: msg.created_at,
-    //       participants: messageResponse.participants,
-    //     }));
-    //
-    //     setMessages(allMessages);
-    //   } catch (error) {
-    //     console.error('Error fetching messages:', error);
-    //   } finally {
-    //     setLoading(false);
-    //   }
-    // };
-    //
-    // fetchMessages();
-    // const unsubscribeMessages = chatService.onMessageForRoom(roomId, (newMessage: Message) => {
-    //   const flatMessage: FlatMessage = {
-    //     id: newMessage.id,
-    //     room_id: newMessage.room_id,
-    //     message: newMessage.message,
-    //     sender_id: newMessage.sender_id,
-    //     created_at: new Date().toISOString(),
-    //     participants: [],
-    //   };
-    //
-    //   setMessages((prev) => [...prev, flatMessage]);
-    // });
-    //
-    // return () => {
-    //   unsubscribeConnection();
-    //   unsubscribeMessages();
-    // };
-  }, [currentUserId]);
+    chatService.connect();
+    const unsubscribeConnection = chatService.onConnectionChange(setIsConnected);
+
+    const unsubscribeMessages = chatService.onMessageForRoom(
+      route.params.roomId,
+      (newMessage: Message) => setMessages((prev) => [...prev, newMessage]),
+    );
+
+    return () => {
+      unsubscribeConnection();
+      unsubscribeMessages();
+    };
+  }, [currentUserId, route.params.roomId]);
 
   const handleSend = async () => {
     const roomId = route.params.roomId;
@@ -151,13 +94,13 @@ export default function DirectMessageScreen({
 
     const messageText = inputMessage.trim();
 
-    const tempId = Math.random(); // Temporary ID for tracking, will be replaced by server
+    const now = new Date();
     const newMessage: Message = {
-      id: tempId,
+      id: now.getTime(),
       room_id: route.params.roomId,
       message: messageText,
       sender_id: currentUserId,
-      created_at: new Date().toISOString(),
+      created_at: now.toISOString(),
       isSending: true,
     };
 
@@ -170,14 +113,14 @@ export default function DirectMessageScreen({
 
       if (success) {
         setMessages((prev) =>
-          prev.map((msg) => (msg.id === tempId ? { ...msg, isSending: false } : msg)),
+          prev.map((msg) => (msg.id === now.getTime() ? { ...msg, isSending: false } : msg)),
         );
       } else {
         throw new Error('Failed to send message');
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
+      setMessages((prev) => prev.filter((msg) => msg.id !== now.getTime()));
       setInputMessage(messageText);
     } finally {
       setSending(false);
@@ -220,11 +163,11 @@ export default function DirectMessageScreen({
 
   return (
     <View style={styles.container}>
-      {/* {!isConnected && ( */}
-      {/*   <View style={styles.connectionBanner}> */}
-      {/*     <Text style={styles.connectionText}>Connecting...</Text> */}
-      {/*   </View> */}
-      {/* )} */}
+      {!isConnected && (
+        <View style={styles.connectionBanner}>
+          <Text style={styles.connectionText}>Connecting...</Text>
+        </View>
+      )}
 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={undefined}>
         <FlatList

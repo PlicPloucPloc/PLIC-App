@@ -47,7 +47,7 @@ export default function RegisterUserInfoScreen({
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{flex: 1}}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
       <View style={styles.container}>
         <View style={styles.buttonContainer}>
           <Text style={styles.title}>Register - About you</Text>

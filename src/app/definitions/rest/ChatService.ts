@@ -3,7 +3,7 @@ import { AuthState } from '../redux/AuthState';
 export type Room = {
   room_id: number;
   participants_id: string[];
-  last_message: string | null;
+  last_message: Message | null;
   is_owner: boolean;
   created_at: string;
 

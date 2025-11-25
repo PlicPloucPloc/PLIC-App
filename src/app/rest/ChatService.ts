@@ -1,3 +1,4 @@
+import { AuthState } from '@app/definitions';
 import {
   CreateRoomResponse,
   Room,
@@ -10,7 +11,6 @@ import { alertOnResponseError } from '@app/utils/Error';
 import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { getOtherUserInfo } from './UserService';
-import { AuthState } from '@app/definitions';
 
 // Add participant details to a room
 async function addRoomParticipants<T extends Room | RoomDetails>(

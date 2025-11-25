@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
+import { AndroidSoftInputModes, KeyboardController } from 'react-native-keyboard-controller';
 import { useSelector } from 'react-redux';
 
 import { RootEnum } from '@app/definitions';
@@ -18,7 +19,6 @@ import SplashScreen from '@screens/SplashScreen';
 
 import AuthNavigator from './AuthNavigator';
 import InsideNavigator from './InsideNavigator';
-import { AndroidSoftInputModes, KeyboardController } from 'react-native-keyboard-controller';
 
 export default function AppContainer() {
   const root = useSelector((state: RootState) => state.appState.root);

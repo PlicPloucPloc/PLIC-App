@@ -59,7 +59,7 @@ export default function RegisterPasswordScreen({
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{flex: 1}}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
       <View style={styles.container}>
         <Loader loading={loading} />
         <View style={styles.bodyContainer}>

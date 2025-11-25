@@ -7,11 +7,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { API_TIMEOUT } from '@app/config/Constants';
 import { API_URL } from '@app/config/Env';
 import { RootEnum, TokenResponse } from '@app/definitions';
+import { storageManager } from '@app/internal/Storage';
 import { setRoot } from '@app/redux/slices';
 import store from '@app/redux/Store';
 
 import Endpoints from './Endpoints';
-import { storageManager } from '@app/internal/Storage';
 
 /**
  * Fetches data from the API with optional authentication.

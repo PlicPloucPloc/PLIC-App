@@ -11,6 +11,7 @@ import {
   RootEnum,
   UserInfoResponse,
 } from '@app/definitions';
+import { storageManager } from '@app/internal/Storage';
 import { setFiltersState, setRoot, setUserInfo } from '@app/redux/slices';
 import store from '@app/redux/Store';
 import { alertOnResponseError } from '@app/utils/Error.ts';
@@ -19,7 +20,6 @@ import { fetchAndCompressImage } from '@app/utils/Image.ts';
 import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { checkProfilePictureExists, postProfilePictureFromSignedUrl } from './S3Service.ts';
-import { storageManager } from '@app/internal/Storage';
 
 async function userInfoToAuthState(userInfo: UserInfoResponse): Promise<AuthState> {
   const authState: AuthState = {

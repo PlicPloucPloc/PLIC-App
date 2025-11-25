@@ -20,9 +20,9 @@ import { FILTERS_SURFACE_MAX, FILTERS_SURFACE_MIN } from '@app/config/Constants'
 import { GOOGLE_API_KEY } from '@app/config/Env';
 import { FiltersState, PlaceSearchResponse } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { storageManager } from '@app/internal/Storage';
 import { setFiltersState } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
-import { storageManager } from '@app/internal/Storage';
 import { alertUnsaveChangesAsync } from '@app/utils/Misc';
 import Loader from '@components/Loader';
 import { AccountStackScreenProps } from '@navigation/Types';

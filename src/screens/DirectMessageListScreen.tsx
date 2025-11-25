@@ -4,12 +4,12 @@ import { FlatList, StyleSheet, Text, TouchableOpacity, View, RefreshControl } fr
 import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
+import { Room } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { getDirectMessageRooms } from '@app/rest/ChatService';
 import MessageListItem from '@components/MessageListItem';
 import { MessageStackScreenProps } from '@navigation/Types';
-import { Room } from '@app/definitions/rest/ChatService';
 
 export default function DirectMessageListScreen({
   navigation,

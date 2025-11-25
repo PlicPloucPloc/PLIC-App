@@ -1,8 +1,10 @@
-import { AuthState } from '@app/definitions';
-import ProfilePicture from './ProfilePicture';
 import { StyleSheet, TouchableOpacity, Text } from 'react-native';
-import { useThemeColors } from '@app/hooks/UseThemeColor';
+
 import { ColorTheme } from '@app/Colors';
+import { AuthState } from '@app/definitions';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
+
+import ProfilePicture from './ProfilePicture';
 
 type HeaderMessageInfoProps = {
   userInfo?: AuthState;

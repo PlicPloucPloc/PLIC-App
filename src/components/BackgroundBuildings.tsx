@@ -19,7 +19,7 @@ export default function BackgroundBuildings(props: BackgroundBuildingsProps) {
 const styles = StyleSheet.create({
   backgroundContainer: {
     width: '100%',
-    top: 20
+    top: 20,
   },
   image: {
     width: '100%',

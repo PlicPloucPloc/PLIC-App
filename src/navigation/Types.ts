@@ -3,7 +3,6 @@ import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/n
 import { StackAnimationName, StackScreenProps } from '@react-navigation/stack';
 
 import { ApartmentInfo } from '@app/definitions';
-import { Room } from '@app/definitions/rest/ChatService';
 
 // ...ParamList is the list of all the screens in the navigator
 // and the types of the props used by the screen

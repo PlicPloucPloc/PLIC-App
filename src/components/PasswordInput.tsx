@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { StyleSheet, TextInput, TextInputProps, TouchableOpacity, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
-import { useThemeColors } from '@app/hooks/UseThemeColor';
+
 import { ColorTheme } from '@app/Colors';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
 
 interface PasswordInputProps extends TextInputProps {
   inputStyle?: object;

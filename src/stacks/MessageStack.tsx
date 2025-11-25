@@ -12,8 +12,6 @@ import GroupInfoScreen from '@screens/GroupInfo';
 import GroupMessageListScreen from '@screens/GroupMessageListScreen';
 import GroupMessageScreen from '@screens/GroupMessageScreen';
 
-import SharedStack from './SharedStack';
-
 const Stack = createStackNavigator<MessageStackParamList>();
 
 function headerOptions(

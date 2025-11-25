@@ -32,7 +32,7 @@ const MessageListItem = memo(({ roomInfo, onPress }: MessageListItemProps) => {
           {otherUser.firstName} {otherUser.lastName}
         </Text>
         <Text numberOfLines={1} style={[styles.lastMessage]}>
-          {roomInfo.last_message || 'No messages yet.'}
+          {roomInfo.last_message?.message || 'No messages yet.'}
         </Text>
       </View>
     </TouchableOpacity>

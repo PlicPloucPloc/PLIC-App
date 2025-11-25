@@ -5,11 +5,11 @@ import {
 } from '@react-navigation/stack';
 
 import HeaderBackButton from '@components/HeaderBackButton';
+import HeaderMessageInfo from '@components/HeaderMessageInfo';
 import { SharedStackParamList } from '@navigation/Types';
 import ApartmentDetailsScreen from '@screens/ApartmentDetailsScreen';
 import DirectMessageScreen from '@screens/DirectMessageScreen';
 import OtherProfileScreen from '@screens/OtherProfileScreen';
-import HeaderMessageInfo from '@components/HeaderMessageInfo';
 
 const Stack = createStackNavigator<SharedStackParamList>();
 
