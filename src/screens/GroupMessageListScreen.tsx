@@ -96,7 +96,7 @@ export default function GroupMessageListScreen({
                   <Text style={styles.name}>{displayName}</Text>
                 </View>
                 <Text numberOfLines={1} style={[styles.lastMessage]}>
-                  {item.last_message || 'No messages yet'}
+                  {item.last_message?.message || 'No messages yet'}
                 </Text>
               </View>
             </TouchableOpacity>

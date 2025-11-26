@@ -34,7 +34,9 @@ function headerOptions(
 export default function MessageStack(_: BottomTabStackScreenProps<'MessageStack'>) {
   return (
     <Stack.Navigator initialRouteName="DirectMessageList" screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="DirectMessageList" component={DirectMessageListScreen} />
+      <Stack.Screen name="DirectMessageList" component={DirectMessageListScreen}
+        options={({ navigation }) => headerOptions(navigation, 'Messages')}
+      />
       <Stack.Screen name="GroupMessageList" component={GroupMessageListScreen} />
       <Stack.Screen name="AddToARoom" component={AddToARoomScreen} />
       <Stack.Screen

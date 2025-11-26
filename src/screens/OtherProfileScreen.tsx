@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
@@ -14,6 +14,7 @@ import { getOtherUserInfo } from '@app/rest/UserService';
 import { calculateAge } from '@app/utils/Misc';
 import ProfilePicture from '@components/ProfilePicture';
 import { SharedStackScreenProps } from '@navigation/Types';
+import Loader from '@components/Loader';
 
 type ProfileItem = {
   icon: IoniconName;
@@ -33,6 +34,9 @@ export default function OtherProfileScreen({
 }: SharedStackScreenProps<'OtherProfile'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
+
+  const [loading, setLoading] = useState(true);
+
   const [profileItems, setProfileItems] = useState<ProfileItem[]>(defaultProfileItems);
   const [userInfo, setUserInfo] = useState<AuthState>({
     firstName: '...',
@@ -50,10 +54,20 @@ export default function OtherProfileScreen({
 
   useEffect(() => {
     (async () => {
-      const userInfo = isCurrentUser ? authState : await getOtherUserInfo(route.params.userId);
+      let userInfo;
 
-      if (!userInfo) {
-        return;
+      if (isCurrentUser) {
+        userInfo = authState;
+      } else {
+        setLoading(true);
+        userInfo = await getOtherUserInfo(route.params.userId).finally(() => setLoading(false));
+
+        if (!userInfo) {
+          return Alert.alert(
+            'Something went wrong.',
+            "We were unable to get this user's information.\nPlease try again later.",
+          );
+        }
       }
 
       setUserInfo(userInfo);
@@ -70,6 +84,7 @@ export default function OtherProfileScreen({
 
   return (
     <View style={styles.container}>
+      <Loader loading={loading} />
       <View style={styles.pictureContainer}>
         <ProfilePicture
           size={200}
@@ -85,6 +100,13 @@ export default function OtherProfileScreen({
           <TouchableOpacity
             onPress={async () => {
               const roomId = await createRoom(roomRequest);
+              if (!roomId) {
+                return Alert.alert(
+                  'Something went wrong.',
+                  'We were unable to create a chat with this user.\nPlease try again later.',
+                );
+              }
+
               navigation.navigate('DirectMessage', { roomId });
             }}
             style={{ marginTop: 12, alignSelf: 'center' }}>

@@ -5,15 +5,6 @@ import { getToken } from '@app/rest/Client';
 
 const RECONNECT_DELAY = 3000;
 
-// export type Message = {
-//   id: number;
-//   room_id: number;
-//   sender_id: string;
-//   message: string;
-//   created_at: string;
-//   isSending?: boolean;
-// };
-
 // Do not put these types in src/app/definitions has their are internal to the ChatService
 
 // Websocket requests
@@ -214,6 +205,8 @@ class ChatService {
 
       // The promise will be resolved in handleMessage when confirmation is received
       this.messageCallbacks.set(tempId, resolve);
+
+      console.log('Sending message command:', command);
 
       this.ws.send(JSON.stringify(command));
 

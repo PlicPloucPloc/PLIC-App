@@ -72,7 +72,12 @@ export default function DirectMessageScreen({
 
   // Effect to handle WebSocket connection and incoming messages
   useEffect(() => {
-    chatService.connect();
+    if (!chatService.isConnected()){
+      chatService.connect();
+    } else {
+      setIsConnected(true);
+    }
+
     const unsubscribeConnection = chatService.onConnectionChange(setIsConnected);
 
     const unsubscribeMessages = chatService.onMessageForRoom(
@@ -121,7 +126,7 @@ export default function DirectMessageScreen({
     } catch (error) {
       console.error('Error sending message:', error);
       setMessages((prev) => prev.filter((msg) => msg.id !== now.getTime()));
-      setInputMessage(messageText);
+      // setInputMessage(messageText);
     } finally {
       setSending(false);
     }
@@ -221,12 +226,12 @@ const createStyles = (colors: ColorTheme) =>
       backgroundColor: colors.background,
     },
     connectionBanner: {
-      backgroundColor: '#FFA500',
+      backgroundColor: colors.contrast,
       paddingVertical: 8,
       alignItems: 'center',
     },
     connectionText: {
-      color: '#fff',
+      color: colors.background,
       fontSize: 12,
       fontWeight: '600',
     },
@@ -234,6 +239,7 @@ const createStyles = (colors: ColorTheme) =>
       paddingHorizontal: 16,
       paddingVertical: 12,
       flexGrow: 1,
+      justifyContent: 'flex-end',
     },
     emptyContainer: {
       flex: 1,
@@ -265,7 +271,7 @@ const createStyles = (colors: ColorTheme) =>
       backgroundColor: colors.primary,
     },
     theirMessageBubble: {
-      backgroundColor: '#E5E5EA',
+      backgroundColor: colors.backgroundSecondary,
     },
     messageSending: {
       opacity: 0.6,
@@ -276,7 +282,7 @@ const createStyles = (colors: ColorTheme) =>
       marginBottom: 2,
     },
     myMessageText: {
-      color: '#fff',
+      color: colors.textPrimary,
     },
     messageTime: {
       fontSize: 11,
