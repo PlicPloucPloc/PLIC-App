@@ -18,7 +18,7 @@ export default function HistoryScreen({ navigation }: AccountStackScreenProps<'H
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.topContainer}>
           <TextInput
-            placeholder="Search..."
+            placeholder="Search for an apartment..."
             value={search}
             onChangeText={setSearch}
             style={styles.searchBar}
@@ -53,24 +53,5 @@ const createStyles = (colors: ColorTheme) =>
       borderColor: '#ccc',
       borderRadius: 100,
       fontSize: 15,
-    },
-    rightAction: {
-      width: 100,
-      height: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 10,
-    },
-    actionTouchable: {
-      flex: 1,
-      width: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
-      borderRadius: 10,
-      backgroundColor: 'red',
-    },
-    actionText: {
-      color: '#fff',
-      fontWeight: 'bold',
     },
   });

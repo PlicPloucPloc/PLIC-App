@@ -39,7 +39,7 @@ export default function DirectMessageScreen({
         <HeaderMessageInfo
           roomInfo={roomInfo}
           onPressSingle={() => {
-            navigation.navigate('OtherProfile', { userId: roomInfo.participants[0].userId });
+            navigation.navigate('OtherProfile', { user: roomInfo.participants[0] });
           }}
           onPressGroup={() => {
             navigation.navigate('GroupInfo', { roomInfo: roomInfo });

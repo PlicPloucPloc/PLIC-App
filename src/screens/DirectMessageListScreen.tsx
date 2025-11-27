@@ -9,6 +9,7 @@ import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { getAllRooms } from '@app/rest/ChatService';
 import ListMessageParticipants from '@components/MessageParticipantsList';
+import Separator from '@components/Separator';
 import { MessageStackScreenProps } from '@navigation/Types';
 
 export default function DirectMessageListScreen({
@@ -53,6 +54,7 @@ export default function DirectMessageListScreen({
         data={rooms}
         renderItem={renderItem}
         contentContainerStyle={{ paddingHorizontal: 16 }}
+        ItemSeparatorComponent={Separator}
         ListEmptyComponent={
           <Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 20 }}>
             No chat found.

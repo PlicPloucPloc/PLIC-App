@@ -93,29 +93,6 @@ export default function AccountScreen({ navigation }: AccountStackScreenProps<'A
         },
       ],
     },
-    {
-      title: 'Section to test scrolling',
-      data: [
-        {
-          title: 'Item 1',
-          subtitle: 'Subtitle 1',
-          icon: 'earth-outline',
-          onPress: () => {},
-        },
-        {
-          title: 'Item 2',
-          subtitle: 'Subtitle 2',
-          icon: 'eye-outline',
-          onPress: () => {},
-        },
-        {
-          title: 'Item 3',
-          subtitle: 'Subtitle 3',
-          icon: 'shield-half-outline',
-          onPress: () => {},
-        },
-      ],
-    },
   ];
 
   function renderItem({ item }: { item: SettingItem }) {
@@ -152,6 +129,7 @@ export default function AccountScreen({ navigation }: AccountStackScreenProps<'A
           imageUri={authState.profilePictureUri}
           firstName={authState.firstName}
           lastName={authState.lastName}
+          borderRadius={10}
         />
         <View style={{ flex: 1 }}>
           <Text style={styles.username} numberOfLines={1} ellipsizeMode="tail">

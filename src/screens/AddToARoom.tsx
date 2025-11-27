@@ -50,7 +50,7 @@ export default function AddToARoomScreen({
           updateParticipant(updateRoomRequest);
           navigation.navigate('SharedStack', {
             screen: 'OtherProfile',
-            params: { userId: route.params.user.userId },
+            params: { user: route.params.user },
           });
         }}
       />

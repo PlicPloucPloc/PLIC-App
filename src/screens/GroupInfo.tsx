@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { Ionicons } from '@expo/vector-icons';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { SharedValue } from 'react-native-reanimated';
 import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
@@ -13,6 +13,7 @@ import { RootState } from '@app/redux/Store';
 import { deleteRoom, updateParticipant } from '@app/rest/ChatService';
 import { calculateAge } from '@app/utils/Misc';
 import ProfilePicture from '@components/ProfilePicture';
+import RightActionDelete from '@components/RightActionDelete';
 import { SharedStackScreenProps } from '@navigation/Types';
 
 export default function GroupInfoScreen({
@@ -53,33 +54,22 @@ export default function GroupInfoScreen({
     [members, navigation, route.params.roomInfo],
   );
 
-  const renderRightActions = (userId: string) => {
-    if (userId === authState.userId) {
-      return null;
-    }
-
-    return (
-      <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteMember(userId)}>
-        <Ionicons name="trash-outline" size={24} color={colors.textPrimary} />
-        <Text style={styles.deleteText}>Delete</Text>
-      </TouchableOpacity>
-    );
-  };
-
   const renderMemberItem = ({ item }: { item: AuthState }) => (
     <Swipeable
-      renderRightActions={() => renderRightActions(item.userId)}
-      enabled={item.userId !== authState.userId}>
+      enabled={item.userId !== authState.userId}
+      renderRightActions={(_, drag: SharedValue<number>) => (
+        <RightActionDelete drag={drag} onPress={() => handleDeleteMember(item.userId)} />
+      )}>
       <TouchableOpacity
         style={styles.memberContainer}
         onPress={() => {
           navigation.navigate('SharedStack', {
             screen: 'OtherProfile',
-            params: { userId: item.userId },
+            params: { user: item },
           });
         }}>
         <ProfilePicture
-          size={52}
+          size={60}
           imageUri={item.profilePictureUri}
           firstName={item.firstName}
           lastName={item.lastName}
@@ -121,7 +111,7 @@ const createStyles = (colors: ColorTheme) =>
 
     headerContainer: {
       paddingHorizontal: 16,
-      paddingVertical: 12,
+      paddingVertical: 8,
       borderBottomWidth: 1,
       borderBottomColor: '#eee',
     },
@@ -133,8 +123,7 @@ const createStyles = (colors: ColorTheme) =>
 
     memberContainer: {
       flexDirection: 'row',
-      alignItems: 'center',
-      paddingVertical: 12,
+      paddingVertical: 8,
       paddingHorizontal: 16,
       borderBottomWidth: 1,
       borderBottomColor: '#eee',
@@ -142,27 +131,14 @@ const createStyles = (colors: ColorTheme) =>
     memberInfo: {
       flex: 1,
       marginLeft: 12,
+      justifyContent: 'center',
     },
     memberName: {
       fontSize: 16,
       fontWeight: '600',
-      marginBottom: 2,
     },
     memberAge: {
       fontSize: 14,
       color: colors.textSecondary,
-    },
-    deleteButton: {
-      backgroundColor: '#ff3b30',
-      justifyContent: 'center',
-      alignItems: 'center',
-      width: 100,
-      height: '100%',
-    },
-    deleteText: {
-      color: colors.textPrimary,
-      fontSize: 12,
-      fontWeight: '600',
-      marginTop: 4,
     },
   });

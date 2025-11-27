@@ -51,7 +51,7 @@ export type SharedStackParamList = {
     apartment: ApartmentInfo;
     enableRelationButtons?: boolean;
   };
-  OtherProfile: { userId: string };
+  OtherProfile: { user: AuthState };
   DirectMessage: { roomInfo: Room };
   GroupInfo: { roomInfo: Room };
   AddToARoom: { user: AuthState };

@@ -1,18 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
-import { IoniconName, AuthState } from '@app/definitions';
+import { IoniconName } from '@app/definitions';
 import { CreateRoomRequest } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { createAndGetRoom } from '@app/rest/ChatService';
-import { getOtherUserInfo } from '@app/rest/UserService';
 import { calculateAge } from '@app/utils/Misc';
-import Loader from '@components/Loader';
 import ProfilePicture from '@components/ProfilePicture';
 import { SharedStackScreenProps } from '@navigation/Types';
 
@@ -22,12 +20,6 @@ type ProfileItem = {
   value: string;
 };
 
-const defaultProfileItems: ProfileItem[] = [
-  { icon: 'person', label: 'First name', value: '...' },
-  { icon: 'person', label: 'Last name', value: '...' },
-  { icon: 'calendar', label: 'Age', value: '...' },
-];
-
 export default function OtherProfileScreen({
   navigation,
   route,
@@ -35,52 +27,19 @@ export default function OtherProfileScreen({
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const [loading, setLoading] = useState(true);
-
-  const [profileItems, setProfileItems] = useState<ProfileItem[]>(defaultProfileItems);
-  const [userInfo, setUserInfo] = useState<AuthState>({
-    firstName: '...',
-    lastName: '...',
-    profilePictureUri: null,
-  } as AuthState);
-
   const authState = useSelector((state: RootState) => state.authState);
-  const isCurrentUser = authState.userId === route.params.userId;
 
-  useEffect(() => {
-    (async () => {
-      let userInfo;
+  const isCurrentUser = authState.userId === route.params.user.userId;
 
-      if (isCurrentUser) {
-        setLoading(false);
-        userInfo = authState;
-      } else {
-        setLoading(true);
-        userInfo = await getOtherUserInfo(route.params.userId).finally(() => setLoading(false));
-
-        if (!userInfo) {
-          return Alert.alert(
-            'Something went wrong.',
-            "We were unable to get this user's information.\nPlease try again later.",
-          );
-        }
-      }
-
-      setUserInfo(userInfo);
-
-      const age = calculateAge(userInfo.birthdate);
-
-      setProfileItems([
-        { icon: 'person', label: 'First name', value: userInfo.firstName },
-        { icon: 'person', label: 'Last name', value: userInfo.lastName },
-        { icon: 'calendar', label: 'Age', value: age.toString() },
-      ]);
-    })();
-  }, [route.params.userId, authState, isCurrentUser]);
+  const profileItems: ProfileItem[] = [
+    { icon: 'person', label: 'First name', value: route.params.user.firstName },
+    { icon: 'person', label: 'Last name', value: route.params.user.lastName },
+    { icon: 'calendar', label: 'Age', value: calculateAge(route.params.user.birthdate).toString() },
+  ];
 
   async function createRoom() {
     const roomRequest: CreateRoomRequest = {
-      users: [route.params.userId],
+      users: [route.params.user.userId],
       apartment_id: null,
       owner_id: authState.userId,
     };
@@ -98,13 +57,12 @@ export default function OtherProfileScreen({
 
   return (
     <View style={styles.container}>
-      <Loader loading={loading} />
       <View style={styles.pictureContainer}>
         <ProfilePicture
           size={200}
-          imageUri={userInfo.profilePictureUri}
-          firstName={userInfo.firstName}
-          lastName={userInfo.lastName}
+          imageUri={route.params.user.profilePictureUri}
+          firstName={route.params.user.firstName}
+          lastName={route.params.user.lastName}
           borderRadius={30}
         />
       </View>
@@ -116,7 +74,7 @@ export default function OtherProfileScreen({
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('AddToARoom', { user: userInfo });
+              navigation.navigate('AddToARoom', { user: route.params.user });
             }}
             style={{ marginTop: 8, alignSelf: 'center' }}>
             <Text style={{ color: colors.primary, fontWeight: '600' }}>Add to a group chat</Text>

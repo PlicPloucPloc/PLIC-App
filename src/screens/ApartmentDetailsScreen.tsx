@@ -91,14 +91,18 @@ export default function ApartmentDetailsScreen({
         {/* ============= Header ============= */}
         <Text style={styles.title}>{apartment.name}</Text>
 
-        <Text style={styles.priceText}>
-          {apartment.rent} € <Text style={styles.lightText}>without charges</Text>
-        </Text>
-
-        {apartment.estimated_price && (
-          <Text style={styles.priceText}>
-            {apartment.estimated_price} € <Text style={styles.lightText}>with charges</Text>
-          </Text>
+        {apartment.rent && apartment.rent <= 10 ? (
+          <Text style={styles.lightText}>Price to negotiate</Text>
+        ) : (
+          <>
+            <Text style={styles.priceText}>
+              {apartment.rent} € <Text style={styles.lightText}>without charges</Text>
+            </Text>
+            apartment.estimated_price && (
+            <Text style={styles.priceText}>
+              {apartment.estimated_price} € <Text style={styles.lightText}>with charges</Text>
+            </Text>
+          </>
         )}
 
         <Divider />

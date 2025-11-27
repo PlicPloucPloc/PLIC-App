@@ -267,7 +267,10 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
               {apartmentInfo.location}
             </Text>
             <Text numberOfLines={1} ellipsizeMode="tail" style={styles.textSubtitle}>
-              {apartmentInfo.surface} m² / {apartmentInfo.rent} €
+              {apartmentInfo.surface} m² /{' '}
+              {apartmentInfo.rent && apartmentInfo.rent <= 10
+                ? 'Price to negotiate'
+                : `${apartmentInfo.rent} €`}
             </Text>
           </>
         )}
