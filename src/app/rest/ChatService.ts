@@ -108,9 +108,9 @@ export async function getRoomDetails(userId: string, roomId: number): Promise<Ro
 export async function createRoom(room: CreateRoomRequest): Promise<number | null> {
   const participants = [...room.users, room.owner_id];
 
-  const roomExists = await doesRoomExists(participants);
-  if (roomExists) {
-    return roomExists;
+  const existingRoomId = await doesRoomExists(participants);
+  if (existingRoomId) {
+    return existingRoomId;
   }
 
   const response = await apiFetch(
@@ -128,6 +128,20 @@ export async function createRoom(room: CreateRoomRequest): Promise<number | null
 
   const data: CreateRoomResponse = await response.json();
   return data.data;
+}
+
+export async function createAndGetRoom(
+  userId: string,
+  room: CreateRoomRequest,
+): Promise<Room | null> {
+  const roomId = await createRoom(room);
+  if (!roomId) {
+    return null;
+  }
+
+  const roomDetails = await getRoomDetails(userId, roomId);
+
+  return roomDetails ? roomDetailToRoom(userId, roomDetails) : null;
 }
 
 export async function deleteRoom(id: number): Promise<boolean> {
@@ -208,4 +222,16 @@ export async function updateParticipant(
 
   const data: RoomDetails[] = await response.json();
   return data;
+}
+
+export function roomDetailToRoom(userId: string, roomDetail: RoomDetails): Room {
+  return {
+    room_id: roomDetail.room_id,
+    participants_id: roomDetail.participants_id,
+    last_message:
+      roomDetail.messages.length > 0 ? roomDetail.messages[roomDetail.messages.length - 1] : null,
+    is_owner: roomDetail.owner_id === userId,
+    created_at: roomDetail.created_at,
+    participants: roomDetail.participants,
+  };
 }

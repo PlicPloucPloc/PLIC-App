@@ -59,14 +59,6 @@ export default function AppContainer() {
   }, []);
 
   useEffect(() => {
-    console.log('AppContainer detected root change to:', root);
-    const mode =
-      root === RootEnum.ROOT_INSIDE
-        ? AndroidSoftInputModes.SOFT_INPUT_ADJUST_RESIZE
-        : AndroidSoftInputModes.SOFT_INPUT_ADJUST_PAN;
-
-    console.log('Setting keyboard input mode to:', mode);
-
     KeyboardController.setInputMode(
       root === RootEnum.ROOT_INSIDE
         ? AndroidSoftInputModes.SOFT_INPUT_ADJUST_RESIZE

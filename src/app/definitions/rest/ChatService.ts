@@ -23,12 +23,12 @@ export type Message = {
 };
 
 export type RoomDetails = {
+  room_id: number;
+  participants_id: string[];
   apartment_id: number | null;
-  created_at: string;
   messages: Message[];
   owner_id: string;
-  participants_id: string[];
-  room_id: number;
+  created_at: string;
 
   // Additionnal fields for app only
   participants: AuthState[];

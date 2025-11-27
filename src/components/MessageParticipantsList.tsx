@@ -1,5 +1,6 @@
 import React, { memo, useEffect, useState } from 'react';
 import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+
 import { Ionicons } from '@expo/vector-icons';
 
 import { ColorTheme } from '@app/Colors';
@@ -8,12 +9,15 @@ import { useThemeColors } from '@app/hooks/UseThemeColor';
 
 import ProfilePicture from './ProfilePicture';
 
-type MessageListItemProps = {
+type MessageParticipantsListProps = {
   roomInfo: Room;
   onPress: () => void;
 };
 
-const MessageListItem = memo(({ roomInfo, onPress }: MessageListItemProps) => {
+const IMAGE_SIZE = 60;
+const BORDER_RADIUS = 10;
+
+const MessageParticipantsList = memo(({ roomInfo, onPress }: MessageParticipantsListProps) => {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -27,16 +31,16 @@ const MessageListItem = memo(({ roomInfo, onPress }: MessageListItemProps) => {
     } else {
       setIsGroup(true);
 
-      const first_two_names = roomInfo.participants
+      let first_two_names = roomInfo.participants
         .slice(0, 2)
         .map((user) => `${user.firstName} ${user.lastName}`)
         .join(', ');
 
       if (roomInfo.participants.length > 2) {
-        setTitle(`${first_two_names}, and ${roomInfo.participants.length - 2} others`);
-      } else {
-        setTitle(first_two_names);
+        first_two_names += `, and ${roomInfo.participants.length - 2} others`;
       }
+
+      setTitle(first_two_names);
     }
   }, [roomInfo]);
 
@@ -45,21 +49,31 @@ const MessageListItem = memo(({ roomInfo, onPress }: MessageListItemProps) => {
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
       {isGroup ? (
-        <View style={styles.groupImageContainer}>
-          <Ionicons name="people" size={36} color="white" />
+        <View
+          style={[
+            styles.groupImageContainer,
+            {
+              width: IMAGE_SIZE,
+              height: IMAGE_SIZE,
+              borderRadius: BORDER_RADIUS,
+            },
+          ]}>
+          <Ionicons name="people" size={IMAGE_SIZE * 0.6} color="white" />
         </View>
       ) : (
         <ProfilePicture
-          size={60}
+          size={IMAGE_SIZE}
           imageUri={otherUser.profilePictureUri}
           firstName={otherUser.firstName}
           lastName={otherUser.lastName}
-          borderRadius={10}
+          borderRadius={BORDER_RADIUS}
         />
       )}
 
       <View style={styles.infoContainer}>
-        <Text style={styles.title}>{title}</Text>
+        <Text numberOfLines={1} style={styles.title}>
+          {title}
+        </Text>
         <Text numberOfLines={1} style={[styles.lastMessage]}>
           {roomInfo.last_message?.message || 'No messages yet.'}
         </Text>
@@ -68,15 +82,16 @@ const MessageListItem = memo(({ roomInfo, onPress }: MessageListItemProps) => {
   );
 });
 
-MessageListItem.displayName = 'MessageListItem';
+MessageParticipantsList.displayName = 'MessageParticipantsList';
 
-export default MessageListItem;
+export default MessageParticipantsList;
 
 const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
     container: {
       flexDirection: 'row',
-      paddingVertical: 12,
+      paddingVertical: 8,
+      paddingRight: 8,
     },
 
     groupImageContainer: {
@@ -85,9 +100,6 @@ const createStyles = (colors: ColorTheme) =>
       borderColor: colors.contrast,
       justifyContent: 'center',
       alignItems: 'center',
-      width: 60,
-      height: 60,
-      borderRadius: 10,
     },
 
     infoContainer: {

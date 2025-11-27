@@ -3,6 +3,7 @@ import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/n
 import { StackAnimationName, StackScreenProps } from '@react-navigation/stack';
 
 import { ApartmentInfo } from '@app/definitions';
+import { Room } from '@app/definitions/rest/ChatService';
 
 // ...ParamList is the list of all the screens in the navigator
 // and the types of the props used by the screen
@@ -51,7 +52,9 @@ export type SharedStackParamList = {
     enableRelationButtons?: boolean;
   };
   OtherProfile: { userId: string };
-  DirectMessage: { roomId: number };
+  DirectMessage: { roomInfo: Room };
+  GroupInfo: { roomInfo: Room };
+  AddToARoom: { userId: string };
 };
 
 export type SharedStackScreenProps<T extends keyof SharedStackParamList> = CompositeScreenProps<
@@ -87,10 +90,6 @@ export type HomeStackScreenProps<T extends keyof HomeStackParamList> = Composite
 // ------- Message stack -------
 export type MessageStackParamList = {
   DirectMessageList: undefined;
-  GroupMessageList: undefined;
-  GroupMessage: { roomId: number | null };
-  GroupInfo: { roomId: number };
-  AddToARoom: { userId: string };
   SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };
 

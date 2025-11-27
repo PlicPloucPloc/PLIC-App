@@ -6,7 +6,6 @@ import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
-import { AuthState } from '@app/definitions';
 import { Message } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
@@ -31,48 +30,49 @@ export default function DirectMessageScreen({
   const [sending, setSending] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [otherUserInfo, setOtherUserInfo] = useState<AuthState | null>(null);
 
   useEffect(() => {
-    if (!otherUserInfo) {
-      return;
-    }
+    const roomInfo = route.params.roomInfo;
+    console.log('Setting header for room:', roomInfo);
 
     navigation.setOptions({
-      headerTitle: () => (
+      headerRight: () => (
         <HeaderMessageInfo
-          userInfo={otherUserInfo}
-          onPress={() => {
-            navigation.navigate('OtherProfile', { userId: otherUserInfo?.userId });
+          roomInfo={roomInfo}
+          onPressSingle={() => {
+            navigation.navigate('OtherProfile', { userId: roomInfo.participants[0].userId });
+          }}
+          onPressGroup={() => {
+            navigation.navigate('GroupInfo', { roomInfo: roomInfo });
           }}
         />
       ),
     });
-  }, [navigation, otherUserInfo]);
+  }, [navigation, route.params.roomInfo]);
 
   // Effect to fetch room details and messages
   useEffect(() => {
     const fetchRoomDetails = async () => {
       setLoading(true);
-      const roomDetails = await getRoomDetails(currentUserId, route.params.roomId).finally(() =>
-        setLoading(false),
-      );
+      const roomDetails = await getRoomDetails(
+        currentUserId,
+        route.params.roomInfo.room_id,
+      ).finally(() => setLoading(false));
 
       if (!roomDetails || roomDetails.participants.length === 0) {
         console.error('No room details found');
         return;
       }
 
-      setOtherUserInfo(roomDetails?.participants[0]);
-      setMessages(roomDetails.messages);
+      setMessages(roomDetails.messages.reverse());
     };
 
     fetchRoomDetails();
-  }, [currentUserId, route.params.roomId]);
+  }, [currentUserId, route.params.roomInfo.room_id]);
 
   // Effect to handle WebSocket connection and incoming messages
   useEffect(() => {
-    if (!chatService.isConnected()){
+    if (!chatService.isConnected()) {
       chatService.connect();
     } else {
       setIsConnected(true);
@@ -81,18 +81,18 @@ export default function DirectMessageScreen({
     const unsubscribeConnection = chatService.onConnectionChange(setIsConnected);
 
     const unsubscribeMessages = chatService.onMessageForRoom(
-      route.params.roomId,
-      (newMessage: Message) => setMessages((prev) => [...prev, newMessage]),
+      route.params.roomInfo.room_id,
+      (newMessage: Message) => setMessages((prev) => [newMessage, ...prev]),
     );
 
     return () => {
       unsubscribeConnection();
       unsubscribeMessages();
     };
-  }, [currentUserId, route.params.roomId]);
+  }, [currentUserId, route.params.roomInfo]);
 
   const handleSend = async () => {
-    const roomId = route.params.roomId;
+    const roomId = route.params.roomInfo.room_id;
     if (!inputMessage.trim()) {
       return;
     }
@@ -102,14 +102,14 @@ export default function DirectMessageScreen({
     const now = new Date();
     const newMessage: Message = {
       id: now.getTime(),
-      room_id: route.params.roomId,
+      room_id: roomId,
       message: messageText,
       sender_id: currentUserId,
       created_at: now.toISOString(),
       isSending: true,
     };
 
-    setMessages((prev) => [...prev, newMessage]);
+    setMessages((prev) => [newMessage, ...prev]);
     setInputMessage('');
 
     try {
@@ -163,7 +163,7 @@ export default function DirectMessageScreen({
   };
 
   if (loading) {
-    return <Loader loading={true} />;
+    return <Loader loading={loading} />;
   }
 
   return (
@@ -178,10 +178,11 @@ export default function DirectMessageScreen({
         <FlatList
           ref={flatListRef}
           data={messages}
+          inverted={true}
           renderItem={renderMessage}
           keyExtractor={(item) => `${item.room_id}-${item.id}`}
           contentContainerStyle={styles.messagesList}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
+          // onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>No messages yet. Say hi!</Text>

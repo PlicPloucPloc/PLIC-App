@@ -6,11 +6,7 @@ import {
 
 import HeaderBackButton from '@components/HeaderBackButton';
 import { BottomTabStackScreenProps, MessageStackParamList } from '@navigation/Types';
-import AddToARoomScreen from '@screens/AddToAroom';
 import DirectMessageListScreen from '@screens/DirectMessageListScreen';
-import GroupInfoScreen from '@screens/GroupInfo';
-import GroupMessageListScreen from '@screens/GroupMessageListScreen';
-import GroupMessageScreen from '@screens/GroupMessageScreen';
 
 const Stack = createStackNavigator<MessageStackParamList>();
 
@@ -34,17 +30,11 @@ function headerOptions(
 export default function MessageStack(_: BottomTabStackScreenProps<'MessageStack'>) {
   return (
     <Stack.Navigator initialRouteName="DirectMessageList" screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="DirectMessageList" component={DirectMessageListScreen}
+      <Stack.Screen
+        name="DirectMessageList"
+        component={DirectMessageListScreen}
         options={({ navigation }) => headerOptions(navigation, 'Messages')}
       />
-      <Stack.Screen name="GroupMessageList" component={GroupMessageListScreen} />
-      <Stack.Screen name="AddToARoom" component={AddToARoomScreen} />
-      <Stack.Screen
-        name="GroupInfo"
-        component={GroupInfoScreen}
-        options={({ navigation }) => headerOptions(navigation, 'Group Info')}
-      />
-      <Stack.Screen name="GroupMessage" component={GroupMessageScreen} />
     </Stack.Navigator>
   );
 }

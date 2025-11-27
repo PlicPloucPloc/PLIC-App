@@ -21,7 +21,7 @@ const ApartmentListRow = memo(({ relation, onPress, onDelete, isHistory }: Props
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  function RightAction(prog: SharedValue<number>, drag: SharedValue<number>) {
+  function RightAction(_: SharedValue<number>, drag: SharedValue<number>) {
     const styleAnimation = useAnimatedStyle(() => {
       return {
         transform: [{ translateX: drag.value + 100 }],

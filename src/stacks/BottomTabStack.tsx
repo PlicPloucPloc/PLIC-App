@@ -6,6 +6,8 @@ import {
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
 
+import { IoniconName } from '@app/definitions';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { BottomTabStackParamList } from '@navigation/Types';
 
 import AccountStack from './AccountStack';
@@ -13,8 +15,6 @@ import ColocFinderStack from './ColocFinderStack';
 import HomeStack from './HomeStack';
 import LikesStack from './LikesStack';
 import MessageStack from './MessageStack';
-import { IoniconName } from '@app/definitions';
-import { useThemeColors } from '@app/hooks/UseThemeColor';
 
 const Stack = createBottomTabNavigator<BottomTabStackParamList>();
 

@@ -166,7 +166,6 @@ export async function isCollocEnabled(): Promise<boolean> {
   }
 
   const data = (await response.json()) as IsCollocEnabledRepsonse;
-  console.log('isCollocEnabled response data:', data);
 
   return data.isCollocEnabled;
 }

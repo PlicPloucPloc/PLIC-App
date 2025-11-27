@@ -19,6 +19,7 @@ import Loader from '@components/Loader';
 import { SharedStackScreenProps } from '@navigation/Types';
 
 const ICON_SIZE = 38;
+const MAX_LINES = 4;
 
 export default function ApartmentDetailsScreen({
   navigation,
@@ -31,7 +32,6 @@ export default function ApartmentDetailsScreen({
   const [apartment, setApartment] = useState<ApartmentInfo>();
 
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const MAX_LINES = 4;
 
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -39,10 +39,15 @@ export default function ApartmentDetailsScreen({
     (async () => {
       setLoading(true);
 
-      const apartment: ApartmentInfo = route.params.apartment;
-      apartment.images = await getApartmentImages(apartment).finally(() => setLoading(false));
+      const apartmentTmp: ApartmentInfo = route.params.apartment;
+      const images = await getApartmentImages(apartmentTmp).finally(() => {
+        setLoading(false);
+      });
 
-      setApartment(apartment);
+      setApartment({
+        ...apartmentTmp,
+        images,
+      });
     })();
   }, [route.params]);
 
@@ -161,13 +166,14 @@ export default function ApartmentDetailsScreen({
             </SwipeButton>
             <SwipeButton
               style={styles.button}
-              onPress={() =>
-                navigation.navigate('BottomTabStack', {
-                  screen: 'MessageStack',
-                  params: {
-                    screen: 'DirectMessage',
-                  },
-                })
+              onPress={
+                () => {}
+                // navigation.navigate('BottomTabStack', {
+                //   screen: 'MessageStack',
+                //   params: {
+                //     screen: 'DirectMessage',
+                //   },
+                // })
               }>
               <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />
             </SwipeButton>

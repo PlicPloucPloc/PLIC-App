@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View, RefreshControl } from 'react-native';
+import { FlatList, StyleSheet, Text, View, RefreshControl } from 'react-native';
 
 import { useSelector } from 'react-redux';
 
@@ -8,7 +8,7 @@ import { Room } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { getAllRooms } from '@app/rest/ChatService';
-import MessageListItem from '@components/MessageListItem';
+import ListMessageParticipants from '@components/MessageParticipantsList';
 import { MessageStackScreenProps } from '@navigation/Types';
 
 export default function DirectMessageListScreen({
@@ -34,12 +34,12 @@ export default function DirectMessageListScreen({
 
   const renderItem = useCallback(
     ({ item }: { item: Room }) => (
-      <MessageListItem
+      <ListMessageParticipants
         roomInfo={item}
         onPress={() =>
           navigation.navigate('SharedStack', {
             screen: 'DirectMessage',
-            params: { roomId: item.room_id },
+            params: { roomInfo: item },
           })
         }
       />
@@ -49,22 +49,13 @@ export default function DirectMessageListScreen({
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>Messages</Text>
-        <TouchableOpacity
-          style={styles.roomiesButton}
-          onPress={() => navigation.navigate('GroupMessageList')}>
-          <Text style={styles.roomiesText}>Group messages</Text>
-        </TouchableOpacity>
-      </View>
-
       <FlatList
         data={rooms}
         renderItem={renderItem}
         contentContainerStyle={{ paddingHorizontal: 16 }}
         ListEmptyComponent={
           <Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 20 }}>
-            No direct message rooms found.
+            No chat found.
           </Text>
         }
         refreshControl={
@@ -85,28 +76,5 @@ const createStyles = (colors: ColorTheme) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
-      paddingTop: 50,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      marginBottom: 12,
-    },
-    headerTitle: {
-      fontSize: 28,
-      fontWeight: 'bold',
-    },
-
-    roomiesButton: {
-      backgroundColor: colors.primary,
-      paddingVertical: 6,
-      paddingHorizontal: 16,
-      borderRadius: 20,
-    },
-    roomiesText: {
-      color: colors.textPrimary,
-      fontWeight: '600',
     },
   });

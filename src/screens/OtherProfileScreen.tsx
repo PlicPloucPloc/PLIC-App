@@ -9,12 +9,12 @@ import { IoniconName, AuthState } from '@app/definitions';
 import { CreateRoomRequest } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
-import { createRoom } from '@app/rest/ChatService';
+import { createAndGetRoom, createRoom } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import { calculateAge } from '@app/utils/Misc';
+import Loader from '@components/Loader';
 import ProfilePicture from '@components/ProfilePicture';
 import { SharedStackScreenProps } from '@navigation/Types';
-import Loader from '@components/Loader';
 
 type ProfileItem = {
   icon: IoniconName;
@@ -46,17 +46,13 @@ export default function OtherProfileScreen({
 
   const authState = useSelector((state: RootState) => state.authState);
   const isCurrentUser = authState.userId === route.params.userId;
-  const roomRequest: CreateRoomRequest = {
-    users: [route.params.userId],
-    apartment_id: null,
-    owner_id: authState.userId,
-  };
 
   useEffect(() => {
     (async () => {
       let userInfo;
 
       if (isCurrentUser) {
+        setLoading(false);
         userInfo = authState;
       } else {
         setLoading(true);
@@ -82,6 +78,24 @@ export default function OtherProfileScreen({
     })();
   }, [route.params.userId, authState, isCurrentUser]);
 
+  async function createRoom() {
+    const roomRequest: CreateRoomRequest = {
+      users: [route.params.userId],
+      apartment_id: null,
+      owner_id: authState.userId,
+    };
+
+    const room = await createAndGetRoom(authState.userId, roomRequest);
+    if (!room) {
+      return Alert.alert(
+        'Something went wrong.',
+        'We were unable to create a chat with this user.\nPlease try again later.',
+      );
+    }
+
+    navigation.navigate('DirectMessage', { roomInfo: room });
+  }
+
   return (
     <View style={styles.container}>
       <Loader loading={loading} />
@@ -97,33 +111,15 @@ export default function OtherProfileScreen({
 
       {!isCurrentUser && (
         <View>
-          <TouchableOpacity
-            onPress={async () => {
-              const roomId = await createRoom(roomRequest);
-              if (!roomId) {
-                return Alert.alert(
-                  'Something went wrong.',
-                  'We were unable to create a chat with this user.\nPlease try again later.',
-                );
-              }
-
-              navigation.navigate('DirectMessage', { roomId });
-            }}
-            style={{ marginTop: 12, alignSelf: 'center' }}>
+          <TouchableOpacity onPress={createRoom} style={{ marginTop: 12, alignSelf: 'center' }}>
             <Text style={{ color: colors.primary, fontWeight: '600' }}>Send message</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={async () => {
-              navigation.navigate('BottomTabStack', {
-                screen: 'MessageStack',
-                params: {
-                  screen: 'AddToARoom',
-                  params: { userId: route.params.userId },
-                },
-              });
+            onPress={() => {
+              navigation.navigate('AddToARoom', { userId: route.params.userId });
             }}
-            style={{ marginTop: 12, alignSelf: 'center' }}>
-            <Text style={{ color: colors.primary, fontWeight: '600' }}>Add to a room</Text>
+            style={{ marginTop: 8, alignSelf: 'center' }}>
+            <Text style={{ color: colors.primary, fontWeight: '600' }}>Add to a group chat</Text>
           </TouchableOpacity>
         </View>
       )}
