@@ -7,10 +7,9 @@ import {
 import HeaderBackButton from '@components/HeaderBackButton';
 import HeaderMessageParticipants from '@components/HeaderMessageInfo';
 import { SharedStackParamList } from '@navigation/Types';
-import AddToARoomScreen from '@screens/AddToARoom';
 import ApartmentDetailsScreen from '@screens/ApartmentDetailsScreen';
-import DirectMessageScreen from '@screens/DirectMessageScreen';
 import GroupInfoScreen from '@screens/GroupInfo';
+import DirectMessageScreen from '@screens/MessageScreen';
 import OtherProfileScreen from '@screens/OtherProfileScreen';
 
 const Stack = createStackNavigator<SharedStackParamList>();
@@ -46,7 +45,7 @@ export default function SharedStack() {
         options={({ navigation }) => headerOptions(navigation, 'Profile')}
       />
       <Stack.Screen
-        name="DirectMessage"
+        name="Message"
         component={DirectMessageScreen}
         options={({ navigation }) => {
           return {
@@ -59,12 +58,6 @@ export default function SharedStack() {
         name="GroupInfo"
         component={GroupInfoScreen}
         options={({ navigation }) => headerOptions(navigation, 'Group Info')}
-      />
-
-      <Stack.Screen
-        name="AddToARoom"
-        component={AddToARoomScreen}
-        options={({ navigation }) => headerOptions(navigation, 'Add to a group')}
       />
     </Stack.Navigator>
   );

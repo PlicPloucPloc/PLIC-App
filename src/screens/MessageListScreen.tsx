@@ -14,7 +14,7 @@ import { MessageStackScreenProps } from '@navigation/Types';
 
 export default function DirectMessageListScreen({
   navigation,
-}: MessageStackScreenProps<'DirectMessageList'>) {
+}: MessageStackScreenProps<'MessageList'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -39,7 +39,7 @@ export default function DirectMessageListScreen({
         roomInfo={item}
         onPress={() =>
           navigation.navigate('SharedStack', {
-            screen: 'DirectMessage',
+            screen: 'Message',
             params: { roomInfo: item },
           })
         }

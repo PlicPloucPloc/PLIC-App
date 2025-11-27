@@ -18,7 +18,7 @@ import { SharedStackScreenProps } from '@navigation/Types';
 export default function DirectMessageScreen({
   navigation,
   route,
-}: SharedStackScreenProps<'DirectMessage'>) {
+}: SharedStackScreenProps<'Message'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 

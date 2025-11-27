@@ -138,7 +138,6 @@ class ChatService {
   }
 
   private handleMessage(response: WebSocketResponse) {
-    console.log(response);
     switch (response.type) {
       case ResponseType.MESSAGE_RECEIVED:
         const msgData = response.data as WSMessageReceivedData;

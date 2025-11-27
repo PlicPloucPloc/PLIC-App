@@ -6,7 +6,7 @@ import {
 
 import HeaderBackButton from '@components/HeaderBackButton';
 import { BottomTabStackScreenProps, MessageStackParamList } from '@navigation/Types';
-import DirectMessageListScreen from '@screens/DirectMessageListScreen';
+import DirectMessageListScreen from '@screens/MessageListScreen';
 
 const Stack = createStackNavigator<MessageStackParamList>();
 
@@ -29,9 +29,9 @@ function headerOptions(
 
 export default function MessageStack(_: BottomTabStackScreenProps<'MessageStack'>) {
   return (
-    <Stack.Navigator initialRouteName="DirectMessageList" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="MessageList" screenOptions={{ headerShown: false }}>
       <Stack.Screen
-        name="DirectMessageList"
+        name="MessageList"
         component={DirectMessageListScreen}
         options={({ navigation }) => headerOptions(navigation, 'Messages')}
       />

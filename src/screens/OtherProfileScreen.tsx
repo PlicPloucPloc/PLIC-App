@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
@@ -11,8 +11,11 @@ import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { createAndGetRoom } from '@app/rest/ChatService';
 import { calculateAge } from '@app/utils/Misc';
+import BottomPopupModal from '@components/BottomPopupModal';
 import ProfilePicture from '@components/ProfilePicture';
 import { SharedStackScreenProps } from '@navigation/Types';
+
+import AddToARoom from './AddToARoom';
 
 type ProfileItem = {
   icon: IoniconName;
@@ -28,6 +31,8 @@ export default function OtherProfileScreen({
   const styles = createStyles(colors);
 
   const authState = useSelector((state: RootState) => state.authState);
+
+  const [modalVisible, setModalVisible] = useState(false);
 
   const isCurrentUser = authState.userId === route.params.user.userId;
 
@@ -52,11 +57,26 @@ export default function OtherProfileScreen({
       );
     }
 
-    navigation.navigate('DirectMessage', { roomInfo: room });
+    navigation.navigate('Message', { roomInfo: room });
   }
 
+  console.log('OtherProfileScreen', route.params.user);
   return (
     <View style={styles.container}>
+      <BottomPopupModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        title="Add to a group chat"
+        subtitle="Select a group chat to add this user to.">
+        <AddToARoom
+          afterAdd={(roomInfo) => {
+            navigation.navigate('Message', { roomInfo: roomInfo });
+            setModalVisible(false);
+          }}
+          user={route.params.user}
+        />
+      </BottomPopupModal>
+
       <View style={styles.pictureContainer}>
         <ProfilePicture
           size={200}
@@ -73,9 +93,7 @@ export default function OtherProfileScreen({
             <Text style={{ color: colors.primary, fontWeight: '600' }}>Send message</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={() => {
-              navigation.navigate('AddToARoom', { user: route.params.user });
-            }}
+            onPress={() => setModalVisible(true)}
             style={{ marginTop: 8, alignSelf: 'center' }}>
             <Text style={{ color: colors.primary, fontWeight: '600' }}>Add to a group chat</Text>
           </TouchableOpacity>

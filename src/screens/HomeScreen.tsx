@@ -178,7 +178,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     };
 
     navigation.navigate('SharedStack', {
-      screen: 'DirectMessage',
+      screen: 'Message',
       params: { roomInfo },
     });
   }

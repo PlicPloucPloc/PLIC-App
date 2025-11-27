@@ -52,9 +52,8 @@ export type SharedStackParamList = {
     enableRelationButtons?: boolean;
   };
   OtherProfile: { user: AuthState };
-  DirectMessage: { roomInfo: Room };
+  Message: { roomInfo: Room };
   GroupInfo: { roomInfo: Room };
-  AddToARoom: { user: AuthState };
 };
 
 export type SharedStackScreenProps<T extends keyof SharedStackParamList> = CompositeScreenProps<
@@ -89,7 +88,7 @@ export type HomeStackScreenProps<T extends keyof HomeStackParamList> = Composite
 
 // ------- Message stack -------
 export type MessageStackParamList = {
-  DirectMessageList: undefined;
+  MessageList: undefined;
   SharedStack: NavigatorScreenParams<SharedStackParamList>;
 };
 
