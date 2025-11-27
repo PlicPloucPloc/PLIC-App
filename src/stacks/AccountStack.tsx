@@ -5,6 +5,7 @@ import {
 } from '@react-navigation/stack';
 
 import HeaderBackButton from '@components/HeaderBackButton';
+import HeaderInfoButton from '@components/HeaderInfoButton';
 import { AccountStackParamList, BottomTabStackScreenProps } from '@navigation/Types';
 import AccountScreen from '@screens/AccountScreen';
 import FiltersScreen from '@screens/FiltersScreen';
@@ -16,6 +17,7 @@ const Stack = createStackNavigator<AccountStackParamList>();
 function headerOptions(
   title: string | null,
   navigation?: StackNavigationProp<AccountStackParamList>,
+  headerRight?: boolean,
 ): StackNavigationOptions {
   return {
     headerShown: true,
@@ -28,6 +30,9 @@ function headerOptions(
     },
     headerLeft: () => {
       return navigation ? <HeaderBackButton navigation={navigation} /> : null;
+    },
+    headerRight: () => {
+      return headerRight ? <HeaderInfoButton icon="help-circle-outline" /> : null;
     },
   };
 }
@@ -55,7 +60,7 @@ export default function AccountStack(_: BottomTabStackScreenProps<'AccountStack'
       <Stack.Screen
         name="History"
         component={HistoryScreen}
-        options={({ navigation }) => headerOptions('History', navigation)}
+        options={({ navigation }) => headerOptions('History', navigation, true)}
       />
     </Stack.Navigator>
   );

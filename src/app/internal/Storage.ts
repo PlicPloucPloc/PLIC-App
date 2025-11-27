@@ -26,8 +26,8 @@ export class StorageManager {
     return filters ? (JSON.parse(filters) as FiltersState) : null;
   }
 
-  clearAsyncStorage(): Promise<void> {
-    return AsyncStorage.clear();
+  clearAsyncStorage(userId: string): Promise<void> {
+    return AsyncStorage.removeItem(StorageManager.AppStorage.filters(userId));
   }
 
   // ---- SECURE STORE ----
@@ -63,8 +63,8 @@ export class StorageManager {
   }
 
   // ---- COMBINED ----
-  async clearStorage(): Promise<void> {
-    await Promise.all([this.clearAsyncStorage(), this.clearSecureStore()]);
+  async clearStorage(userId: string): Promise<void> {
+    await Promise.all([this.clearAsyncStorage(userId), this.clearSecureStore()]);
   }
 }
 

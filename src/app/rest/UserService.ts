@@ -117,6 +117,20 @@ export async function logoutUser(): Promise<void> {
       profilePictureUri: null,
     }),
   );
+  store.dispatch(
+    setFiltersState({
+      hasValues: false,
+      minSurface: 0,
+      maxSurface: 0,
+      maxPrice: 0,
+      isFurnished: false,
+      location: {
+        name: '',
+        latitude: 0,
+        longitude: 0,
+      },
+    }),
+  );
 }
 
 export async function registerUser(userInfo: RegisterRequest): Promise<boolean> {

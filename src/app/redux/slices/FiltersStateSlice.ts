@@ -3,7 +3,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { FILTERS_SURFACE_MAX, FILTERS_SURFACE_MIN } from '@app/config/Constants';
 import { FiltersState } from '@app/definitions';
 
-const initialState: FiltersState | null = {
+const initialState: FiltersState = {
   hasValues: false,
   minSurface: FILTERS_SURFACE_MIN,
   maxSurface: FILTERS_SURFACE_MAX,
