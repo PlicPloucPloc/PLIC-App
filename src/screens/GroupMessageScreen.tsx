@@ -15,7 +15,7 @@ import { Ionicons } from '@expo/vector-icons';
 
 import { ColorTheme } from '@app/Colors';
 import { AuthState } from '@app/definitions';
-import { chatService, Message, RoomDetails } from '@app/definitions/rest/ChatService';
+import { Message, RoomDetails } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import store from '@app/redux/Store';
 import { getMessage } from '@app/rest/ChatService';

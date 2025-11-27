@@ -82,6 +82,11 @@ export async function getMyRooms(userId: string): Promise<Room[]> {
   return addRoomsParticipants(userId, myRooms);
 }
 
+export async function getAllRooms(userId: string): Promise<Room[]> {
+  const allRooms = await getRooms();
+  return addRoomsParticipants(userId, allRooms);
+}
+
 export async function getRoomDetails(userId: string, roomId: number): Promise<RoomDetails | null> {
   const response = await apiFetch(
     Endpoints.CHAT.GET_ROOM_DETAILS(roomId),

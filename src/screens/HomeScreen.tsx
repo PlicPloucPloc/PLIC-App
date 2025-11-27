@@ -141,8 +141,8 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     }
   }
 
-  async function createChat(apartmentId: number, owner_id: string) {
-    if (owner_id === authState.userId) {
+  async function createChat(apartmentId: number, aptOwner: string) {
+    if (aptOwner === authState.userId) {
       Alert.alert(
         'Could not create chat !',
         'This apartment belongs to you, we cannot create a chat room.',
@@ -152,7 +152,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     const roomRequest: CreateRoomRequest = {
       apartment_id: apartmentId,
       owner_id: authState.userId,
-      users: [owner_id],
+      users: [aptOwner],
     };
 
     const roomId = await createRoom(roomRequest);

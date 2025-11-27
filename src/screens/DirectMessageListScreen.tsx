@@ -7,7 +7,7 @@ import { ColorTheme } from '@app/Colors';
 import { Room } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
-import { getDirectMessageRooms } from '@app/rest/ChatService';
+import { getAllRooms } from '@app/rest/ChatService';
 import MessageListItem from '@components/MessageListItem';
 import { MessageStackScreenProps } from '@navigation/Types';
 
@@ -24,7 +24,7 @@ export default function DirectMessageListScreen({
 
   const fetchRooms = useCallback(async () => {
     setRefreshing(true);
-    const rooms = await getDirectMessageRooms(currentUserId).finally(() => setRefreshing(false));
+    const rooms = await getAllRooms(currentUserId).finally(() => setRefreshing(false));
     setRooms(rooms);
   }, [currentUserId]);
 
