@@ -34,10 +34,6 @@ const HeaderMessageInfo = memo(
       if (roomInfo.participants.length === 1) {
         setIsGroup(false);
         setTitle(`${roomInfo.participants[0].firstName} ${roomInfo.participants[0].lastName}`);
-        console.log(
-          'One participant:',
-          `${roomInfo.participants[0].firstName} ${roomInfo.participants[0].lastName}`,
-        );
       } else {
         setIsGroup(true);
 
@@ -50,7 +46,6 @@ const HeaderMessageInfo = memo(
           first_two_names += `, and ${roomInfo.participants.length - 2} others`;
         }
 
-        console.log('Group chat with participants:', first_two_names);
         setTitle(first_two_names);
       }
     }, [roomInfo]);

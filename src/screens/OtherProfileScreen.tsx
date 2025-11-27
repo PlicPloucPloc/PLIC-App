@@ -9,7 +9,7 @@ import { IoniconName, AuthState } from '@app/definitions';
 import { CreateRoomRequest } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
-import { createAndGetRoom, createRoom } from '@app/rest/ChatService';
+import { createAndGetRoom } from '@app/rest/ChatService';
 import { getOtherUserInfo } from '@app/rest/UserService';
 import { calculateAge } from '@app/utils/Misc';
 import Loader from '@components/Loader';
@@ -116,7 +116,7 @@ export default function OtherProfileScreen({
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => {
-              navigation.navigate('AddToARoom', { userId: route.params.userId });
+              navigation.navigate('AddToARoom', { user: userInfo });
             }}
             style={{ marginTop: 8, alignSelf: 'center' }}>
             <Text style={{ color: colors.primary, fontWeight: '600' }}>Add to a group chat</Text>

@@ -33,7 +33,6 @@ export default function DirectMessageScreen({
 
   useEffect(() => {
     const roomInfo = route.params.roomInfo;
-    console.log('Setting header for room:', roomInfo);
 
     navigation.setOptions({
       headerRight: () => (
@@ -182,7 +181,6 @@ export default function DirectMessageScreen({
           renderItem={renderMessage}
           keyExtractor={(item) => `${item.room_id}-${item.id}`}
           contentContainerStyle={styles.messagesList}
-          // onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>No messages yet. Say hi!</Text>

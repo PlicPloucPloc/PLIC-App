@@ -2,7 +2,7 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 import { StackAnimationName, StackScreenProps } from '@react-navigation/stack';
 
-import { ApartmentInfo } from '@app/definitions';
+import { ApartmentInfo, AuthState } from '@app/definitions';
 import { Room } from '@app/definitions/rest/ChatService';
 
 // ...ParamList is the list of all the screens in the navigator
@@ -54,7 +54,7 @@ export type SharedStackParamList = {
   OtherProfile: { userId: string };
   DirectMessage: { roomInfo: Room };
   GroupInfo: { roomInfo: Room };
-  AddToARoom: { userId: string };
+  AddToARoom: { user: AuthState };
 };
 
 export type SharedStackScreenProps<T extends keyof SharedStackParamList> = CompositeScreenProps<
