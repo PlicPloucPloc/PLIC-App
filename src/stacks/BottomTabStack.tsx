@@ -37,7 +37,7 @@ export default function BottomTabStack() {
 
   return (
     <Stack.Navigator
-      initialRouteName="MessageStack"
+      initialRouteName="HomeStack"
       screenOptions={{
         headerShown: false,
         tabBarStyle: { paddingHorizontal: 8 },
