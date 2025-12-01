@@ -47,7 +47,7 @@ export default function RegisterUserInfoScreen({
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={styles.container}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
       <View style={styles.container}>
         <View style={styles.buttonContainer}>
           <Text style={styles.title}>Register - About you</Text>
@@ -109,21 +109,19 @@ const createStyles = (colors: ColorTheme) =>
     container: {
       flex: 1,
       alignItems: 'center',
-      justifyContent: 'center',
       backgroundColor: colors.background,
+    },
+    buttonContainer: {
+      flex: 1,
+      width: '100%',
+      gap: 20,
+      paddingHorizontal: 20,
     },
     title: {
       fontSize: 28,
       fontWeight: 'bold',
       color: colors.textPrimary,
-    },
-    buttonContainer: {
-      flex: 3,
-      width: '100%',
-      justifyContent: 'center',
-      alignItems: 'center',
-      gap: 20,
-      paddingHorizontal: 20,
+      alignSelf: 'center',
     },
     input: {
       width: '100%',

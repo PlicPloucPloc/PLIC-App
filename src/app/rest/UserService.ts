@@ -11,6 +11,7 @@ import {
   RootEnum,
   UserInfoResponse,
 } from '@app/definitions';
+import { storageManager } from '@app/internal/Storage';
 import { setFiltersState, setRoot, setUserInfo } from '@app/redux/slices';
 import store from '@app/redux/Store';
 import { alertOnResponseError } from '@app/utils/Error.ts';
@@ -19,7 +20,6 @@ import { fetchAndCompressImage } from '@app/utils/Image.ts';
 import { apiFetch } from './Client';
 import Endpoints from './Endpoints';
 import { checkProfilePictureExists, postProfilePictureFromSignedUrl } from './S3Service.ts';
-import { storageManager } from './Storage.ts';
 
 async function userInfoToAuthState(userInfo: UserInfoResponse): Promise<AuthState> {
   const authState: AuthState = {
@@ -91,7 +91,7 @@ export async function loginUser(credentials: LoginRequest): Promise<boolean | nu
       return null; // Signal to navigate to VerifyEmail screen
     }
 
-    Alert.alert('User Error', errorData.message || 'An error occurred during login.');
+    Alert.alert('Login failed', errorData.message || 'An error occurred during login.');
     return false;
   }
 
@@ -115,6 +115,20 @@ export async function logoutUser(): Promise<void> {
       lastName: '',
       birthdate: '',
       profilePictureUri: null,
+    }),
+  );
+  store.dispatch(
+    setFiltersState({
+      hasValues: false,
+      minSurface: 0,
+      maxSurface: 0,
+      maxPrice: 0,
+      isFurnished: false,
+      location: {
+        name: '',
+        latitude: 0,
+        longitude: 0,
+      },
     }),
   );
 }

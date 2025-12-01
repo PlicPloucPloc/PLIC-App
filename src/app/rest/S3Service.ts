@@ -80,7 +80,10 @@ export async function getApartmentImages(apt: ApartmentInfo) {
   while (true) {
     const imageUrl = `${S3_URL}/public/apartment-pictures/${apt.apartment_id}/${index}.jpeg`;
     const exists = await checkImageExists(imageUrl);
-    if (!exists) break;
+    if (!exists) {
+      break;
+    }
+
     images_url.push(imageUrl);
     index++;
   }

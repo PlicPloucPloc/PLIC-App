@@ -1,161 +1,137 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  FlatList,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-  TextInput,
-  Pressable,
-  TouchableOpacity,
-} from 'react-native';
+import { FlatList, StyleSheet, Text, View, TextInput, Pressable } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
+import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
-import { AuthState } from '@app/definitions';
-import { chatService, Message, MessageResponse } from '@app/definitions/rest/ChatService';
+import { Message } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import store from '@app/redux/Store';
-import { getMessage } from '@app/rest/ChatService';
-import { getOtherUserInfo } from '@app/rest/UserService';
+import { RootState } from '@app/redux/Store';
+import { getRoomDetails } from '@app/rest/ChatService';
+import { chatService } from '@app/socket/ChatService';
+import HeaderMessageInfo from '@components/HeaderMessageInfo';
 import Loader from '@components/Loader';
-import ProfilePicture from '@components/ProfilePicture';
 import { SharedStackScreenProps } from '@navigation/Types';
-
-type FlatMessage = {
-  id: number | string;
-  room_id: number;
-  message: string;
-  sender_id: string;
-  created_at: string;
-  participants: string[];
-  isSending?: boolean;
-};
 
 export default function DirectMessageScreen({
   navigation,
   route,
-}: SharedStackScreenProps<'DirectMessage'>) {
+}: SharedStackScreenProps<'Message'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
-  const flatListRef = useRef<FlatList>(null);
-  const currentUserId: string = store.getState().authState.userId;
 
+  const currentUserId: string = useSelector((state: RootState) => state.authState.userId);
+
+  const flatListRef = useRef<FlatList>(null);
   const [loading, setLoading] = useState(true);
   const [inputMessage, setInputMessage] = useState('');
   const [sending, setSending] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
-  const [messages, setMessages] = useState<FlatMessage[]>([]);
-  const [otherUserInfo, setOtherUserInfo] = useState<AuthState | null>(null);
-
-  const roomId = route.params.roomId;
+  const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
-    if (roomId == null) {
-      setLoading(false);
-      return;
-    }
+    const roomInfo = route.params.roomInfo;
 
-    chatService.connect();
-    const unsubscribeConnection = chatService.onConnectionChange((connected) => {
-      setIsConnected(connected);
+    navigation.setOptions({
+      headerRight: () => (
+        <HeaderMessageInfo
+          roomInfo={roomInfo}
+          onPressSingle={() => {
+            navigation.navigate('OtherProfile', { user: roomInfo.participants[0] });
+          }}
+          onPressGroup={() => {
+            navigation.navigate('GroupInfo', { roomInfo: roomInfo });
+          }}
+        />
+      ),
     });
+  }, [navigation, route.params.roomInfo]);
 
-    const fetchMessages = async () => {
-      try {
-        const messageResponse: MessageResponse | null = await getMessage(roomId);
+  // Effect to fetch room details and messages
+  useEffect(() => {
+    const fetchRoomDetails = async () => {
+      setLoading(true);
+      const roomDetails = await getRoomDetails(
+        currentUserId,
+        route.params.roomInfo.room_id,
+      ).finally(() => setLoading(false));
 
-        if (!messageResponse) {
-          console.error('No messages found');
-          return;
-        }
-
-        const otherUserId = messageResponse.participants.find((id) => id !== currentUserId);
-        if (otherUserId) {
-          const userInfo = await getOtherUserInfo(otherUserId);
-          setOtherUserInfo(userInfo);
-        }
-
-        const allMessages: FlatMessage[] = messageResponse.messages.map((msg) => ({
-          id: msg.id,
-          room_id: msg.room_id,
-          message: msg.message,
-          sender_id: msg.sender_id,
-          created_at: msg.created_at,
-          participants: messageResponse.participants,
-        }));
-
-        setMessages(allMessages);
-      } catch (error) {
-        console.error('Error fetching messages:', error);
-      } finally {
-        setLoading(false);
+      if (!roomDetails || roomDetails.participants.length === 0) {
+        console.error('No room details found');
+        return;
       }
+
+      setMessages(roomDetails.messages.reverse());
     };
 
-    fetchMessages();
-    const unsubscribeMessages = chatService.onMessageForRoom(roomId, (newMessage: Message) => {
-      const flatMessage: FlatMessage = {
-        id: newMessage.id,
-        room_id: newMessage.room_id,
-        message: newMessage.message,
-        sender_id: newMessage.sender_id,
-        created_at: new Date().toISOString(),
-        participants: [],
-      };
+    fetchRoomDetails();
+  }, [currentUserId, route.params.roomInfo.room_id]);
 
-      setMessages((prev) => [...prev, flatMessage]);
-    });
+  // Effect to handle WebSocket connection and incoming messages
+  useEffect(() => {
+    if (!chatService.isConnected()) {
+      chatService.connect();
+    } else {
+      setIsConnected(true);
+    }
+
+    const unsubscribeConnection = chatService.onConnectionChange(setIsConnected);
+
+    const unsubscribeMessages = chatService.onMessageForRoom(
+      route.params.roomInfo.room_id,
+      (newMessage: Message) => setMessages((prev) => [newMessage, ...prev]),
+    );
 
     return () => {
       unsubscribeConnection();
       unsubscribeMessages();
     };
-  }, [roomId, currentUserId]);
+  }, [currentUserId, route.params.roomInfo]);
 
   const handleSend = async () => {
-    if (!inputMessage.trim() || !roomId) return;
+    const roomId = route.params.roomInfo.room_id;
+    if (!inputMessage.trim()) {
+      return;
+    }
 
     const messageText = inputMessage.trim();
-    const tempId = `temp-${Date.now()}`;
-    const optimisticMessage: FlatMessage = {
-      id: tempId,
+
+    const now = new Date();
+    const newMessage: Message = {
+      id: now.getTime(),
       room_id: roomId,
       message: messageText,
       sender_id: currentUserId,
-      created_at: new Date().toISOString(),
-      participants: [],
+      created_at: now.toISOString(),
       isSending: true,
     };
 
-    setMessages((prev) => [...prev, optimisticMessage]);
+    setMessages((prev) => [newMessage, ...prev]);
     setInputMessage('');
-    setSending(true);
 
     try {
+      setSending(true);
       const success = await chatService.sendMessage(roomId, messageText);
 
       if (success) {
         setMessages((prev) =>
-          prev.map((msg) => (msg.id === tempId ? { ...msg, isSending: false } : msg)),
+          prev.map((msg) => (msg.id === now.getTime() ? { ...msg, isSending: false } : msg)),
         );
       } else {
-        console.error('Failed to send message');
-        setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
-        setInputMessage(messageText);
+        throw new Error('Failed to send message');
       }
     } catch (error) {
       console.error('Error sending message:', error);
-      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
-      setInputMessage(messageText);
+      setMessages((prev) => prev.filter((msg) => msg.id !== now.getTime()));
+      // setInputMessage(messageText);
     } finally {
       setSending(false);
     }
   };
 
-  const renderMessage = ({ item }: { item: FlatMessage }) => {
+  const renderMessage = ({ item }: { item: Message }) => {
     const isMyMessage = item.sender_id === currentUserId;
 
     return (
@@ -186,7 +162,7 @@ export default function DirectMessageScreen({
   };
 
   if (loading) {
-    return <Loader loading={true} />;
+    return <Loader loading={loading} />;
   }
 
   return (
@@ -197,39 +173,14 @@ export default function DirectMessageScreen({
         </View>
       )}
 
-      <View style={styles.senderInfo}>
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate('SharedStack', {
-              screen: 'OtherProfile',
-              params: { userId: otherUserInfo?.userId || '' },
-            })
-          }>
-          <ProfilePicture
-            size={70}
-            imageUri={otherUserInfo?.profilePictureUri ?? null}
-            firstName={otherUserInfo?.firstName || ''}
-            lastName={otherUserInfo?.lastName || ''}
-            borderRadius={10}
-          />
-        </TouchableOpacity>
-
-        <Text style={styles.senderName}>
-          {otherUserInfo ? `${otherUserInfo.firstName} ${otherUserInfo.lastName}` : 'Loading...'}
-        </Text>
-      </View>
-
-      <KeyboardAvoidingView
-        style={styles.messagesContainer}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        keyboardVerticalOffset={0}>
+      <KeyboardAvoidingView style={{ flex: 1 }} behavior={undefined}>
         <FlatList
           ref={flatListRef}
           data={messages}
+          inverted={true}
           renderItem={renderMessage}
           keyExtractor={(item) => `${item.room_id}-${item.id}`}
           contentContainerStyle={styles.messagesList}
-          onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
           ListEmptyComponent={
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>No messages yet. Say hi!</Text>
@@ -274,38 +225,20 @@ const createStyles = (colors: ColorTheme) =>
       backgroundColor: colors.background,
     },
     connectionBanner: {
-      backgroundColor: '#FFA500',
+      backgroundColor: colors.contrast,
       paddingVertical: 8,
       alignItems: 'center',
     },
     connectionText: {
-      color: '#fff',
+      color: colors.background,
       fontSize: 12,
       fontWeight: '600',
-    },
-    senderInfo: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 16,
-      paddingTop: 25,
-      paddingBottom: 12,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: '#E5E5EA',
-      backgroundColor: colors.background,
-    },
-    senderName: {
-      fontSize: 15,
-      fontWeight: '600',
-      color: colors.textPrimary,
-      marginLeft: 10,
-    },
-    messagesContainer: {
-      flex: 1,
     },
     messagesList: {
       paddingHorizontal: 16,
       paddingVertical: 12,
       flexGrow: 1,
+      justifyContent: 'flex-end',
     },
     emptyContainer: {
       flex: 1,
@@ -337,7 +270,7 @@ const createStyles = (colors: ColorTheme) =>
       backgroundColor: colors.primary,
     },
     theirMessageBubble: {
-      backgroundColor: '#E5E5EA',
+      backgroundColor: colors.backgroundSecondary,
     },
     messageSending: {
       opacity: 0.6,
@@ -348,7 +281,7 @@ const createStyles = (colors: ColorTheme) =>
       marginBottom: 2,
     },
     myMessageText: {
-      color: '#fff',
+      color: colors.textPrimary,
     },
     messageTime: {
       fontSize: 11,

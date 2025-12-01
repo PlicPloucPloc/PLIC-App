@@ -6,6 +6,8 @@ import {
   createBottomTabNavigator,
 } from '@react-navigation/bottom-tabs';
 
+import { IoniconName } from '@app/definitions';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { BottomTabStackParamList } from '@navigation/Types';
 
 import AccountStack from './AccountStack';
@@ -16,12 +18,10 @@ import MessageStack from './MessageStack';
 
 const Stack = createBottomTabNavigator<BottomTabStackParamList>();
 
-type IconNames = keyof typeof Ionicons.glyphMap;
-
 function tabBarOptions(
   tabBarLabel: string,
-  icon: IconNames,
-  iconFocused: IconNames,
+  icon: IoniconName,
+  iconFocused: IoniconName,
 ): BottomTabNavigationOptions {
   return {
     tabBarLabel,
@@ -33,13 +33,16 @@ function tabBarOptions(
 }
 
 export default function BottomTabStack() {
+  const colors = useThemeColors();
+
   return (
     <Stack.Navigator
       initialRouteName="HomeStack"
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#4BA3C3',
-        tabBarInactiveTintColor: 'black',
+        tabBarStyle: { paddingHorizontal: 8 },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.contrast,
         animation: 'shift',
       }}>
       <Stack.Screen

@@ -12,6 +12,7 @@ export type BottomPopupModalProps = {
   modalVisible: boolean;
   setModalVisible: (visible: boolean) => void;
   title: string;
+  subtitle?: string;
   handleAlertOnClose?: { willAlert: () => boolean; isCloseApproved: () => Promise<boolean> };
 };
 
@@ -20,6 +21,7 @@ export default function BottomPopupModal({
   modalVisible,
   setModalVisible,
   title,
+  subtitle,
   handleAlertOnClose,
 }: BottomPopupModalProps) {
   const colors = useThemeColors();
@@ -64,19 +66,20 @@ export default function BottomPopupModal({
       onSwipeComplete={() => handleClose(false)}
       style={{ margin: 0 }}>
       <TouchableWithoutFeedback style={{ flex: 1 }} onPress={Keyboard.dismiss}>
-        <View style={styles.modalView}>
-          <View style={styles.modalSwipeIndicator} />
+        <View style={styles.container}>
+          <View style={styles.swipeIndicator} />
 
-          <View style={styles.modalHeaderContainer}>
+          <View style={styles.headerContainer}>
             <Ionicons
               name="close"
               size={26}
               color={colors.textPrimary}
               onPress={() => handleClose(true)}
             />
-            <Text style={styles.modalTitle}>{title}</Text>
+            <Text style={styles.title}>{title}</Text>
             <Ionicons name="close" size={24} style={{ opacity: 0 }} />
           </View>
+          <Text style={styles.subtitle}>{subtitle}</Text>
 
           {children}
         </View>
@@ -87,7 +90,7 @@ export default function BottomPopupModal({
 
 const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
-    modalView: {
+    container: {
       position: 'absolute',
       bottom: 0,
       width: '100%',
@@ -99,7 +102,7 @@ const createStyles = (colors: ColorTheme) =>
       borderTopRightRadius: 20,
       borderTopLeftRadius: 20,
     },
-    modalSwipeIndicator: {
+    swipeIndicator: {
       width: '10%',
       height: 5,
       backgroundColor: colors.contrast,
@@ -107,16 +110,22 @@ const createStyles = (colors: ColorTheme) =>
       alignSelf: 'center',
       marginBottom: 15,
     },
-    modalHeaderContainer: {
+    headerContainer: {
       flexDirection: 'row',
       justifyContent: 'space-around',
       marginTop: 10,
     },
-    modalTitle: {
+    title: {
       color: colors.textPrimary,
       fontSize: 18,
       fontWeight: '600',
       marginBottom: 23,
+      textAlign: 'center',
+    },
+    subtitle: {
+      color: colors.textSecondary,
+      fontSize: 14,
+      marginBottom: 15,
       textAlign: 'center',
     },
   });

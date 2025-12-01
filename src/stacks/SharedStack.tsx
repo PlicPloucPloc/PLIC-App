@@ -5,9 +5,11 @@ import {
 } from '@react-navigation/stack';
 
 import HeaderBackButton from '@components/HeaderBackButton';
+import HeaderMessageParticipants from '@components/HeaderMessageInfo';
 import { SharedStackParamList } from '@navigation/Types';
 import ApartmentDetailsScreen from '@screens/ApartmentDetailsScreen';
-import DirectMessageScreen from '@screens/DirectMessageScreen';
+import GroupInfoScreen from '@screens/GroupInfo';
+import DirectMessageScreen from '@screens/MessageScreen';
 import OtherProfileScreen from '@screens/OtherProfileScreen';
 
 const Stack = createStackNavigator<SharedStackParamList>();
@@ -31,7 +33,7 @@ function headerOptions(
 
 export default function SharedStack() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
+    <Stack.Navigator>
       <Stack.Screen
         name="ApartmentDetails"
         component={ApartmentDetailsScreen}
@@ -42,7 +44,21 @@ export default function SharedStack() {
         component={OtherProfileScreen}
         options={({ navigation }) => headerOptions(navigation, 'Profile')}
       />
-      <Stack.Screen name="DirectMessage" component={DirectMessageScreen} />
+      <Stack.Screen
+        name="Message"
+        component={DirectMessageScreen}
+        options={({ navigation }) => {
+          return {
+            ...headerOptions(navigation, ''),
+            headerRight: () => <HeaderMessageParticipants />,
+          };
+        }}
+      />
+      <Stack.Screen
+        name="GroupInfo"
+        component={GroupInfoScreen}
+        options={({ navigation }) => headerOptions(navigation, 'Group Info')}
+      />
     </Stack.Navigator>
   );
 }

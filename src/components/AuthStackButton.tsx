@@ -36,18 +36,16 @@ const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
     container: {
       backgroundColor: colors.primary,
-      borderColor: colors.contrast,
       alignItems: 'center',
-      justifyContent: 'center',
-      width: '65%',
-      padding: 3,
-      borderRadius: 100,
-      borderWidth: 2,
-      elevation: 3,
+      paddingVertical: 10,
+      marginTop: 20,
+      borderRadius: 8,
+      borderWidth: 1,
+      elevation: 5,
     },
     text: {
       color: colors.textPrimary,
-      fontSize: 22,
-      fontWeight: 'bold',
+      fontWeight: '600',
+      fontSize: 20,
     },
   });

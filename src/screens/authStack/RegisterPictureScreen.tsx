@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
@@ -35,10 +35,6 @@ export default function RegisterPictureScreen({
   }
 
   function handleNext() {
-    if (!imageUri) {
-      Alert.alert('Error', 'Please select or take a profile picture, or skip.');
-      return;
-    }
     navigation.navigate('RegisterPassword');
   }
 
@@ -72,7 +68,11 @@ export default function RegisterPictureScreen({
           </TouchableOpacity>
         </View>
 
-        <AuthStackButton title={imageUri ? 'Next' : 'Skip'} onPress={handleNext} />
+        <AuthStackButton
+          title={imageUri ? 'Next' : 'Skip'}
+          onPress={handleNext}
+          containerStyle={{ alignSelf: 'stretch' }}
+        />
       </View>
 
       <BackgroundBuildings />
@@ -85,14 +85,10 @@ const createStyles = (colors: any) =>
     container: {
       paddingTop: 20,
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
       backgroundColor: colors.background,
     },
     content: {
-      flex: 3,
       width: '100%',
-      justifyContent: 'center',
       alignItems: 'center',
       paddingHorizontal: 20,
       gap: 20,

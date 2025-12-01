@@ -23,7 +23,7 @@ const ApartmentListItem = memo(
 
     return (
       <View style={styles.likesContainer}>
-        <View style={styles.imageWrapper}>
+        <View style={{ position: 'relative' }}>
           <Image source={{ uri: imageUrl }} style={styles.image} />
           {relationType && (
             <View style={styles.iconOverlay}>
@@ -61,9 +61,6 @@ const createStyles = (_: ColorTheme) =>
       flexDirection: 'row',
       alignItems: 'center',
       padding: 10,
-    },
-    imageWrapper: {
-      position: 'relative',
     },
     image: {
       width: 70,

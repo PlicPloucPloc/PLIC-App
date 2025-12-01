@@ -11,7 +11,6 @@ import { ApartmentInfo } from '@app/definitions';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setSwipeDirection } from '@app/redux/slices';
 import store from '@app/redux/Store';
-import { getApartmentInfoById } from '@app/rest/ApartmentService';
 import { getApartmentImages } from '@app/rest/S3Service';
 import SwipeButton from '@components/ActionButton';
 import ApartmentDetailsAmenities from '@components/ApartmentDetailsAmenities';
@@ -20,6 +19,7 @@ import Loader from '@components/Loader';
 import { SharedStackScreenProps } from '@navigation/Types';
 
 const ICON_SIZE = 38;
+const MAX_LINES = 4;
 
 export default function ApartmentDetailsScreen({
   navigation,
@@ -32,7 +32,6 @@ export default function ApartmentDetailsScreen({
   const [apartment, setApartment] = useState<ApartmentInfo>();
 
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const MAX_LINES = 4;
 
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -40,22 +39,15 @@ export default function ApartmentDetailsScreen({
     (async () => {
       setLoading(true);
 
-      let apartmentTmp: ApartmentInfo;
-      if (route.params?.apartment) {
-        apartmentTmp = { ...route.params.apartment };
-      } else if (route.params?.apartmentId) {
-        const apartmentResponse = await getApartmentInfoById(route.params.apartmentId);
-        if (!apartmentResponse) return;
+      const apartmentTmp: ApartmentInfo = route.params.apartment;
+      const images = await getApartmentImages(apartmentTmp).finally(() => {
+        setLoading(false);
+      });
 
-        apartmentTmp = apartmentResponse;
-      } else {
-        console.warn('No apartment data provided in route params');
-        return;
-      }
-
-      apartmentTmp.images = await getApartmentImages(apartmentTmp);
-      setApartment(apartmentTmp);
-      setLoading(false);
+      setApartment({
+        ...apartmentTmp,
+        images,
+      });
     })();
   }, [route.params]);
 
@@ -99,14 +91,18 @@ export default function ApartmentDetailsScreen({
         {/* ============= Header ============= */}
         <Text style={styles.title}>{apartment.name}</Text>
 
-        <Text style={styles.priceText}>
-          {apartment.rent} € <Text style={styles.lightText}>without charges</Text>
-        </Text>
-
-        {apartment.estimated_price && (
-          <Text style={styles.priceText}>
-            {apartment.estimated_price} € <Text style={styles.lightText}>with charges</Text>
-          </Text>
+        {apartment.rent && apartment.rent <= 10 ? (
+          <Text style={styles.lightText}>Price to negotiate</Text>
+        ) : (
+          <>
+            <Text style={styles.priceText}>
+              {apartment.rent} € <Text style={styles.lightText}>without charges</Text>
+            </Text>
+            apartment.estimated_price && (
+            <Text style={styles.priceText}>
+              {apartment.estimated_price} € <Text style={styles.lightText}>with charges</Text>
+            </Text>
+          </>
         )}
 
         <Divider />
@@ -174,13 +170,14 @@ export default function ApartmentDetailsScreen({
             </SwipeButton>
             <SwipeButton
               style={styles.button}
-              onPress={() =>
-                navigation.navigate('BottomTabStack', {
-                  screen: 'MessageStack',
-                  params: {
-                    screen: 'DirectMessage',
-                  },
-                })
+              onPress={
+                () => {}
+                // navigation.navigate('BottomTabStack', {
+                //   screen: 'MessageStack',
+                //   params: {
+                //     screen: 'DirectMessage',
+                //   },
+                // })
               }>
               <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />
             </SwipeButton>

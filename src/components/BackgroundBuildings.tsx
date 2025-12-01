@@ -18,10 +18,8 @@ export default function BackgroundBuildings(props: BackgroundBuildingsProps) {
 
 const styles = StyleSheet.create({
   backgroundContainer: {
-    flex: 2,
     width: '100%',
-    alignItems: 'center',
-    paddingTop: 20,
+    top: 20,
   },
   image: {
     width: '100%',

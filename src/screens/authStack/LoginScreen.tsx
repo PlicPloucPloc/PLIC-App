@@ -50,11 +50,11 @@ export default function LoginScreen({ navigation }: AuthStackScreenProps<'Login'
     setLoading(true);
     const response = await loginUser({ email, password }).finally(() => setLoading(false));
 
-    if (response == null) {
+    if (response === null) {
       return navigation.navigate('VerifyEmail', { isNewlyRegistered: false });
     }
 
-    if (response == false) {
+    if (response === false) {
       return;
     }
 
@@ -66,7 +66,7 @@ export default function LoginScreen({ navigation }: AuthStackScreenProps<'Login'
   };
 
   return (
-    <TouchableWithoutFeedback style={styles.container} onPress={Keyboard.dismiss}>
+    <TouchableWithoutFeedback style={{ flex: 1 }} onPress={Keyboard.dismiss}>
       <View style={styles.container}>
         <Loader loading={loading} />
         <View style={styles.buttonContainer}>
@@ -113,21 +113,19 @@ const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
       backgroundColor: colors.background,
     },
     title: {
       fontSize: 34,
       fontWeight: 'bold',
       color: colors.textPrimary,
+      alignSelf: 'center',
     },
 
     buttonContainer: {
       flex: 3,
       width: '100%',
       justifyContent: 'center',
-      alignItems: 'center',
       gap: 20,
       paddingHorizontal: 20,
     },
@@ -135,13 +133,14 @@ const createStyles = (colors: ColorTheme) =>
       width: '100%',
       padding: 12,
       borderWidth: 1,
-      borderColor: '#ccc',
+      borderColor: colors.contrast,
       borderRadius: 10,
       fontSize: 16,
     },
     forgotText: {
-      color: '#007BFF',
+      color: colors.primary,
       fontSize: 14,
       marginBottom: 10,
+      alignSelf: 'center',
     },
   });

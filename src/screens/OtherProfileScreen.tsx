@@ -1,19 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import React, { useState } from 'react';
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
-import { IoniconName, AuthState } from '@app/definitions';
-import { RoomRequest } from '@app/definitions/rest/ChatService';
+import { IoniconName } from '@app/definitions';
+import { CreateRoomRequest } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
-import { postRoom } from '@app/rest/ChatService';
-import { getOtherUserInfo } from '@app/rest/UserService';
+import { createAndGetRoom } from '@app/rest/ChatService';
 import { calculateAge } from '@app/utils/Misc';
+import BottomPopupModal from '@components/BottomPopupModal';
 import ProfilePicture from '@components/ProfilePicture';
 import { SharedStackScreenProps } from '@navigation/Types';
+
+import AddToARoom from './AddToARoom';
 
 type ProfileItem = {
   icon: IoniconName;
@@ -21,87 +23,79 @@ type ProfileItem = {
   value: string;
 };
 
-const defaultProfileItems: ProfileItem[] = [
-  { icon: 'person', label: 'First name', value: '...' },
-  { icon: 'person', label: 'Last name', value: '...' },
-  { icon: 'calendar', label: 'Age', value: '...' },
-];
-
 export default function OtherProfileScreen({
   navigation,
   route,
 }: SharedStackScreenProps<'OtherProfile'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
-  const [profileItems, setProfileItems] = useState<ProfileItem[]>(defaultProfileItems);
-  const [userInfo, setUserInfo] = useState<AuthState>({
-    firstName: '...',
-    lastName: '...',
-    profilePictureUri: null,
-  } as AuthState);
 
   const authState = useSelector((state: RootState) => state.authState);
-  const isCurrentUser = authState.userId === route.params.userId;
-  const roomRequest: RoomRequest = {
-    users: [route.params.userId],
-    apartment_id: null,
-    owner_id: authState.userId,
-  };
 
-  useEffect(() => {
-    (async () => {
-      const userInfo = isCurrentUser ? authState : await getOtherUserInfo(route.params.userId);
+  const [modalVisible, setModalVisible] = useState(false);
 
-      if (!userInfo) {
-        return;
-      }
+  const isCurrentUser = authState.userId === route.params.user.userId;
 
-      setUserInfo(userInfo);
+  const profileItems: ProfileItem[] = [
+    { icon: 'person', label: 'First name', value: route.params.user.firstName },
+    { icon: 'person', label: 'Last name', value: route.params.user.lastName },
+    { icon: 'calendar', label: 'Age', value: calculateAge(route.params.user.birthdate).toString() },
+  ];
 
-      const age = calculateAge(userInfo.birthdate);
+  async function createRoom() {
+    const roomRequest: CreateRoomRequest = {
+      users: [route.params.user.userId],
+      apartment_id: null,
+      owner_id: authState.userId,
+    };
 
-      setProfileItems([
-        { icon: 'person', label: 'First name', value: userInfo.firstName },
-        { icon: 'person', label: 'Last name', value: userInfo.lastName },
-        { icon: 'calendar', label: 'Age', value: age.toString() },
-      ]);
-    })();
-  }, [route.params.userId, authState, isCurrentUser]);
+    const room = await createAndGetRoom(authState.userId, roomRequest);
+    if (!room) {
+      return Alert.alert(
+        'Something went wrong.',
+        'We were unable to create a chat with this user.\nPlease try again later.',
+      );
+    }
 
+    navigation.navigate('Message', { roomInfo: room });
+  }
+
+  console.log('OtherProfileScreen', route.params.user);
   return (
     <View style={styles.container}>
+      <BottomPopupModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        title="Add to a group chat"
+        subtitle="Select a group chat to add this user to.">
+        <AddToARoom
+          afterAdd={(roomInfo) => {
+            navigation.navigate('Message', { roomInfo: roomInfo });
+            setModalVisible(false);
+          }}
+          user={route.params.user}
+        />
+      </BottomPopupModal>
+
       <View style={styles.pictureContainer}>
         <ProfilePicture
           size={200}
-          imageUri={userInfo.profilePictureUri}
-          firstName={userInfo.firstName}
-          lastName={userInfo.lastName}
+          imageUri={route.params.user.profilePictureUri}
+          firstName={route.params.user.firstName}
+          lastName={route.params.user.lastName}
           borderRadius={30}
         />
       </View>
 
       {!isCurrentUser && (
         <View>
-          <TouchableOpacity
-            onPress={async () => {
-              const roomId = await postRoom(roomRequest);
-              navigation.navigate('DirectMessage', { roomId });
-            }}
-            style={{ marginTop: 12, alignSelf: 'center' }}>
+          <TouchableOpacity onPress={createRoom} style={{ marginTop: 12, alignSelf: 'center' }}>
             <Text style={{ color: colors.primary, fontWeight: '600' }}>Send message</Text>
           </TouchableOpacity>
           <TouchableOpacity
-            onPress={async () => {
-              navigation.navigate('BottomTabStack', {
-                screen: 'MessageStack',
-                params: {
-                  screen: 'AddToARoom',
-                  params: { userId: route.params.userId },
-                },
-              });
-            }}
-            style={{ marginTop: 12, alignSelf: 'center' }}>
-            <Text style={{ color: colors.primary, fontWeight: '600' }}>Add to a room</Text>
+            onPress={() => setModalVisible(true)}
+            style={{ marginTop: 8, alignSelf: 'center' }}>
+            <Text style={{ color: colors.primary, fontWeight: '600' }}>Add to a group chat</Text>
           </TouchableOpacity>
         </View>
       )}

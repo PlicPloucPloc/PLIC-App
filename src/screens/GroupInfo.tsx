@@ -1,255 +1,144 @@
-import React, { useEffect, useState } from 'react';
-import {
-  FlatList,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
-} from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
-import { Ionicons } from '@expo/vector-icons';
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
+import { SharedValue } from 'react-native-reanimated';
 import { useSelector } from 'react-redux';
 
+import { ColorTheme } from '@app/Colors';
 import { AuthState } from '@app/definitions';
-import { MessageResponse, UpdateRoomRequest } from '@app/definitions/rest/ChatService';
+import { UpdateRoomRequest } from '@app/definitions/rest/ChatService';
+import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
-import { deleteRoom, getMessage, updateParticipant } from '@app/rest/ChatService';
-import { getOtherUserInfo } from '@app/rest/UserService';
+import { deleteRoom, updateParticipant } from '@app/rest/ChatService';
 import { calculateAge } from '@app/utils/Misc';
 import ProfilePicture from '@components/ProfilePicture';
-import { MessageStackScreenProps } from '@navigation/Types';
-
-type MemberWithInfo = {
-  userId: string;
-  userInfo: AuthState;
-  age: number;
-};
+import RightActionDelete from '@components/RightActionDelete';
+import { SharedStackScreenProps } from '@navigation/Types';
 
 export default function GroupInfoScreen({
   navigation,
   route,
-}: MessageStackScreenProps<'GroupInfo'>) {
-  const [roomData, setRoomData] = useState<MessageResponse | null>(null);
-  const [members, setMembers] = useState<MemberWithInfo[]>([]);
-  const [loading, setLoading] = useState(true);
-  const currentUserId = useSelector((state: RootState) => state.authState.userId);
+}: SharedStackScreenProps<'GroupInfo'>) {
+  const colors = useThemeColors();
+  const styles = createStyles(colors);
+
+  const [members, setMembers] = useState<AuthState[]>([]);
+  const authState = useSelector((state: RootState) => state.authState);
 
   useEffect(() => {
-    const fetchRoomData = async () => {
+    setMembers([authState, ...route.params.roomInfo.participants]);
+  }, [authState, route.params.roomInfo]);
+
+  const handleDeleteMember = useCallback(
+    async (userId: string) => {
+      const roomId = route.params.roomInfo.room_id;
+
       try {
-        setLoading(true);
-        const data = await getMessage(route.params.roomId);
+        const updateRequest: UpdateRoomRequest = {
+          room_id: roomId,
+          users_to_add: [],
+          users_to_remove: [userId],
+        };
 
-        if (!data) {
-          console.error('No room data found');
-          return;
+        await updateParticipant(updateRequest);
+        setMembers(members.filter((member) => member.userId !== userId));
+        if (members.length <= 1) {
+          await deleteRoom(roomId);
+          navigation.goBack();
         }
-
-        setRoomData(data);
-        const membersData = await Promise.all(
-          data.participants.map(async (userId) => {
-            try {
-              const userInfo = await getOtherUserInfo(userId);
-              if (!userInfo) {
-                return null;
-              }
-              const age = calculateAge(userInfo.birthdate);
-              return {
-                userId,
-                userInfo,
-                age,
-              };
-            } catch (error) {
-              console.error(`Error fetching user info for ${userId}:`, error);
-              return null;
-            }
-          }),
-        );
-        const validMembers = membersData.filter(
-          (member): member is MemberWithInfo => member !== null,
-        );
-        setMembers(validMembers);
       } catch (error) {
-        console.error('Error fetching room data:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error removing participant:', error);
       }
-    };
+    },
+    [members, navigation, route.params.roomInfo],
+  );
 
-    fetchRoomData();
-  }, [route.params.roomId]);
-
-  const handleDeleteMember = async (userId: string) => {
-    if (!roomData) return;
-
-    try {
-      const updateRequest: UpdateRoomRequest = {
-        room_id: roomData.room_id,
-        users_to_add: [],
-        users_to_remove: [userId],
-      };
-
-      await updateParticipant(updateRequest);
-      setMembers(members.filter((member) => member.userId !== userId));
-      if (members.length <= 1) {
-        await deleteRoom(route.params.roomId);
-        await navigation.goBack();
-      }
-    } catch (error) {
-      console.error('Error removing participant:', error);
-    }
-  };
-
-  const renderRightActions = (userId: string) => {
-    if (userId === currentUserId) {
-      return null;
-    }
-
-    return (
-      <TouchableOpacity style={styles.deleteButton} onPress={() => handleDeleteMember(userId)}>
-        <Ionicons name="trash-outline" size={24} color="#fff" />
-        <Text style={styles.deleteText}>Supprimer</Text>
-      </TouchableOpacity>
-    );
-  };
-
-  const renderMemberItem = ({ item }: { item: MemberWithInfo }) => (
+  const renderMemberItem = ({ item }: { item: AuthState }) => (
     <Swipeable
-      renderRightActions={() => renderRightActions(item.userId)}
-      enabled={item.userId !== currentUserId}>
+      enabled={item.userId !== authState.userId}
+      renderRightActions={(_, drag: SharedValue<number>) => (
+        <RightActionDelete drag={drag} onPress={() => handleDeleteMember(item.userId)} />
+      )}>
       <TouchableOpacity
         style={styles.memberContainer}
         onPress={() => {
           navigation.navigate('SharedStack', {
             screen: 'OtherProfile',
-            params: { userId: item.userId },
+            params: { user: item },
           });
         }}>
         <ProfilePicture
-          size={48}
-          imageUri={item.userInfo.profilePictureUri ?? null}
-          firstName={item.userInfo.firstName}
-          lastName={item.userInfo.lastName}
-          borderRadius={24}
+          size={60}
+          imageUri={item.profilePictureUri}
+          firstName={item.firstName}
+          lastName={item.lastName}
+          borderRadius={10}
         />
         <View style={styles.memberInfo}>
           <Text style={styles.memberName}>
-            {item.userInfo.firstName} {item.userInfo.lastName}
-            {item.userId === currentUserId && ' (Vous)'}
+            {item.firstName} {item.lastName}
+            {item.userId === authState.userId && ' (You)'}
           </Text>
-          <Text style={styles.memberAge}>{item.age} ans</Text>
+          <Text style={styles.memberAge}>{calculateAge(item.birthdate)} years</Text>
         </View>
       </TouchableOpacity>
     </Swipeable>
   );
 
-  if (loading) {
-    return (
-      <View style={[styles.container, styles.centerContent]}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-    );
-  }
-
-  if (!roomData) {
-    return (
-      <View style={[styles.container, styles.centerContent]}>
-        <Text style={styles.errorText}>Erreur lors du chargement des informations</Text>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.container}>
-      <View style={styles.headerInfo}>
-        <Text style={styles.memberCount}>{members.length} participant(s)</Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.headerTitle}>{members.length} participants</Text>
       </View>
 
       <FlatList
         data={members}
         keyExtractor={(item) => item.userId}
-        contentContainerStyle={styles.listContainer}
+        contentContainerStyle={{ paddingTop: 8 }}
         renderItem={renderMemberItem}
-        ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>Aucun participant</Text>
-          </View>
-        }
       />
     </View>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  centerContent: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  headerInfo: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  memberCount: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  listContainer: {
-    paddingTop: 8,
-  },
-  memberContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  memberInfo: {
-    flex: 1,
-    marginLeft: 12,
-  },
-  memberName: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 2,
-  },
-  memberAge: {
-    fontSize: 14,
-    color: '#666',
-  },
-  deleteButton: {
-    backgroundColor: '#FF3B30',
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
-    height: '100%',
-  },
-  deleteText: {
-    color: '#fff',
-    fontSize: 12,
-    fontWeight: '600',
-    marginTop: 4,
-  },
-  errorText: {
-    fontSize: 16,
-    color: '#666',
-  },
-  emptyContainer: {
-    padding: 20,
-    alignItems: 'center',
-  },
-  emptyText: {
-    fontSize: 16,
-    color: '#999',
-  },
-});
+const createStyles = (colors: ColorTheme) =>
+  StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: colors.background,
+    },
+
+    headerContainer: {
+      paddingHorizontal: 16,
+      paddingVertical: 8,
+      borderBottomWidth: 1,
+      borderBottomColor: '#eee',
+    },
+    headerTitle: {
+      fontSize: 14,
+      color: colors.textSecondary,
+      fontWeight: '500',
+    },
+
+    memberContainer: {
+      flexDirection: 'row',
+      paddingVertical: 8,
+      paddingHorizontal: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: '#eee',
+    },
+    memberInfo: {
+      flex: 1,
+      marginLeft: 12,
+      justifyContent: 'center',
+    },
+    memberName: {
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    memberAge: {
+      fontSize: 14,
+      color: colors.textSecondary,
+    },
+  });

@@ -6,6 +6,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { Asset } from 'expo-asset';
 import * as Font from 'expo-font';
 import { StatusBar } from 'expo-status-bar';
+import { AndroidSoftInputModes, KeyboardController } from 'react-native-keyboard-controller';
 import { useSelector } from 'react-redux';
 
 import { RootEnum } from '@app/definitions';
@@ -20,7 +21,7 @@ import AuthNavigator from './AuthNavigator';
 import InsideNavigator from './InsideNavigator';
 
 export default function AppContainer() {
-  const appState = useSelector((state: RootState) => state.appState);
+  const root = useSelector((state: RootState) => state.appState.root);
   const scheme = useColorScheme();
 
   const [isLoading, setIsLoading] = useState(true);
@@ -57,6 +58,14 @@ export default function AppContainer() {
     })();
   }, []);
 
+  useEffect(() => {
+    KeyboardController.setInputMode(
+      root === RootEnum.ROOT_INSIDE
+        ? AndroidSoftInputModes.SOFT_INPUT_ADJUST_RESIZE
+        : AndroidSoftInputModes.SOFT_INPUT_ADJUST_PAN,
+    );
+  }, [root]);
+
   if (isLoading) {
     return <SplashScreen />;
   }
@@ -64,7 +73,7 @@ export default function AppContainer() {
   return (
     <NavigationContainer>
       <StatusBar style={scheme == 'dark' ? 'dark' : 'light'} />
-      {appState.root === RootEnum.ROOT_INSIDE ? <InsideNavigator /> : <AuthNavigator />}
+      {root === RootEnum.ROOT_INSIDE ? <InsideNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );
 }

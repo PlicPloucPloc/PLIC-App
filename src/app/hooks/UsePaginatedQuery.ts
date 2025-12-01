@@ -14,9 +14,10 @@ export function usePaginatedQuery<T>(
   const fetchInitialData = useCallback(async () => {
     setRefreshing(true);
     setHasMore(true);
+
     try {
       const result = await fetchFunction(0);
-      console.log('initial fetch length: ' + result.length);
+      console.log('UsePaginatedQuery: initial fetch length: ' + result.length);
       setData(result);
       setHasMore(result.length === API_PAGE_SIZE);
       return result;
@@ -31,11 +32,12 @@ export function usePaginatedQuery<T>(
     async (offset?: number) => {
       if (loadingMore || refreshing || !hasMore) return;
       setLoadingMore(true);
+
       try {
         const offsetValue = typeof offset === 'number' ? offset : data.length;
         const result = await fetchFunction(offsetValue);
 
-        console.log('fetch more length: ' + result.length);
+        console.log('UsePaginatedQuery: fetch more length: ' + result.length);
         if (result.length < API_PAGE_SIZE) {
           setHasMore(false);
         }

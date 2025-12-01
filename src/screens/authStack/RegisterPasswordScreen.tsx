@@ -59,10 +59,10 @@ export default function RegisterPasswordScreen({
   }
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={styles.container}>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={{ flex: 1 }}>
       <View style={styles.container}>
         <Loader loading={loading} />
-        <View style={styles.buttonContainer}>
+        <View style={styles.bodyContainer}>
           <Text style={styles.title}>Register - Password</Text>
           <PasswordInput
             value={password}
@@ -94,20 +94,19 @@ const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
       backgroundColor: colors.background,
     },
     title: {
       fontSize: 28,
       fontWeight: 'bold',
       color: colors.textPrimary,
+      alignSelf: 'center',
     },
-    buttonContainer: {
-      flex: 3,
+
+    bodyContainer: {
+      flex: 1,
       width: '100%',
       justifyContent: 'center',
-      alignItems: 'center',
       gap: 20,
       paddingHorizontal: 20,
     },

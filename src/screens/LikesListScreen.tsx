@@ -18,7 +18,7 @@ export default function LikesListScreen({ navigation }: LikesStackScreenProps<'L
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.topContainer}>
           <TextInput
-            placeholder="Search..."
+            placeholder="Search for an apartment..."
             value={search}
             onChangeText={setSearch}
             style={styles.searchBar}
@@ -44,7 +44,7 @@ const createStyles = (colors: ColorTheme) =>
     },
     topContainer: {
       paddingHorizontal: 20,
-      paddingVertical: 10,
+      paddingVertical: 5,
       backgroundColor: colors.background,
     },
     searchBar: {

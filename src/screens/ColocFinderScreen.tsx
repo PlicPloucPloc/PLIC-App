@@ -22,6 +22,7 @@ import ColocFinderNotEnabled from '@components/ColocFinderNotEnabled';
 import HeaderSwitch from '@components/HeaderSwitch';
 import Loader from '@components/Loader';
 import ProfilePicture from '@components/ProfilePicture';
+import Separator from '@components/Separator';
 import { ColocFinderStackScreenProps } from '@navigation/Types';
 
 export default function ColocFinderScreen({
@@ -40,8 +41,6 @@ export default function ColocFinderScreen({
       setIsEnabled(collocEnabled);
     })();
   }, []);
-
-  console.log('Rendering ColocFinderScreen, isEnabled:', isEnabled);
 
   const fetchData = useCallback((offset: number) => {
     return getRecommendedColloc(offset);
@@ -78,80 +77,84 @@ export default function ColocFinderScreen({
     });
   }, [navigation, isEnabled, toggleSwitch]);
 
+  // ========== Render ==========
+  const renderItem = useCallback(
+    ({ item }: { item: AuthState }) => (
+      <TouchableOpacity
+        onPress={() =>
+          navigation.navigate('SharedStack', {
+            screen: 'OtherProfile',
+            params: { user: item },
+          })
+        }
+        style={styles.userCard}>
+        <ProfilePicture
+          size={70}
+          imageUri={item.profilePictureUri}
+          firstName={item.firstName}
+          lastName={item.lastName}
+          borderRadius={10}
+        />
+        <View style={styles.userInfo}>
+          <Text style={styles.userName}>
+            {item.firstName} {item.lastName}
+          </Text>
+          <Text style={styles.userAge}>{calculateAge(item.birthdate)} years</Text>
+        </View>
+      </TouchableOpacity>
+    ),
+    [navigation, styles],
+  );
+
+  const renderEmptyComponent = refreshing ? null : (
+    <View style={styles.emptyContainer}>
+      <Text style={styles.emptyTitle}>
+        We haven&apos;t found any potential roommates for you at the moment.
+      </Text>
+
+      <Image source={Images.alone} style={styles.gif} />
+
+      <Text style={styles.emptyText}>Try to like more apartments to increase your chances!</Text>
+    </View>
+  );
+
   if (loading) {
     return <Loader loading={loading} />;
   }
 
+  if (!isEnabled) {
+    return (
+      <View style={styles.container}>
+        <ColocFinderNotEnabled toggleSwitch={toggleSwitch} />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {!isEnabled && <ColocFinderNotEnabled toggleSwitch={toggleSwitch} />}
-
-      {isEnabled && (
-        <FlatList
-          data={users}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('SharedStack', {
-                  screen: 'OtherProfile',
-                  params: { userId: item.userId },
-                })
-              }
-              style={styles.userCard}>
-              <ProfilePicture
-                size={70}
-                imageUri={item.profilePictureUri}
-                firstName={item.firstName}
-                lastName={item.lastName}
-                borderRadius={10}
-              />
-              <View style={styles.userInfo}>
-                <Text style={styles.userName}>
-                  {item.firstName} {item.lastName}
-                </Text>
-                <Text style={styles.userAge}>{calculateAge(item.birthdate)} years</Text>
-              </View>
-            </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item.userId}
-          contentContainerStyle={{ flexGrow: 1 }}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-          onEndReached={() => fetchMore()}
-          onEndReachedThreshold={0.2}
-          ListFooterComponent={
-            loadingMore ? (
-              <ActivityIndicator
-                size="small"
-                color={colors.primary}
-                style={{ marginVertical: 20 }}
-              />
-            ) : null
-          }
-          refreshControl={
-            <RefreshControl
-              refreshing={refreshing}
-              onRefresh={refresh}
-              colors={[colors.primary]}
-              tintColor={colors.primary}
-            />
-          }
-          ListEmptyComponent={
-            refreshing ? null : (
-              <View style={styles.emptyContainer}>
-                <Text style={styles.emptyTitle}>
-                  We haven&apos;t found any potential roommates for you at the moment.
-                </Text>
-
-                <Image source={Images.alone} style={styles.gif} />
-
-                <Text style={styles.emptyText}>
-                  Try to like more apartments to increase your chances!
-                </Text>
-              </View>
-            )
-          }
-        />
-      )}
+      <FlatList
+        data={users}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.userId}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+        ItemSeparatorComponent={Separator}
+        onEndReached={() => fetchMore()}
+        onEndReachedThreshold={0.2}
+        ListFooterComponent={
+          loadingMore ? (
+            <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 20 }} />
+          ) : null
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={refresh}
+            colors={[colors.primary]}
+            tintColor={colors.primary}
+          />
+        }
+        ListEmptyComponent={renderEmptyComponent}
+      />
     </View>
   );
 }
@@ -167,7 +170,6 @@ const createStyles = (colors: ColorTheme) =>
       alignItems: 'center',
       backgroundColor: colors.background,
       paddingVertical: 12,
-      paddingHorizontal: 8,
     },
     userInfo: {
       marginLeft: 16,
@@ -183,13 +185,9 @@ const createStyles = (colors: ColorTheme) =>
       fontSize: 16,
       color: colors.textSecondary,
     },
-    separator: {
-      height: 1,
-      backgroundColor: colors.textSecondary,
-    },
 
     emptyContainer: {
-      height: '85%',
+      flex: 1,
       justifyContent: 'center',
       paddingHorizontal: 20,
       paddingTop: 40,

@@ -37,8 +37,6 @@ const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
     container: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
       backgroundColor: colors.background,
     },
 
@@ -62,7 +60,6 @@ const createStyles = (colors: ColorTheme) =>
     buttonContainer: {
       flex: 1,
       width: '100%',
-      justifyContent: 'space-evenly',
-      alignItems: 'center',
+      paddingHorizontal: 20,
     },
   });

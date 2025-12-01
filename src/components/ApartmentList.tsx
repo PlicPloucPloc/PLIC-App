@@ -13,6 +13,7 @@ import store, { RootState } from '@app/redux/Store';
 import { deleteRelation } from '@app/rest/RelationService';
 
 import ApartmentListRow from './ApartmentListRow';
+import Separator from './Separator';
 
 type ApartmentListProps = {
   navigation: any;
@@ -109,10 +110,10 @@ export default function ApartmentList({
   return (
     <FlatList
       data={filteredRelations}
-      keyExtractor={(relation) => relation.apt.apartment_id.toString()}
-      style={{ flex: 1 }}
-      contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}
       renderItem={renderItem}
+      keyExtractor={(relation) => relation.apt.apartment_id.toString()}
+      contentContainerStyle={{ paddingBottom: 20, flexGrow: 1 }}
+      ItemSeparatorComponent={Separator}
       refreshControl={
         <RefreshControl
           refreshing={refreshing}
