@@ -53,7 +53,7 @@ export type SharedStackParamList = {
   };
   OtherProfile: { user: AuthState };
   Message: { roomInfo: Room };
-  GroupInfo: { roomInfo: Room };
+  GroupInfo: { roomInfo: Room; apartment?: ApartmentInfo };
 };
 
 export type SharedStackScreenProps<T extends keyof SharedStackParamList> = CompositeScreenProps<

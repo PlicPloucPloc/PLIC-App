@@ -205,8 +205,6 @@ class ChatService {
       // The promise will be resolved in handleMessage when confirmation is received
       this.messageCallbacks.set(tempId, resolve);
 
-      console.log('Sending message command:', command);
-
       this.ws.send(JSON.stringify(command));
 
       setTimeout(() => {

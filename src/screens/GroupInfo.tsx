@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 import Swipeable from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { SharedValue } from 'react-native-reanimated';
@@ -56,7 +56,7 @@ export default function GroupInfoScreen({
 
   const renderMemberItem = ({ item }: { item: AuthState }) => (
     <Swipeable
-      enabled={item.userId !== authState.userId}
+      enabled={route.params.roomInfo.is_owner && item.userId !== authState.userId}
       renderRightActions={(_, drag: SharedValue<number>) => (
         <RightActionDelete drag={drag} onPress={() => handleDeleteMember(item.userId)} />
       )}>
@@ -79,6 +79,7 @@ export default function GroupInfoScreen({
           <Text style={styles.memberName}>
             {item.firstName} {item.lastName}
             {item.userId === authState.userId && ' (You)'}
+            {item.userId === route.params.apartment?.owner_id && ' (Owner)'}
           </Text>
           <Text style={styles.memberAge}>{calculateAge(item.birthdate)} years</Text>
         </View>
@@ -88,6 +89,25 @@ export default function GroupInfoScreen({
 
   return (
     <View style={styles.container}>
+      {/* ===== Apartment =====*/}
+      {route.params.apartment && (
+        <TouchableOpacity
+          style={styles.aptInfoContainer}
+          onPress={() => {
+            if (route.params.apartment) {
+              navigation.navigate('ApartmentDetails', { apartment: route.params.apartment });
+            }
+          }}>
+          <Image
+            source={{ uri: route.params.apartment.image_thumbnail || undefined }}
+            style={styles.aptImage}
+            resizeMode="cover"
+          />
+          <Text style={styles.aptName}>{route.params.apartment.name}</Text>
+        </TouchableOpacity>
+      )}
+
+      {/* ===== Participants =====*/}
       <View style={styles.headerContainer}>
         <Text style={styles.headerTitle}>{members.length} participants</Text>
       </View>
@@ -107,6 +127,27 @@ const createStyles = (colors: ColorTheme) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
+    },
+
+    aptInfoContainer: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 16,
+      borderBottomWidth: 1,
+      borderBottomColor: colors.contrast,
+      marginBottom: 16,
+    },
+    aptImage: {
+      borderWidth: 2,
+      borderColor: colors.contrast,
+      width: 60,
+      height: 60,
+      borderRadius: 10,
+    },
+    aptName: {
+      fontSize: 18,
+      fontWeight: '500',
+      marginLeft: 12,
     },
 
     headerContainer: {

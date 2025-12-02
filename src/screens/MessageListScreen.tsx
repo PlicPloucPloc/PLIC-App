@@ -8,7 +8,7 @@ import { Room } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { getAllRooms } from '@app/rest/ChatService';
-import ListMessageParticipants from '@components/MessageParticipantsList';
+import MessageListParticipants from '@components/MessageParticipantsList';
 import Separator from '@components/Separator';
 import { MessageStackScreenProps } from '@navigation/Types';
 
@@ -35,7 +35,7 @@ export default function DirectMessageListScreen({
 
   const renderItem = useCallback(
     ({ item }: { item: Room }) => (
-      <ListMessageParticipants
+      <MessageListParticipants
         roomInfo={item}
         onPress={() =>
           navigation.navigate('SharedStack', {

@@ -14,7 +14,7 @@ import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setSwipeDirection } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
 import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
-import { createRoom, getRoomDetails } from '@app/rest/ChatService';
+import { createRoom, getRoomDetails, roomDetailToRoom } from '@app/rest/ChatService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
 import EverythingSwiped from '@components/EverythingSwiped';
@@ -151,8 +151,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
     const roomRequest: CreateRoomRequest = {
       apartment_id: apartmentId,
-      owner_id: authState.userId,
-      users: [aptOwner],
+      users: [authState.userId, aptOwner],
     };
 
     const roomId = await createRoom(roomRequest);
@@ -165,17 +164,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
       return Alert.alert('Error', 'An error occurred while fetching the chat room details.');
     }
 
-    const roomInfo = {
-      room_id: roomDetails.room_id,
-      participants_id: roomDetails.participants_id,
-      last_message:
-        roomDetails.messages.length > 0
-          ? roomDetails.messages[roomDetails.messages.length - 1]
-          : null,
-      is_owner: roomDetails.owner_id === authState.userId,
-      created_at: roomDetails.created_at,
-      participants: roomDetails.participants,
-    };
+    const roomInfo = roomDetailToRoom(authState.userId, roomDetails);
 
     navigation.navigate('SharedStack', {
       screen: 'Message',

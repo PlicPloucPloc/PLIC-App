@@ -106,9 +106,7 @@ export async function getRoomDetails(userId: string, roomId: number): Promise<Ro
 }
 
 export async function createRoom(room: CreateRoomRequest): Promise<number | null> {
-  const participants = [...room.users, room.owner_id];
-
-  const existingRoomId = await doesRoomExists(participants);
+  const existingRoomId = await doesRoomExists(room.users);
   if (existingRoomId) {
     return existingRoomId;
   }
@@ -227,6 +225,7 @@ export async function updateParticipant(
 export function roomDetailToRoom(userId: string, roomDetail: RoomDetails): Room {
   return {
     room_id: roomDetail.room_id,
+    apartment_id: roomDetail.apartment_id,
     participants_id: roomDetail.participants_id,
     last_message:
       roomDetail.messages.length > 0 ? roomDetail.messages[roomDetail.messages.length - 1] : null,

@@ -1,5 +1,5 @@
 import { API_PAGE_SIZE } from '@app/config/Constants.ts';
-import { ApartmentInfo, FiltersState } from '@app/definitions';
+import { ApartmentInfo, ApartmentOwner, FiltersState } from '@app/definitions';
 import { alertOnResponseError } from '@app/utils/Error.ts';
 
 import { apiFetch } from './Client';
@@ -53,4 +53,22 @@ export async function getApartmentInfoById(id: number): Promise<ApartmentInfo | 
   await getApartmentImages(apartment);
 
   return apartment;
+}
+
+export async function getApartmentOwnerById(id: number): Promise<ApartmentOwner | null> {
+  const response = await apiFetch(
+    Endpoints.APARTMENT.GET_OWNER_BY_ID(id),
+    {
+      method: 'GET',
+    },
+    true,
+  );
+
+  if (await alertOnResponseError(response, 'Apartment Owner', 'fetching apartment owner')) {
+    return null;
+  }
+
+  const apartmentOwner: ApartmentOwner = await response.json();
+
+  return apartmentOwner;
 }

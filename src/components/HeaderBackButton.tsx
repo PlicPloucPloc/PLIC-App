@@ -16,7 +16,7 @@ export default function HeaderBackButton({ navigation }: HeaderBackButtonProps) 
         Keyboard.dismiss();
         navigation.goBack();
       }}
-      style={{ paddingHorizontal: 15 }}>
+      style={{ padding: 15 }}>
       <Ionicons name="arrow-back-outline" size={28} color="black" />
     </TouchableOpacity>
   );

@@ -2,6 +2,7 @@ import { AuthState } from '../redux/AuthState';
 
 export type Room = {
   room_id: number;
+  apartment_id: number | null;
   participants_id: string[];
   last_message: Message | null;
   is_owner: boolean;
@@ -37,7 +38,6 @@ export type RoomDetails = {
 export type CreateRoomRequest = {
   users: string[];
   apartment_id: number | null;
-  owner_id: string;
 };
 
 export type CreateRoomResponse = {

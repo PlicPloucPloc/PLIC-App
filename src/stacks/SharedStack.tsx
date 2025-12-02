@@ -51,6 +51,7 @@ export default function SharedStack() {
           return {
             ...headerOptions(navigation, ''),
             headerRight: () => <HeaderMessageParticipants />,
+            headerShadowVisible: true,
           };
         }}
       />

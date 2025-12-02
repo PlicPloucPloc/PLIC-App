@@ -28,3 +28,8 @@ export type ApartmentInfo = {
   image_thumbnail: string;
   images: string[];
 };
+
+export type ApartmentOwner = {
+  id: number;
+  owner_id: string;
+};

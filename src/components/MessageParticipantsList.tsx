@@ -1,11 +1,12 @@
 import React, { memo, useEffect, useState } from 'react';
-import { TouchableOpacity, View, Text, StyleSheet } from 'react-native';
+import { Image, TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
 
 import { ColorTheme } from '@app/Colors';
 import { Room } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
+import { getApartmentInfoById } from '@app/rest/ApartmentService';
 
 import ProfilePicture from './ProfilePicture';
 
@@ -14,6 +15,12 @@ type MessageParticipantsListProps = {
   onPress: () => void;
 };
 
+enum ChatRoomType {
+  APARTMENT = 'apartment',
+  DIRECT = 'direct',
+  GROUP = 'group',
+}
+
 const IMAGE_SIZE = 60;
 const BORDER_RADIUS = 10;
 
@@ -21,15 +28,27 @@ const MessageParticipantsList = memo(({ roomInfo, onPress }: MessageParticipants
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const [isGroup, setIsGroup] = useState(false);
+  const [type, setType] = useState<ChatRoomType>(ChatRoomType.DIRECT);
+  const [aptThumbnailUri, setAptThumbnailUri] = useState<string | null>(null);
   const [title, setTitle] = useState('');
 
   useEffect(() => {
-    if (roomInfo.participants.length === 1) {
-      setIsGroup(false);
+    if (roomInfo.apartment_id) {
+      // ===== Apartment mode =====
+      setType(ChatRoomType.APARTMENT);
+      getApartmentInfoById(roomInfo.apartment_id).then((apartment) => {
+        if (apartment) {
+          setTitle(apartment.name);
+          setAptThumbnailUri(apartment.image_thumbnail);
+        }
+      });
+    } else if (roomInfo.participants.length === 1) {
+      // ===== Direct message mode =====
+      setType(ChatRoomType.DIRECT);
       setTitle(`${roomInfo.participants[0].firstName} ${roomInfo.participants[0].lastName}`);
     } else {
-      setIsGroup(true);
+      // ===== Group message mode =====
+      setType(ChatRoomType.GROUP);
 
       let first_two_names = roomInfo.participants
         .slice(0, 2)
@@ -48,19 +67,15 @@ const MessageParticipantsList = memo(({ roomInfo, onPress }: MessageParticipants
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>
-      {isGroup ? (
-        <View
-          style={[
-            styles.groupImageContainer,
-            {
-              width: IMAGE_SIZE,
-              height: IMAGE_SIZE,
-              borderRadius: BORDER_RADIUS,
-            },
-          ]}>
-          <Ionicons name="people" size={IMAGE_SIZE * 0.6} color="white" />
-        </View>
-      ) : (
+      {type === ChatRoomType.APARTMENT && (
+        <Image
+          source={{ uri: aptThumbnailUri || undefined }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+      )}
+
+      {type === ChatRoomType.DIRECT && (
         <ProfilePicture
           size={IMAGE_SIZE}
           imageUri={otherUser.profilePictureUri}
@@ -68,6 +83,12 @@ const MessageParticipantsList = memo(({ roomInfo, onPress }: MessageParticipants
           lastName={otherUser.lastName}
           borderRadius={BORDER_RADIUS}
         />
+      )}
+
+      {type === ChatRoomType.GROUP && (
+        <View style={styles.image}>
+          <Ionicons name="people" size={IMAGE_SIZE * 0.6} color={colors.secondary} />
+        </View>
       )}
 
       <View style={styles.infoContainer}>
@@ -94,12 +115,15 @@ const createStyles = (colors: ColorTheme) =>
       paddingRight: 8,
     },
 
-    groupImageContainer: {
+    image: {
       backgroundColor: colors.primary,
-      borderWidth: 2,
-      borderColor: colors.contrast,
       justifyContent: 'center',
       alignItems: 'center',
+      borderWidth: 2,
+      borderColor: colors.contrast,
+      width: IMAGE_SIZE,
+      height: IMAGE_SIZE,
+      borderRadius: BORDER_RADIUS,
     },
 
     infoContainer: {

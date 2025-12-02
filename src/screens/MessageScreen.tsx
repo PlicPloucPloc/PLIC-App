@@ -32,19 +32,9 @@ export default function DirectMessageScreen({
   const [messages, setMessages] = useState<Message[]>([]);
 
   useEffect(() => {
-    const roomInfo = route.params.roomInfo;
-
     navigation.setOptions({
       headerRight: () => (
-        <HeaderMessageInfo
-          roomInfo={roomInfo}
-          onPressSingle={() => {
-            navigation.navigate('OtherProfile', { user: roomInfo.participants[0] });
-          }}
-          onPressGroup={() => {
-            navigation.navigate('GroupInfo', { roomInfo: roomInfo });
-          }}
-        />
+        <HeaderMessageInfo roomInfo={route.params.roomInfo} navigation={navigation} />
       ),
     });
   }, [navigation, route.params.roomInfo]);

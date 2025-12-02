@@ -25,7 +25,8 @@ const Endpoints = {
   APARTMENT: {
     NO_RELATIONS_PAGINATED: (offset: number, limit: number, filters: string) =>
       `/apt/noRelations?offset=${offset}&limit=${limit}&${filters}`,
-    GET_INFO_BY_ID: (id: number) => `/apartment/${id}`,
+    GET_INFO_BY_ID: (id: number) => `/apt/${id}`,
+    GET_OWNER_BY_ID: (id: number) => `/apt/owner/${id}`,
   },
   CHAT: {
     GET_ROOM_DETAILS: (id: number) => `/chat/rooms/${id}`,

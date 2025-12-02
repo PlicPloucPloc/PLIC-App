@@ -44,9 +44,8 @@ export default function OtherProfileScreen({
 
   async function createRoom() {
     const roomRequest: CreateRoomRequest = {
-      users: [route.params.user.userId],
+      users: [authState.userId, route.params.user.userId],
       apartment_id: null,
-      owner_id: authState.userId,
     };
 
     const room = await createAndGetRoom(authState.userId, roomRequest);
