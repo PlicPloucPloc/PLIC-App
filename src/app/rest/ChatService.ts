@@ -105,8 +105,8 @@ export async function getRoomDetails(userId: string, roomId: number): Promise<Ro
   return addRoomParticipants(userId, data);
 }
 
-export async function createRoom(room: CreateRoomRequest): Promise<number | null> {
-  const existingRoomId = await doesRoomExists(room.users);
+async function createRoom(room: CreateRoomRequest): Promise<number | null> {
+  const existingRoomId = await doesRoomExists(room);
   if (existingRoomId) {
     return existingRoomId;
   }
@@ -126,6 +126,31 @@ export async function createRoom(room: CreateRoomRequest): Promise<number | null
 
   const data: CreateRoomResponse = await response.json();
   return data.data;
+}
+
+async function doesRoomExists(newRoom: CreateRoomRequest): Promise<number | null> {
+  const rooms = await getRooms();
+  if (!rooms) {
+    return null;
+  }
+
+  const newRoomParticipantsSet = new Set(newRoom.users);
+
+  for (const room of rooms) {
+    if (newRoom.apartment_id !== room.apartment_id) {
+      continue;
+    }
+
+    const roomParticipantsSet = new Set(room.participants_id);
+
+    if (
+      roomParticipantsSet.size === newRoomParticipantsSet.size &&
+      newRoom.users.every((p) => roomParticipantsSet.has(p))
+    ) {
+      return room.room_id;
+    }
+  }
+  return null;
 }
 
 export async function createAndGetRoom(
@@ -156,35 +181,6 @@ export async function deleteRoom(id: number): Promise<boolean> {
   }
 
   return true;
-}
-
-export async function doesRoomExists(participants: string[]): Promise<number | null> {
-  const response = await apiFetch(
-    Endpoints.CHAT.GET_ROOMS,
-    {
-      method: 'GET',
-    },
-    true,
-  );
-
-  if (await alertOnResponseError(response, 'Chat', 'getting rooms')) {
-    return null;
-  }
-
-  const rooms: Room[] = await response.json();
-  const normalizedParticipants = [...new Set(participants)].sort();
-
-  for (const room of rooms) {
-    const normalizedRoomParticipants = [...new Set(room.participants_id)].sort();
-
-    if (
-      normalizedRoomParticipants.length === normalizedParticipants.length &&
-      normalizedParticipants.every((p, i) => p === normalizedRoomParticipants[i])
-    ) {
-      return room.room_id;
-    }
-  }
-  return null;
 }
 
 export async function getMessage(id: number): Promise<RoomDetails | null> {

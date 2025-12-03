@@ -29,10 +29,13 @@ const MessageParticipantsList = memo(({ roomInfo, onPress }: MessageParticipants
   const styles = createStyles(colors);
 
   const [type, setType] = useState<ChatRoomType>(ChatRoomType.DIRECT);
+  const [isGroup, setIsGroup] = useState(false);
   const [aptThumbnailUri, setAptThumbnailUri] = useState<string | null>(null);
   const [title, setTitle] = useState('');
 
   useEffect(() => {
+    setIsGroup(roomInfo.participants.length > 1);
+
     if (roomInfo.apartment_id) {
       // ===== Apartment mode =====
       setType(ChatRoomType.APARTMENT);
@@ -99,6 +102,15 @@ const MessageParticipantsList = memo(({ roomInfo, onPress }: MessageParticipants
           {roomInfo.last_message?.message || 'No messages yet.'}
         </Text>
       </View>
+
+      {isGroup && (
+        <View style={{ alignItems: 'center', justifyContent: 'center', marginLeft: 8 }}>
+          <Ionicons name="people" size={24} color={colors.textPrimary} />
+          <Text style={{ color: colors.textPrimary, fontSize: 12 }}>
+            {roomInfo.participants.length} members
+          </Text>
+        </View>
+      )}
     </TouchableOpacity>
   );
 });

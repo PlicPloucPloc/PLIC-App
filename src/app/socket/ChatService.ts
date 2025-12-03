@@ -112,7 +112,7 @@ class ChatService {
     };
 
     this.ws.onerror = (error) => {
-      console.error('Socket on error:', JSON.stringify(error, null, 2));
+      console.error('Socket error:', JSON.stringify(error, null, 2));
     };
 
     this.ws.onclose = (event) => {

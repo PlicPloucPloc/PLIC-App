@@ -14,7 +14,7 @@ import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setSwipeDirection } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
 import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
-import { createRoom, getRoomDetails, roomDetailToRoom } from '@app/rest/ChatService';
+import { createAndGetRoom } from '@app/rest/ChatService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
 import SwipeButton from '@components/ActionButton';
 import EverythingSwiped from '@components/EverythingSwiped';
@@ -141,7 +141,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     }
   }
 
-  async function createChat(apartmentId: number, aptOwner: string) {
+  async function sendMessage(apartmentId: number, aptOwner: string) {
     if (aptOwner === authState.userId) {
       Alert.alert(
         'Could not create chat !',
@@ -154,21 +154,15 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
       users: [authState.userId, aptOwner],
     };
 
-    const roomId = await createRoom(roomRequest);
-    if (!roomId) {
-      return Alert.alert('Error', 'An error occurred while creating the chat room.');
+    const room = await createAndGetRoom(authState.userId, roomRequest);
+    if (!room) {
+      Alert.alert('Error', 'An error occurred while creating the chat room.');
+      return;
     }
-
-    const roomDetails = await getRoomDetails(authState.userId, roomId);
-    if (!roomDetails) {
-      return Alert.alert('Error', 'An error occurred while fetching the chat room details.');
-    }
-
-    const roomInfo = roomDetailToRoom(authState.userId, roomDetails);
 
     navigation.navigate('SharedStack', {
       screen: 'Message',
-      params: { roomInfo },
+      params: { roomInfo: room },
     });
   }
 
@@ -298,7 +292,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
           disabled={allSwiped}
           onPress={() => {
             const currentIndex = swiperRef.current?.activeIndex || 0;
-            createChat(apartments[currentIndex].apartment_id, apartments[currentIndex].owner_id);
+            sendMessage(apartments[currentIndex].apartment_id, apartments[currentIndex].owner_id);
           }}>
           <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />
         </SwipeButton>

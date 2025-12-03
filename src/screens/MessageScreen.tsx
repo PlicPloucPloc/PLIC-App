@@ -230,17 +230,18 @@ const createStyles = (colors: ColorTheme) =>
       flexGrow: 1,
       justifyContent: 'flex-end',
     },
+
     emptyContainer: {
       flex: 1,
       justifyContent: 'center',
       alignItems: 'center',
-      paddingVertical: 48,
     },
     emptyText: {
       fontSize: 16,
       color: colors.textSecondary,
       textAlign: 'center',
     },
+
     messageContainer: {
       marginVertical: 4,
       maxWidth: '80%',

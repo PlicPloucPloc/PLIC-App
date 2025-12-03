@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Keyboard,
   StyleSheet,
@@ -24,15 +24,13 @@ export default function HistoryScreen({ navigation }: AccountStackScreenProps<'H
 
   const [search, setSearch] = useState('');
 
-  const toggleHelp = useCallback(() => {
-    setModalVisible(true);
-  }, []);
-
   useEffect(() => {
     navigation.setOptions({
-      headerRight: () => <HeaderInfoButton icon="help-circle-outline" onPress={toggleHelp} />,
+      headerRight: () => (
+        <HeaderInfoButton icon="help-circle-outline" onPress={() => setModalVisible(true)} />
+      ),
     });
-  }, [navigation, toggleHelp]);
+  }, [navigation]);
 
   return (
     <View style={styles.container}>

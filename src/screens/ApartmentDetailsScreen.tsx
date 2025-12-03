@@ -1,20 +1,24 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { SwipeDirection } from '@ellmos/rn-swiper-list';
 import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import PagerView from 'react-native-pager-view';
+import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo } from '@app/definitions';
+import { CreateRoomRequest } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setSwipeDirection } from '@app/redux/slices';
-import store from '@app/redux/Store';
+import store, { RootState } from '@app/redux/Store';
+import { createAndGetRoom } from '@app/rest/ChatService';
 import { getApartmentImages } from '@app/rest/S3Service';
 import SwipeButton from '@components/ActionButton';
 import ApartmentDetailsAmenities from '@components/ApartmentDetailsAmenities';
 import NearbyInfrastructureMap from '@components/ApartmentDetailsMap';
+import HeaderSendMessageButton from '@components/HeaderSendMessageButton';
 import Loader from '@components/Loader';
 import { SharedStackScreenProps } from '@navigation/Types';
 
@@ -28,12 +32,57 @@ export default function ApartmentDetailsScreen({
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
+  const authState = useSelector((state: RootState) => state.authState);
+
   const [loading, setLoading] = useState(true);
   const [apartment, setApartment] = useState<ApartmentInfo>();
 
   const [showFullDescription, setShowFullDescription] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(0);
+
+  const sendMessage = useCallback(
+    async (apartmentId: number, aptOwner: string) => {
+      if (aptOwner === authState.userId) {
+        Alert.alert(
+          'Could not create chat !',
+          'This apartment belongs to you, we cannot create a chat room.',
+        );
+      }
+
+      const roomRequest: CreateRoomRequest = {
+        apartment_id: apartmentId,
+        users: [authState.userId, aptOwner],
+      };
+
+      const room = await createAndGetRoom(authState.userId, roomRequest);
+      if (!room) {
+        Alert.alert('Error', 'An error occurred while creating the chat room.');
+        return;
+      }
+
+      navigation.navigate('SharedStack', {
+        screen: 'Message',
+        params: { roomInfo: room },
+      });
+    },
+    [authState.userId, navigation],
+  );
+
+  useEffect(() => {
+    if (!apartment) {
+      return;
+    }
+
+    navigation.setOptions({
+      headerRight: () => (
+        <HeaderSendMessageButton
+          icon="chatbox-ellipses-outline"
+          onPress={() => sendMessage(apartment?.apartment_id, apartment?.owner_id)}
+        />
+      ),
+    });
+  }, [navigation, apartment, sendMessage]);
 
   useEffect(() => {
     (async () => {
@@ -98,10 +147,12 @@ export default function ApartmentDetailsScreen({
             <Text style={styles.priceText}>
               {apartment.rent} € <Text style={styles.lightText}>without charges</Text>
             </Text>
-            apartment.estimated_price && (
-            <Text style={styles.priceText}>
-              {apartment.estimated_price} € <Text style={styles.lightText}>with charges</Text>
-            </Text>
+
+            {apartment.estimated_price && (
+              <Text style={styles.priceText}>
+                {apartment.estimated_price} € <Text style={styles.lightText}>with charges</Text>
+              </Text>
+            )}
           </>
         )}
 

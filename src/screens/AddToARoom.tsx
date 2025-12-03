@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet } from 'react-native';
+import { Alert, FlatList, StyleSheet, Text, View } from 'react-native';
 
 import { useSelector } from 'react-redux';
 
@@ -61,8 +61,13 @@ export default function AddToARoom({ user, afterAdd }: AddToARoomModalProps) {
     <FlatList
       data={rooms}
       style={styles.card}
-      contentContainerStyle={{ paddingHorizontal: 16 }}
+      contentContainerStyle={{ paddingHorizontal: 16, flex: 1 }}
       renderItem={renderItem}
+      ListEmptyComponent={
+        <View style={styles.emptyContainer}>
+          <Text style={styles.emptyText}>No group found to add user.</Text>
+        </View>
+      }
     />
   );
 }
@@ -74,5 +79,16 @@ const createStyles = (colors: ColorTheme) =>
       borderWidth: 1,
       borderRadius: 8,
       elevation: 4,
+    },
+
+    emptyContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    emptyText: {
+      fontSize: 16,
+      color: colors.textSecondary,
+      textAlign: 'center',
     },
   });

@@ -83,7 +83,10 @@ const HeaderMessageInfo = memo(({ roomInfo, navigation }: HeaderMessageInfoProps
       disabled={!roomInfo}
       onPress={() => {
         if (type === ChatRoomType.APARTMENT && apartment) {
-          navigation?.navigate('ApartmentDetails', { apartment: apartment });
+          navigation?.navigate('ApartmentDetails', {
+            apartment: apartment,
+            enableMessageButton: true,
+          });
         } else if (type === ChatRoomType.DIRECT && roomInfo) {
           navigation?.navigate('OtherProfile', { user: roomInfo.participants[0] });
         } else if (type === ChatRoomType.GROUP && roomInfo) {
@@ -123,7 +126,7 @@ const HeaderMessageInfo = memo(({ roomInfo, navigation }: HeaderMessageInfoProps
         </Text>
       </View>
 
-      {type === ChatRoomType.APARTMENT && isGroup && (
+      {(type === ChatRoomType.APARTMENT || isGroup) && (
         <TouchableOpacity
           style={{ padding: 15, marginLeft: 8 }}
           onPress={() => {

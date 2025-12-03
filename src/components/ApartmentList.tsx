@@ -5,7 +5,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
-import { RelationInfo } from '@app/definitions';
+import { RELATION_TYPE, RelationInfo } from '@app/definitions';
 import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setShouldRefetchHistory, setShouldRefetchLikeList } from '@app/redux/slices';
@@ -85,7 +85,10 @@ export default function ApartmentList({
     (relation: RelationInfo) => {
       navigation.navigate('SharedStack', {
         screen: 'ApartmentDetails',
-        params: { apartment: relation.apt, enableRelationButtons: false },
+        params: {
+          apartment: relation.apt,
+          enableMessageButton: relation.type === RELATION_TYPE.LIKE,
+        },
       });
     },
     [navigation],

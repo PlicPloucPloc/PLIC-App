@@ -50,6 +50,7 @@ export type SharedStackParamList = {
   ApartmentDetails: {
     apartment: ApartmentInfo;
     enableRelationButtons?: boolean;
+    enableMessageButton?: boolean;
   };
   OtherProfile: { user: AuthState };
   Message: { roomInfo: Room };

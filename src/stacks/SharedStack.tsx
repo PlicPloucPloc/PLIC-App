@@ -6,6 +6,7 @@ import {
 
 import HeaderBackButton from '@components/HeaderBackButton';
 import HeaderMessageParticipants from '@components/HeaderMessageInfo';
+import HeaderSendMessageButton from '@components/HeaderSendMessageButton';
 import { SharedStackParamList } from '@navigation/Types';
 import ApartmentDetailsScreen from '@screens/ApartmentDetailsScreen';
 import GroupInfoScreen from '@screens/GroupInfo';
@@ -37,7 +38,16 @@ export default function SharedStack() {
       <Stack.Screen
         name="ApartmentDetails"
         component={ApartmentDetailsScreen}
-        options={({ navigation }) => headerOptions(navigation, 'Details')}
+        options={({ route, navigation }) => {
+          return {
+            ...headerOptions(navigation, 'Details'),
+            headerRight: () =>
+              route.params.enableMessageButton ? (
+                <HeaderSendMessageButton icon="chatbox-ellipses-outline" />
+              ) : null,
+            headerShadowVisible: true,
+          };
+        }}
       />
       <Stack.Screen
         name="OtherProfile"

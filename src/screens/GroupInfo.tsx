@@ -95,7 +95,10 @@ export default function GroupInfoScreen({
           style={styles.aptInfoContainer}
           onPress={() => {
             if (route.params.apartment) {
-              navigation.navigate('ApartmentDetails', { apartment: route.params.apartment });
+              navigation.navigate('ApartmentDetails', {
+                apartment: route.params.apartment,
+                enableMessageButton: true,
+              });
             }
           }}>
           <Image
