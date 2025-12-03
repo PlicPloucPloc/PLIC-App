@@ -11,11 +11,10 @@ import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { RootState } from '@app/redux/Store';
 import { createAndGetRoom } from '@app/rest/ChatService';
 import { calculateAge } from '@app/utils/Misc';
+import AddToARoomModal from '@components/AddToARoomModal';
 import BottomPopupModal from '@components/BottomPopupModal';
 import ProfilePicture from '@components/ProfilePicture';
 import { SharedStackScreenProps } from '@navigation/Types';
-
-import AddToARoom from './AddToARoom';
 
 type ProfileItem = {
   icon: IoniconName;
@@ -67,7 +66,7 @@ export default function OtherProfileScreen({
         setModalVisible={setModalVisible}
         title="Add to a group chat"
         subtitle="Select a group chat to add this user to.">
-        <AddToARoom
+        <AddToARoomModal
           afterAdd={(roomInfo) => {
             navigation.navigate('Message', { roomInfo: roomInfo });
             setModalVisible(false);

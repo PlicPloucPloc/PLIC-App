@@ -186,8 +186,7 @@ const createStyles = (colors: ColorTheme) =>
 
     buttonContainer: {
       flex: 1,
-      alignItems: 'center',
-      justifyContent: 'center',
+      paddingHorizontal: 20,
       marginTop: 20,
     },
   });

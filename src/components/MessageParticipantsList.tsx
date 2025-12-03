@@ -4,6 +4,7 @@ import { Image, TouchableOpacity, View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { ColorTheme } from '@app/Colors';
+import { AuthState } from '@app/definitions';
 import { Room } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { getApartmentInfoById } from '@app/rest/ApartmentService';
@@ -66,7 +67,13 @@ const MessageParticipantsList = memo(({ roomInfo, onPress }: MessageParticipants
     }
   }, [roomInfo]);
 
-  const otherUser = roomInfo.participants[0];
+  const otherUser =
+    roomInfo.participants[0] ??
+    ({
+      firstName: 'Error',
+      lastName: '',
+      profilePictureUri: null,
+    } as AuthState);
 
   return (
     <TouchableOpacity style={styles.container} onPress={onPress}>

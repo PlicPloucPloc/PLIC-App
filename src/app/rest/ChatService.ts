@@ -6,6 +6,8 @@ import {
   CreateRoomRequest,
   UpdateRoomRequest,
 } from '@app/definitions/rest/ChatService';
+import { setShouldRefecthMessages } from '@app/redux/slices';
+import store from '@app/redux/Store';
 import { alertOnResponseError } from '@app/utils/Error';
 
 import { apiFetch } from './Client';
@@ -64,18 +66,6 @@ async function getRooms(): Promise<Room[]> {
   return data;
 }
 
-export async function getDirectMessageRooms(userId: string): Promise<Room[]> {
-  const allRooms = await getRooms();
-  const directMessageRooms = allRooms.filter((room) => room.participants_id.length == 2);
-  return addRoomsParticipants(userId, directMessageRooms);
-}
-
-export async function getGroupMessageRooms(userId: string): Promise<Room[]> {
-  const allRooms = await getRooms();
-  const groupMessageRooms = allRooms.filter((room) => room.participants_id.length > 2);
-  return addRoomsParticipants(userId, groupMessageRooms);
-}
-
 export async function getMyRooms(userId: string): Promise<Room[]> {
   const allRooms = await getRooms();
   const myRooms = allRooms.filter((room) => room.is_owner);
@@ -123,6 +113,8 @@ async function createRoom(room: CreateRoomRequest): Promise<number | null> {
   if (await alertOnResponseError(response, 'Chat', 'creating room')) {
     return null;
   }
+
+  store.dispatch(setShouldRefecthMessages(true));
 
   const data: CreateRoomResponse = await response.json();
   return data.data;
@@ -198,9 +190,7 @@ export async function getMessage(id: number): Promise<RoomDetails | null> {
   return data;
 }
 
-export async function updateParticipant(
-  updateRoomRequest: UpdateRoomRequest,
-): Promise<RoomDetails[]> {
+export async function updateParticipant(updateRoomRequest: UpdateRoomRequest): Promise<boolean> {
   const response = await apiFetch(
     Endpoints.CHAT.UPDATE_ROOMS,
     {
@@ -210,12 +200,11 @@ export async function updateParticipant(
     true,
   );
 
-  if (await alertOnResponseError(response, 'Chat', 'adding participants')) {
-    return [];
+  if (await alertOnResponseError(response, 'Chat', 'updating participants')) {
+    return false;
   }
 
-  const data: RoomDetails[] = await response.json();
-  return data;
+  return true;
 }
 
 export function roomDetailToRoom(userId: string, roomDetail: RoomDetails): Room {

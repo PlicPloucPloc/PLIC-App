@@ -1,24 +1,23 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { FlatList, StyleSheet, Text, View, TextInput, Pressable } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
+import { useFocusEffect } from '@react-navigation/native';
 import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
 import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
-import { Message } from '@app/definitions/rest/ChatService';
+import { Message, Room } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { RootState } from '@app/redux/Store';
+import { setShouldRefecthMessages, setShouldRefetchRoomInfo } from '@app/redux/slices';
+import store, { RootState } from '@app/redux/Store';
 import { getRoomDetails } from '@app/rest/ChatService';
 import { chatService } from '@app/socket/ChatService';
 import HeaderMessageInfo from '@components/HeaderMessageInfo';
 import Loader from '@components/Loader';
 import { SharedStackScreenProps } from '@navigation/Types';
 
-export default function DirectMessageScreen({
-  navigation,
-  route,
-}: SharedStackScreenProps<'Message'>) {
+export default function MessageScreen({ navigation, route }: SharedStackScreenProps<'Message'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -31,13 +30,30 @@ export default function DirectMessageScreen({
   const [isConnected, setIsConnected] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
 
+  // Header
+  const updateNavigationOptions = useCallback(
+    (roomInfo: Room) => {
+      navigation.setOptions({
+        headerRight: () => <HeaderMessageInfo roomInfo={roomInfo} navigation={navigation} />,
+      });
+    },
+    [navigation],
+  );
+
   useEffect(() => {
-    navigation.setOptions({
-      headerRight: () => (
-        <HeaderMessageInfo roomInfo={route.params.roomInfo} navigation={navigation} />
-      ),
-    });
-  }, [navigation, route.params.roomInfo]);
+    updateNavigationOptions(route.params.roomInfo);
+  }, [route.params.roomInfo, updateNavigationOptions]);
+
+  const roomInfoToUpdate = useSelector((state: RootState) => state.appState.shouldRefetchRoomInfo);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (roomInfoToUpdate?.room_id === route.params.roomInfo.room_id) {
+        updateNavigationOptions(roomInfoToUpdate);
+        store.dispatch(setShouldRefetchRoomInfo(null));
+      }
+    }, [route.params.roomInfo, roomInfoToUpdate, updateNavigationOptions]),
+  );
 
   // Effect to fetch room details and messages
   useEffect(() => {
@@ -71,7 +87,10 @@ export default function DirectMessageScreen({
 
     const unsubscribeMessages = chatService.onMessageForRoom(
       route.params.roomInfo.room_id,
-      (newMessage: Message) => setMessages((prev) => [newMessage, ...prev]),
+      (newMessage: Message) => {
+        setMessages((prev) => [newMessage, ...prev]);
+        store.dispatch(setShouldRefecthMessages(true));
+      },
     );
 
     return () => {
@@ -109,6 +128,7 @@ export default function DirectMessageScreen({
         setMessages((prev) =>
           prev.map((msg) => (msg.id === now.getTime() ? { ...msg, isSending: false } : msg)),
         );
+        store.dispatch(setShouldRefecthMessages(true));
       } else {
         throw new Error('Failed to send message');
       }

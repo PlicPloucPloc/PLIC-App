@@ -41,7 +41,7 @@ export default function HistoryScreen({ navigation }: AccountStackScreenProps<'H
         <View>
           <Text style={{ fontSize: 16, color: colors.textPrimary }}>
             This screen shows the list of every apartments you have likes or disliked.{'\n\n'}You
-            can swipe an apartment to the left on order to remove it from the history so it will
+            can swipe an apartment to the left in order to remove it from the history so it will
             show again in the main feed.
           </Text>
         </View>

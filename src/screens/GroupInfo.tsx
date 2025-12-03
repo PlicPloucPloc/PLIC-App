@@ -9,9 +9,12 @@ import { ColorTheme } from '@app/Colors';
 import { AuthState } from '@app/definitions';
 import { UpdateRoomRequest } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { RootState } from '@app/redux/Store';
+import { setShouldRefecthMessages, setShouldRefetchRoomInfo } from '@app/redux/slices';
+import store, { RootState } from '@app/redux/Store';
 import { deleteRoom, updateParticipant } from '@app/rest/ChatService';
 import { calculateAge } from '@app/utils/Misc';
+import BottomPopupModal from '@components/BottomPopupModal';
+import HeaderInfoButton from '@components/HeaderInfoButton';
 import ProfilePicture from '@components/ProfilePicture';
 import RightActionDelete from '@components/RightActionDelete';
 import { SharedStackScreenProps } from '@navigation/Types';
@@ -23,6 +26,18 @@ export default function GroupInfoScreen({
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
+  // Modal
+  const [modalVisible, setModalVisible] = useState(false);
+
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <HeaderInfoButton icon="help-circle-outline" onPress={() => setModalVisible(true)} />
+      ),
+    });
+  }, [navigation]);
+
+  // Page
   const [members, setMembers] = useState<AuthState[]>([]);
   const authState = useSelector((state: RootState) => state.authState);
 
@@ -41,17 +56,38 @@ export default function GroupInfoScreen({
           users_to_remove: [userId],
         };
 
-        await updateParticipant(updateRequest);
-        setMembers(members.filter((member) => member.userId !== userId));
-        if (members.length <= 1) {
-          await deleteRoom(roomId);
-          navigation.goBack();
+        if (members.length <= 2) {
+          updateRequest.users_to_remove.push(authState.userId);
         }
+
+        await updateParticipant(updateRequest);
+
+        const newMembers = members.filter((member) => member.userId !== userId);
+        setMembers(newMembers);
+
+        store.dispatch(setShouldRefecthMessages(true));
+
+        if (newMembers.length <= 0) {
+          await deleteRoom(roomId);
+          navigation.navigate('BottomTabStack', {
+            screen: 'MessageStack',
+            params: { screen: 'MessageList' },
+          });
+          return;
+        }
+
+        const newRoomInfo = { ...route.params.roomInfo };
+        newRoomInfo.participants = newMembers.filter(
+          (member) => member.userId !== authState.userId,
+        );
+        newRoomInfo.participants_id = newRoomInfo.participants.map((p) => p.userId);
+
+        store.dispatch(setShouldRefetchRoomInfo(newRoomInfo));
       } catch (error) {
         console.error('Error removing participant:', error);
       }
     },
-    [members, navigation, route.params.roomInfo],
+    [members, navigation, route.params.roomInfo, authState.userId],
   );
 
   const renderMemberItem = ({ item }: { item: AuthState }) => (
@@ -89,6 +125,18 @@ export default function GroupInfoScreen({
 
   return (
     <View style={styles.container}>
+      <BottomPopupModal
+        modalVisible={modalVisible}
+        setModalVisible={setModalVisible}
+        title="List of members of this group chat">
+        <View>
+          <Text style={{ fontSize: 16, color: colors.textPrimary }}>
+            This screen is showing all the participants of this group chat.
+            {'\n\n'}You can swipe a user to the left in order to remove it from the discussion.
+          </Text>
+        </View>
+      </BottomPopupModal>
+
       {/* ===== Apartment =====*/}
       {route.params.apartment && (
         <TouchableOpacity

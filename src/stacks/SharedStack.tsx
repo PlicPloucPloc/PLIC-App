@@ -5,12 +5,13 @@ import {
 } from '@react-navigation/stack';
 
 import HeaderBackButton from '@components/HeaderBackButton';
+import HeaderInfoButton from '@components/HeaderInfoButton';
 import HeaderMessageParticipants from '@components/HeaderMessageInfo';
 import HeaderSendMessageButton from '@components/HeaderSendMessageButton';
 import { SharedStackParamList } from '@navigation/Types';
 import ApartmentDetailsScreen from '@screens/ApartmentDetailsScreen';
 import GroupInfoScreen from '@screens/GroupInfo';
-import DirectMessageScreen from '@screens/MessageScreen';
+import MessageScreen from '@screens/MessageScreen';
 import OtherProfileScreen from '@screens/OtherProfileScreen';
 
 const Stack = createStackNavigator<SharedStackParamList>();
@@ -56,7 +57,7 @@ export default function SharedStack() {
       />
       <Stack.Screen
         name="Message"
-        component={DirectMessageScreen}
+        component={MessageScreen}
         options={({ navigation }) => {
           return {
             ...headerOptions(navigation, ''),
@@ -68,7 +69,12 @@ export default function SharedStack() {
       <Stack.Screen
         name="GroupInfo"
         component={GroupInfoScreen}
-        options={({ navigation }) => headerOptions(navigation, 'Group Info')}
+        options={({ navigation }) => {
+          return {
+            ...headerOptions(navigation, 'Group Info'),
+            headerRight: () => <HeaderInfoButton icon="help-circle-outline" />,
+          };
+        }}
       />
     </Stack.Navigator>
   );

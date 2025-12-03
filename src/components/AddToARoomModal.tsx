@@ -7,7 +7,8 @@ import { ColorTheme } from '@app/Colors';
 import { AuthState } from '@app/definitions';
 import { Room, UpdateRoomRequest } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { RootState } from '@app/redux/Store';
+import { setShouldRefecthMessages } from '@app/redux/slices';
+import store, { RootState } from '@app/redux/Store';
 import { updateParticipant, getMyRooms } from '@app/rest/ChatService';
 import MessageParticipantsList from '@components/MessageParticipantsList';
 
@@ -16,7 +17,7 @@ type AddToARoomModalProps = {
   user: AuthState;
 };
 
-export default function AddToARoom({ user, afterAdd }: AddToARoomModalProps) {
+export default function AddToARoomModal({ user, afterAdd }: AddToARoomModalProps) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -50,7 +51,15 @@ export default function AddToARoom({ user, afterAdd }: AddToARoomModalProps) {
           };
 
           await updateParticipant(updateRoomRequest);
-          afterAdd(item);
+
+          store.dispatch(setShouldRefecthMessages(true));
+
+          const roomWithNewParticipant = {
+            ...item,
+            participants: [...item.participants, user],
+            participants_id: [...item.participants_id, user.userId],
+          };
+          afterAdd(roomWithNewParticipant);
         }}
       />
     ),

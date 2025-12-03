@@ -1,20 +1,20 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { FlatList, StyleSheet, Text, View, RefreshControl } from 'react-native';
 
+import { useFocusEffect } from '@react-navigation/native';
 import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
 import { Room } from '@app/definitions/rest/ChatService';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
-import { RootState } from '@app/redux/Store';
+import { setShouldRefecthMessages } from '@app/redux/slices';
+import store, { RootState } from '@app/redux/Store';
 import { getAllRooms } from '@app/rest/ChatService';
 import MessageListParticipants from '@components/MessageParticipantsList';
 import Separator from '@components/Separator';
 import { MessageStackScreenProps } from '@navigation/Types';
 
-export default function DirectMessageListScreen({
-  navigation,
-}: MessageStackScreenProps<'MessageList'>) {
+export default function MessageListScreen({ navigation }: MessageStackScreenProps<'MessageList'>) {
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
@@ -32,6 +32,17 @@ export default function DirectMessageListScreen({
   useEffect(() => {
     fetchRooms();
   }, [fetchRooms]);
+
+  const shouldRefetch = useSelector((state: RootState) => state.appState.shouldRefecthMessages);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (shouldRefetch) {
+        fetchRooms();
+        store.dispatch(setShouldRefecthMessages(false));
+      }
+    }, [fetchRooms, shouldRefetch]),
+  );
 
   const renderItem = useCallback(
     ({ item }: { item: Room }) => (
