@@ -164,7 +164,8 @@ const createStyles = (colors: ColorTheme) =>
     headerContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      paddingVertical: 20,
+      paddingTop: 8,
+      paddingBottom: 20,
       borderBottomWidth: 0.5,
       borderBottomColor: '#333',
     },
@@ -179,7 +180,7 @@ const createStyles = (colors: ColorTheme) =>
       color: colors.textPrimary,
       fontSize: 15,
       fontWeight: '600',
-      marginTop: 20,
+      marginTop: 15,
     },
     item: {
       flexDirection: 'row',

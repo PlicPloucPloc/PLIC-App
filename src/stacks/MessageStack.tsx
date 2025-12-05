@@ -16,7 +16,6 @@ function headerOptions(
 ): StackNavigationOptions {
   return {
     headerShown: true,
-    headerShadowVisible: false,
     headerTitle: title ?? '',
     headerTitleAlign: 'left',
     headerTitleStyle: {

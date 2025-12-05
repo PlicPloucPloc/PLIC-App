@@ -46,7 +46,6 @@ export default function SharedStack() {
               route.params.enableMessageButton ? (
                 <HeaderSendMessageButton icon="chatbox-ellipses-outline" />
               ) : null,
-            headerShadowVisible: true,
           };
         }}
       />

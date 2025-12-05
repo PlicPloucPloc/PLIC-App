@@ -89,5 +89,6 @@ const createStyles = (colors: ColorTheme) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
+      paddingTop: 8,
     },
   });

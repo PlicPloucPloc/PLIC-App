@@ -238,6 +238,7 @@ const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
     scrollContainer: {
       paddingBottom: 24,
+      backgroundColor: colors.background,
     },
 
     pagerWrapper: {
@@ -258,7 +259,7 @@ const createStyles = (colors: ColorTheme) =>
       alignItems: 'center',
     },
     image: {
-      width: width - 10,
+      width: width - 8,
       height: '100%',
       borderRadius: 12,
     },
@@ -313,7 +314,6 @@ const createStyles = (colors: ColorTheme) =>
       height: 400,
       borderRadius: 12,
       overflow: 'hidden',
-      backgroundColor: '#eee',
       marginTop: 8,
     },
 

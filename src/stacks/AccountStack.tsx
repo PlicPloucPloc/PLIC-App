@@ -39,9 +39,7 @@ function headerOptions(
 
 export default function AccountStack(_: BottomTabStackScreenProps<'AccountStack'>) {
   return (
-    <Stack.Navigator
-      initialRouteName="Account"
-      screenOptions={{ headerShown: false, animation: 'fade_from_right' }}>
+    <Stack.Navigator initialRouteName="Account" screenOptions={{ animation: 'fade_from_right' }}>
       <Stack.Screen
         name="Account"
         component={AccountScreen}

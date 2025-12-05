@@ -164,12 +164,13 @@ const createStyles = (colors: ColorTheme) =>
     container: {
       flex: 1,
       backgroundColor: colors.background,
+      paddingTop: 8,
     },
     userCard: {
       flexDirection: 'row',
       alignItems: 'center',
       backgroundColor: colors.background,
-      paddingVertical: 12,
+      paddingVertical: 8,
     },
     userInfo: {
       marginLeft: 16,

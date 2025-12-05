@@ -9,7 +9,6 @@ const Stack = createStackNavigator<ColocFinderStackParamList>();
 function headerOptions(): StackNavigationOptions {
   return {
     headerShown: true,
-    headerShadowVisible: false,
     headerTitle: 'Coloc Finder',
     headerTitleAlign: 'left',
     headerTitleStyle: {
