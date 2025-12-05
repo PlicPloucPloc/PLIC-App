@@ -8,19 +8,17 @@ import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
 import { ApartmentInfo, RELATION_TYPE } from '@app/definitions';
-import { CreateRoomRequest } from '@app/definitions/rest/ChatService';
 import { usePaginatedQuery } from '@app/hooks/UsePaginatedQuery';
 import { useThemeColors } from '@app/hooks/UseThemeColor';
 import { setSwipeDirection } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
 import { getApartmentsNoRelationPaginated } from '@app/rest/ApartmentService';
-import { createAndGetRoom } from '@app/rest/ChatService';
 import { deleteRelation, postRelation } from '@app/rest/RelationService';
-import SwipeButton from '@components/ActionButton';
 import EverythingSwiped from '@components/EverythingSwiped';
 import FiltersNotSet from '@components/FiltersNotSet';
 import HeaderRefreshButton from '@components/HeaderRefreshButton';
 import Loader from '@components/Loader';
+import SwipeButton from '@components/SwipeButton';
 import { HomeStackScreenProps } from '@navigation/Types';
 
 const ICON_SIZE = 38;
@@ -31,7 +29,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
   const styles = createStyles(colors);
 
   const filters = useSelector((state: RootState) => state.filtersState);
-  const authState = useSelector((state: RootState) => state.authState);
 
   const swiperRef = useRef<SwiperCardRefType>(null);
   const swipeDirection = useSelector((state: RootState) => state.appState.swipeDirection);
@@ -141,31 +138,6 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     }
   }
 
-  async function sendMessage(apartmentId: number, aptOwner: string) {
-    if (aptOwner === authState.userId) {
-      Alert.alert(
-        'Could not create chat !',
-        'This apartment belongs to you, we cannot create a chat room.',
-      );
-    }
-
-    const roomRequest: CreateRoomRequest = {
-      apartment_id: apartmentId,
-      users: [authState.userId, aptOwner],
-    };
-
-    const room = await createAndGetRoom(authState.userId, roomRequest);
-    if (!room) {
-      Alert.alert('Error', 'An error occurred while creating the chat room.');
-      return;
-    }
-
-    navigation.navigate('SharedStack', {
-      screen: 'Message',
-      params: { roomInfo: room },
-    });
-  }
-
   if (refreshing) {
     return <Loader loading={true} />;
   }
@@ -262,8 +234,12 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
       {/* Buttons */}
       <View style={styles.buttonsContainer}>
         <SwipeButton
+          icon={{
+            name: 'arrow-undo',
+            size: ICON_SIZE - 15,
+            color: colors.contrast,
+          }}
           disabled={backButtonDisabled || apartments.length === 0}
-          style={styles.button}
           onPress={() => {
             const currentIndex = swiperRef.current?.activeIndex || 0;
             if (currentIndex <= 0) return;
@@ -272,30 +248,24 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
             swiperRef.current?.swipeBack();
             setBackButtonDisabled(true);
-          }}>
-          <Ionicons name="arrow-undo" size={ICON_SIZE - 10} color={colors.contrast} />
-        </SwipeButton>
+          }}
+        />
         <SwipeButton
+          icon={{ name: 'close', size: ICON_SIZE, color: 'red' }}
           disabled={allSwiped}
-          style={styles.button}
-          onPress={() => swiperRef.current?.swipeLeft()}>
-          <Ionicons name="close" size={ICON_SIZE} color="red" />
-        </SwipeButton>
+          onPress={() => swiperRef.current?.swipeLeft()}
+        />
         <SwipeButton
-          style={styles.button}
+          icon={{ name: 'heart', size: ICON_SIZE, color: colors.primary }}
           disabled={allSwiped}
-          onPress={() => swiperRef.current?.swipeRight()}>
-          <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
-        </SwipeButton>
+          onPress={() => swiperRef.current?.swipeRight()}
+        />
+
+        {/* disabled button */}
         <SwipeButton
-          style={styles.button}
-          disabled={allSwiped}
-          onPress={() => {
-            const currentIndex = swiperRef.current?.activeIndex || 0;
-            sendMessage(apartments[currentIndex].apartment_id, apartments[currentIndex].owner_id);
-          }}>
-          <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />
-        </SwipeButton>
+          icon={{ name: 'chatbox-outline', size: ICON_SIZE - 15, color: colors.contrast }}
+          hidden={true}
+        />
       </View>
     </View>
   );
@@ -358,15 +328,5 @@ const createStyles = (colors: ColorTheme) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-evenly',
-    },
-    button: {
-      padding: 10,
-      borderRadius: 40,
-      aspectRatio: 1,
-      backgroundColor: colors.background,
-      elevation: 4,
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: 'black',
     },
   });

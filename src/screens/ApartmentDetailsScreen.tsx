@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Alert, Dimensions, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { SwipeDirection } from '@ellmos/rn-swiper-list';
-import { Ionicons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import PagerView from 'react-native-pager-view';
 import { useSelector } from 'react-redux';
@@ -15,11 +14,11 @@ import { setSwipeDirection } from '@app/redux/slices';
 import store, { RootState } from '@app/redux/Store';
 import { createAndGetRoom } from '@app/rest/ChatService';
 import { getApartmentImages } from '@app/rest/S3Service';
-import SwipeButton from '@components/ActionButton';
 import ApartmentDetailsAmenities from '@components/ApartmentDetailsAmenities';
 import NearbyInfrastructureMap from '@components/ApartmentDetailsMap';
 import HeaderSendMessageButton from '@components/HeaderSendMessageButton';
 import Loader from '@components/Loader';
+import SwipeButton from '@components/SwipeButton';
 import { SharedStackScreenProps } from '@navigation/Types';
 
 const ICON_SIZE = 38;
@@ -200,38 +199,32 @@ export default function ApartmentDetailsScreen({
           <Divider />
 
           <View style={styles.buttonsContainer}>
-            <SwipeButton style={styles.button} onPress={navigation.goBack}>
-              <Ionicons name="arrow-back" size={ICON_SIZE - 10} color={colors.contrast} />
-            </SwipeButton>
             <SwipeButton
-              style={styles.button}
+              icon={{ name: 'arrow-back', size: ICON_SIZE - 15, color: colors.contrast }}
+              onPress={navigation.goBack}
+            />
+
+            <SwipeButton
+              icon={{ name: 'close', size: ICON_SIZE, color: 'red' }}
               onPress={() => {
                 store.dispatch(setSwipeDirection(SwipeDirection.LEFT));
                 navigation.goBack();
-              }}>
-              <Ionicons name="close" size={ICON_SIZE} color="red" />
-            </SwipeButton>
+              }}
+            />
+
             <SwipeButton
-              style={styles.button}
+              icon={{ name: 'heart', size: ICON_SIZE, color: colors.primary }}
               onPress={() => {
                 store.dispatch(setSwipeDirection(SwipeDirection.RIGHT));
                 navigation.goBack();
-              }}>
-              <Ionicons name="heart" size={ICON_SIZE} color={colors.primary} />
-            </SwipeButton>
+              }}
+            />
+
+            {/* disabled button */}
             <SwipeButton
-              style={styles.button}
-              onPress={
-                () => {}
-                // navigation.navigate('BottomTabStack', {
-                //   screen: 'MessageStack',
-                //   params: {
-                //     screen: 'DirectMessage',
-                //   },
-                // })
-              }>
-              <Ionicons name="chatbox-outline" size={ICON_SIZE - 10} color={colors.contrast} />
-            </SwipeButton>
+              icon={{ name: 'chatbox-outline', size: ICON_SIZE - 15, color: colors.contrast }}
+              hidden={true}
+            />
           </View>
         </>
       )}
@@ -330,15 +323,5 @@ const createStyles = (colors: ColorTheme) =>
       flexDirection: 'row',
       alignItems: 'center',
       justifyContent: 'space-evenly',
-    },
-    button: {
-      padding: 10,
-      borderRadius: 40,
-      aspectRatio: 1,
-      backgroundColor: colors.background,
-      elevation: 4,
-      justifyContent: 'center',
-      alignItems: 'center',
-      shadowColor: 'black',
     },
   });
