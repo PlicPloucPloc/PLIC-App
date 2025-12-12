@@ -57,7 +57,7 @@ const createStyles = (colors: ColorTheme) =>
       padding: 12,
       paddingRight: 40,
       borderWidth: 1,
-      borderColor: colors.contrast,
+      borderColor: colors.secondary,
       borderRadius: 10,
       fontSize: 16,
     },

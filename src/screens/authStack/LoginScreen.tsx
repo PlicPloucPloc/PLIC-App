@@ -133,7 +133,7 @@ const createStyles = (colors: ColorTheme) =>
       width: '100%',
       padding: 12,
       borderWidth: 1,
-      borderColor: colors.contrast,
+      borderColor: colors.textSecondary,
       borderRadius: 10,
       fontSize: 16,
     },

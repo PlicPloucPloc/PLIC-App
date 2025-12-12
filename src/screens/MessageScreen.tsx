@@ -25,7 +25,8 @@ export default function MessageScreen({ navigation, route }: SharedStackScreenPr
   const colors = useThemeColors();
   const styles = createStyles(colors);
 
-  const currentUserId: string = useSelector((state: RootState) => state.authState.userId);
+  const authState = useSelector((state: RootState) => state.authState);
+  const currentUserId = authState.userId;
 
   const flatListRef = useRef<FlatList>(null);
   const [loading, setLoading] = useState(true);
@@ -155,6 +156,12 @@ export default function MessageScreen({ navigation, route }: SharedStackScreenPr
   const renderMessage = ({ item }: { item: Message }) => {
     const isMyMessage = item.sender_id === currentUserId;
 
+    const user = route.params.roomInfo.participants.find((p) => p.userId === item.sender_id);
+    const sender = isMyMessage
+      ? null
+      : user
+        ? `${user.firstName} ${user.lastName}`
+        : 'Unknown User';
     return (
       <View
         style={[
@@ -167,10 +174,9 @@ export default function MessageScreen({ navigation, route }: SharedStackScreenPr
             isMyMessage ? styles.myMessageBubble : styles.theirMessageBubble,
             item.isSending && styles.messageSending,
           ]}>
-          <Text style={[styles.messageText, isMyMessage && styles.myMessageText]}>
-            {item.message}
-          </Text>
-          <Text style={[styles.messageTime, isMyMessage && styles.myMessageTime]}>
+          {sender && <Text style={styles.messageSenderText}>{sender}</Text>}
+          <Text style={styles.messageText}>{item.message}</Text>
+          <Text style={styles.messageTime}>
             {new Date(item.created_at).toLocaleTimeString('fr-FR', {
               hour: '2-digit',
               minute: '2-digit',
@@ -297,13 +303,16 @@ const createStyles = (colors: ColorTheme) =>
     messageSending: {
       opacity: 0.6,
     },
+    messageSenderText: {
+      fontStyle: 'italic',
+      fontSize: 14,
+      color: colors.textSecondary,
+      marginBottom: 4,
+    },
     messageText: {
       fontSize: 16,
       color: colors.textPrimary,
       marginBottom: 2,
-    },
-    myMessageText: {
-      color: colors.textPrimary,
     },
     messageTime: {
       fontSize: 11,
