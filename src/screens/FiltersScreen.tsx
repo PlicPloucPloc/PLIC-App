@@ -219,6 +219,7 @@ export default function FiltersScreen({ navigation }: AccountStackScreenProps<'F
         {/* ======== Address ======== */}
         <Text style={styles.sectionTitle}>Address</Text>
         <GooglePlacesTextInput
+          style={{ input: { borderColor: colors.textSecondary, borderRadius: 8 } }}
           apiKey={GOOGLE_API_KEY}
           value={placeDetails.structuredFormat.mainText.text}
           placeHolderText="Enter an address"
@@ -319,7 +320,7 @@ const createStyles = (colors: ColorTheme) =>
     },
     surfaceInput: {
       color: colors.textPrimary,
-      borderColor: colors.contrast,
+      borderColor: colors.textSecondary,
       borderWidth: 1,
       borderRadius: 8,
       padding: 8,
@@ -331,8 +332,8 @@ const createStyles = (colors: ColorTheme) =>
       width: '100%',
       padding: 12,
       borderWidth: 1,
-      borderColor: colors.contrast,
-      borderRadius: 10,
+      borderColor: colors.textSecondary,
+      borderRadius: 8,
       fontSize: 16,
       color: colors.textPrimary,
     },
@@ -358,6 +359,7 @@ const createStyles = (colors: ColorTheme) =>
       paddingVertical: 10,
       marginTop: 20,
       borderRadius: 8,
+      borderColor: colors.textSecondary,
       borderWidth: 1,
       elevation: 3,
     },

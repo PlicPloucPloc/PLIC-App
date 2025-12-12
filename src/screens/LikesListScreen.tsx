@@ -44,6 +44,7 @@ const createStyles = (colors: ColorTheme) =>
     },
     topContainer: {
       paddingHorizontal: 20,
+      marginBottom: 10,
       backgroundColor: colors.background,
     },
     searchBar: {

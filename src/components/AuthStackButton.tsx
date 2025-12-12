@@ -39,6 +39,7 @@ const createStyles = (colors: ColorTheme) =>
       alignItems: 'center',
       paddingVertical: 10,
       marginTop: 20,
+      borderColor: colors.textSecondary,
       borderRadius: 8,
       borderWidth: 1,
       elevation: 5,

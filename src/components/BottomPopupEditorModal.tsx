@@ -58,6 +58,7 @@ const createStyles = (colors: ColorTheme) =>
       paddingVertical: 10,
       marginTop: 20,
       borderRadius: 8,
+      borderColor: colors.textSecondary,
       borderWidth: 1,
       elevation: 5,
     },

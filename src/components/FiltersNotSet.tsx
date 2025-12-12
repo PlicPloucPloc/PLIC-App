@@ -24,7 +24,7 @@ export default function FiltersNotSet({ navigation }: FiltersNotSetProps) {
 
       <TouchableOpacity
         style={styles.button}
-        onPress={() => navigation.navigate('AccountStack', { screen: 'Filters' })}>
+        onPress={() => navigation.navigate('AccountStack', { screen: 'Account' })}>
         <Text style={styles.buttonText}>Edit preferences</Text>
       </TouchableOpacity>
     </View>

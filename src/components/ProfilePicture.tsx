@@ -36,14 +36,11 @@ export default function ProfilePicture({
         <>
           <Image
             source={{ uri: imageUri }}
-            style={[
-              styles.imagePreview,
-              {
-                width: size,
-                height: size,
-                borderRadius: borderRadius,
-              },
-            ]}
+            style={{
+              width: size,
+              height: size,
+              borderRadius: borderRadius,
+            }}
           />
           {onRemove && imageUri && (
             <TouchableOpacity
@@ -75,10 +72,6 @@ const createStyles = (colors: any) =>
     imageContainer: {
       position: 'relative',
     },
-    imagePreview: {
-      borderWidth: 2,
-      borderColor: colors.contrast,
-    },
     removeIcon: {
       position: 'absolute',
       top: 0,
@@ -87,8 +80,6 @@ const createStyles = (colors: any) =>
       borderRadius: 100,
     },
     placeholder: {
-      borderWidth: 2,
-      borderColor: colors.contrast,
       justifyContent: 'center',
       alignItems: 'center',
       backgroundColor: colors.primary,

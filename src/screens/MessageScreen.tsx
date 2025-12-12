@@ -3,7 +3,11 @@ import { FlatList, StyleSheet, Text, View, TextInput, Pressable } from 'react-na
 
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect } from '@react-navigation/native';
-import { KeyboardAvoidingView } from 'react-native-keyboard-controller';
+import {
+  AndroidSoftInputModes,
+  KeyboardAvoidingView,
+  KeyboardController,
+} from 'react-native-keyboard-controller';
 import { useSelector } from 'react-redux';
 
 import { ColorTheme } from '@app/Colors';
@@ -54,6 +58,13 @@ export default function MessageScreen({ navigation, route }: SharedStackScreenPr
       }
     }, [route.params.roomInfo, roomInfoToUpdate, updateNavigationOptions]),
   );
+
+  useEffect(() => {
+    KeyboardController.setInputMode(AndroidSoftInputModes.SOFT_INPUT_ADJUST_RESIZE);
+    return () => {
+      KeyboardController.setInputMode(AndroidSoftInputModes.SOFT_INPUT_ADJUST_PAN);
+    };
+  }, []);
 
   // Effect to fetch room details and messages
   useEffect(() => {

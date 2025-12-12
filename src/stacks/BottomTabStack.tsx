@@ -63,7 +63,7 @@ export default function BottomTabStack() {
       <Stack.Screen
         name="ColocFinderStack"
         component={ColocFinderStack}
-        options={tabBarOptions('Coloc', 'search-outline', 'search')}
+        options={tabBarOptions('Coloc', 'people-outline', 'people')}
       />
       <Stack.Screen
         name="AccountStack"

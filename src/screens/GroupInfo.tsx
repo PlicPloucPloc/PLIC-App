@@ -189,8 +189,6 @@ const createStyles = (colors: ColorTheme) =>
       marginBottom: 16,
     },
     aptImage: {
-      borderWidth: 2,
-      borderColor: colors.contrast,
       width: 60,
       height: 60,
       borderRadius: 10,

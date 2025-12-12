@@ -59,11 +59,7 @@ export default function AppContainer() {
   }, []);
 
   useEffect(() => {
-    KeyboardController.setInputMode(
-      root === RootEnum.ROOT_INSIDE
-        ? AndroidSoftInputModes.SOFT_INPUT_ADJUST_RESIZE
-        : AndroidSoftInputModes.SOFT_INPUT_ADJUST_PAN,
-    );
+    KeyboardController.setInputMode(AndroidSoftInputModes.SOFT_INPUT_ADJUST_PAN);
   }, [root]);
 
   if (isLoading) {

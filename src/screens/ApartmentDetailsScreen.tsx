@@ -159,12 +159,14 @@ export default function ApartmentDetailsScreen({
 
         {/* ============= Description ============= */}
         <Text style={styles.sectionTitle}>Description</Text>
-        <Text
-          style={styles.description}
-          numberOfLines={showFullDescription ? undefined : MAX_LINES}
-          ellipsizeMode="tail">
-          {apartment.description}
-        </Text>
+        <View style={styles.descriptionContainer}>
+          <Text
+            style={styles.description}
+            numberOfLines={showFullDescription ? undefined : MAX_LINES}
+            ellipsizeMode="tail">
+            {apartment.description}
+          </Text>
+        </View>
         {apartment.description.length > 100 && (
           <Pressable onPress={() => setShowFullDescription(!showFullDescription)}>
             <Text style={{ color: '#007bff', marginTop: 4 }}>
@@ -303,6 +305,11 @@ const createStyles = (colors: ColorTheme) =>
       fontSize: 18,
       fontWeight: '600',
       marginBottom: 6,
+    },
+    descriptionContainer: {
+      padding: 10,
+      backgroundColor: `${colors.primary}50`,
+      borderRadius: 12,
     },
     description: {
       fontSize: 14,

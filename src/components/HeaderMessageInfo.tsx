@@ -163,8 +163,6 @@ const createStyles = (colors: ColorTheme) =>
       backgroundColor: colors.primary,
       justifyContent: 'center',
       alignItems: 'center',
-      borderWidth: 2,
-      borderColor: colors.contrast,
       width: IMAGE_SIZE,
       height: IMAGE_SIZE,
       borderRadius: BORDER_RADIUS,

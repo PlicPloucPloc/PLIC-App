@@ -67,7 +67,7 @@ export default function ApartmentDetailsAmenities({ apartment }: AmenitiesProps)
         { icon: 'thermometer', label: 'Heating Mode', value: apartment.heating_mode },
         { icon: 'leaf', label: 'Energy Class', value: apartment.energy_class },
         { icon: 'stats-chart', label: 'GES', value: apartment.ges },
-        { icon: 'chevron-up', label: 'Floor', value: apartment.floor },
+        { icon: 'business', label: 'Floor', value: apartment.floor },
         {
           icon: 'compass',
           label: 'Orientation',
@@ -106,8 +106,10 @@ export default function ApartmentDetailsAmenities({ apartment }: AmenitiesProps)
 const createStyles = (colors: ColorTheme) =>
   StyleSheet.create({
     amenitiesContainer: {
-      padding: 4,
+      padding: 10,
       justifyContent: 'center',
+      backgroundColor: `${colors.primary}50`,
+      borderRadius: 12,
     },
     amenitiesItem: {
       flexDirection: 'row',
