@@ -14,7 +14,7 @@ const Colors = {
     primary: '#68CADE',
     secondary: '#175676',
     textPrimary: '#000000',
-    textSecondary: '#888',
+    textSecondary: '#888888',
     textContrast: '#eeffff',
     background: '#FFFFFF',
     backgroundSecondary: '#F5F5F5',

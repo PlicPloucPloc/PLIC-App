@@ -18,15 +18,21 @@ export function usePaginatedQuery<T>(
     try {
       const result = await fetchFunction(0);
       console.log('UsePaginatedQuery: initial fetch length: ' + result.length);
-      setData(result);
       setHasMore(result.length === API_PAGE_SIZE);
+
+      if (duplicateResolver) {
+        setData(duplicateResolver(result));
+      } else {
+        setData(result);
+      }
+
       return result;
     } catch (err) {
       console.error(err);
     } finally {
       setRefreshing(false);
     }
-  }, [fetchFunction]);
+  }, [fetchFunction, duplicateResolver]);
 
   const fetchMore = useCallback(
     async (offset?: number) => {

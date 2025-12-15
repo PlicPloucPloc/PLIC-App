@@ -68,11 +68,22 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
 
   const duplicateResolver = useCallback((data: ApartmentInfo[]) => {
     const seen = new Set();
-    return data.filter((item) => {
+
+    // use this to filter the apartments to only include the ones in goodApts array
+    const goodApts = [870, 880, 1231, 1264, 1300];
+
+    const filtered = data.filter((item) => {
       const duplicate = seen.has(item.apartment_id);
       seen.add(item.apartment_id);
-      return !duplicate;
+      return !duplicate && goodApts.includes(item.apartment_id);
     });
+
+    //sort the filtered by the order in goodApts
+    const res = filtered.sort((a, b) => {
+      return goodApts.indexOf(a.apartment_id) - goodApts.indexOf(b.apartment_id);
+    });
+
+    return res;
   }, []);
 
   const {
@@ -247,6 +258,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
             deleteRelation(apartments[currentIndex - 1].apartment_id);
 
             swiperRef.current?.swipeBack();
+            setAllSwiped(false);
             setBackButtonDisabled(true);
           }}
         />

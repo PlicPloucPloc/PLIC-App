@@ -69,7 +69,7 @@ export default function ApartmentDetailsScreen({
   );
 
   useEffect(() => {
-    if (!apartment) {
+    if (!apartment || !route.params.enableMessageButton) {
       return;
     }
 
@@ -81,7 +81,7 @@ export default function ApartmentDetailsScreen({
         />
       ),
     });
-  }, [navigation, apartment, sendMessage]);
+  }, [apartment, route.params.enableMessageButton, navigation, sendMessage]);
 
   useEffect(() => {
     (async () => {
@@ -147,9 +147,18 @@ export default function ApartmentDetailsScreen({
               {apartment.rent} € <Text style={styles.lightText}>without charges</Text>
             </Text>
 
+            {/* {apartment.estimated_price && ( */}
+            {/*   <Text style={styles.priceText}> */}
+            {/*     {apartment.rent + apartment.estimated_price} € <Text style={styles.lightText}>with charges</Text> */}
+            {/*   </Text> */}
+            {/* )} */}
+            {/**/}
+
             {apartment.estimated_price && (
-              <Text style={styles.priceText}>
-                {apartment.estimated_price} € <Text style={styles.lightText}>with charges</Text>
+              <Text style={styles.priceTextEstimated}>
+                {(apartment.rent + apartment.estimated_price * 0.9).toFixed(0)} ~{' '}
+                {(apartment.rent + apartment.estimated_price * 1.1).toFixed(0)} €{' '}
+                <Text style={styles.lightText}>with charges</Text>
               </Text>
             )}
           </>
@@ -296,8 +305,14 @@ const createStyles = (colors: ColorTheme) =>
       fontSize: 18,
       marginTop: 8,
     },
+    priceTextEstimated: {
+      fontWeight: '600',
+      fontSize: 16,
+      marginTop: 8,
+      color: colors.textPrimary,
+    },
     lightText: {
-      color: colors.textSecondary,
+      color: `${colors.textSecondary}B0`,
       fontSize: 14,
     },
 
