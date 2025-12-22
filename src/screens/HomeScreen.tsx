@@ -70,7 +70,7 @@ export default function HomeScreen({ navigation }: HomeStackScreenProps<'Home'>)
     const seen = new Set();
 
     // use this to filter the apartments to only include the ones in goodApts array
-    const goodApts = [870, 880, 1231, 1264, 1300];
+    const goodApts = [870, 880, 1231, 1300, 1264];
 
     const filtered = data.filter((item) => {
       const duplicate = seen.has(item.apartment_id);
